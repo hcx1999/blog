@@ -633,6 +633,7 @@ class BlogApp {
             }
         }
     }    // 处理图片路径（增强版，集成 ImageFixUtil）
+
     processImages(container) {
         const images = container.querySelectorAll('img');
         images.forEach(img => {
@@ -659,6 +660,18 @@ class BlogApp {
                     this.addImageErrorHandler(img);
                     img.setAttribute('data-error-handled', 'true');
                 }
+                
+                // 对图片路径进行 URL 编码以处理空格和特殊字符
+                const encodedPath = this.encodeImagePath(imagePath);
+                img.setAttribute('src', encodedPath);
+                
+                // 添加错误处理，如果图片加载失败显示占位符
+                img.addEventListener('error', () => {
+                    img.style.border = '2px dashed #ccc';
+                    img.style.padding = '20px';
+                    img.alt = `图片加载失败: ${src}`;
+                    img.title = `图片路径: ${imagePath}`;
+                }, { once: true });
             }
         });
         
@@ -731,6 +744,14 @@ class BlogApp {
         if (img.parentNode) {
             img.parentNode.replaceChild(errorDiv, img);
         }
+    }
+    
+    // 编码图片路径以处理空格和特殊字符
+    encodeImagePath(path) {
+        // 分割路径和文件名
+        const parts = path.split('/');
+        // 对每个部分进行编码，但保留路径分隔符
+        return parts.map(part => encodeURIComponent(part)).join('/');
     }
 
     // 处理表格 - 添加横向滚动容器
