@@ -274,11 +274,12 @@ class BlogApp {
             console.error('渲染文章失败:', error);
             this.showError('文章渲染失败');
         }
-    }
-
-    // 预处理Markdown内容（修复标题格式）
+    }    // 预处理Markdown内容（修复标题格式和Obsidian图片语法）
     preprocessMarkdown(content) {
-        // 确保标题前有空行（除了文档开头）
+        // 1. 处理 Obsidian 图片语法
+        content = this.processObsidianImages(content);
+        
+        // 2. 确保标题前有空行（除了文档开头）
         // 匹配标题行（# ## ### 等）
         const lines = content.split('\n');
         const processedLines = [];
@@ -304,6 +305,33 @@ class BlogApp {
         }
         
         return processedLines.join('\n');
+    }
+
+    // 处理 Obsidian 图片语法
+    processObsidianImages(content) {
+        // 匹配 Obsidian 格式图片引用: ![[attachments/filename.png]] 或 ![[filename.png]]
+        const obsidianImageRegex = /!\[\[(attachments\/)?([^\]]+\.(png|jpg|jpeg|gif|svg|webp|bmp|tiff))\]\]/gi;
+        
+        return content.replace(obsidianImageRegex, (match, attachmentsPath, filename, extension) => {
+            // 构建图片路径
+            let imagePath;
+            if (attachmentsPath) {
+                // 如果已经包含 attachments/ 路径
+                imagePath = `Vault/attachments/${filename}`;
+            } else {
+                // 如果只有文件名，添加 attachments/ 前缀
+                imagePath = `Vault/attachments/${filename}`;
+            }
+            
+            // 处理文件名中的空格，进行 URL 编码
+            imagePath = imagePath.replace(/\s+/g, '%20');
+            
+            // 生成图片的 alt 文本（使用文件名，去掉扩展名）
+            const altText = filename.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+            
+            // 转换为标准 Markdown 图片语法
+            return `![${altText}](${imagePath})`;
+        });
     }
 
     // 预处理数学公式
@@ -604,19 +632,105 @@ class BlogApp {
                 backToTopBtn.classList.remove('visible');
             }
         }
-    }    // 处理图片路径
+    }    // 处理图片路径（增强版，集成 ImageFixUtil）
     processImages(container) {
         const images = container.querySelectorAll('img');
         images.forEach(img => {
             const src = img.getAttribute('src');
             if (src && !src.startsWith('http') && !src.startsWith('/')) {
+                let newSrc = src;
+                
+                // 基本路径处理
                 if (src.startsWith('attachments/')) {
-                    img.setAttribute('src', `Vault/${src}`);
-                } else {
-                    img.setAttribute('src', `Vault/attachments/${src}`);
+                    newSrc = `Vault/${src}`;
+                } else if (!src.startsWith('Vault/')) {
+                    newSrc = `Vault/attachments/${src}`;
+                }
+                
+                // 使用 ImageFixUtil 进一步优化路径
+                if (typeof ImageFixUtil !== 'undefined') {
+                    newSrc = ImageFixUtil.fixImagePath(newSrc);
+                }
+                
+                img.setAttribute('src', newSrc);
+                
+                // 添加加载错误处理
+                if (!img.hasAttribute('data-error-handled')) {
+                    this.addImageErrorHandler(img);
+                    img.setAttribute('data-error-handled', 'true');
                 }
             }
         });
+        
+        // 如果 ImageFixUtil 可用，执行额外的图片修复
+        if (typeof ImageFixUtil !== 'undefined') {
+            ImageFixUtil.scanAndFixImages();
+        }
+    }
+
+    // 为图片添加错误处理
+    addImageErrorHandler(img) {
+        const originalSrc = img.getAttribute('src');
+        
+        img.addEventListener('error', (e) => {
+            if (!img.hasAttribute('data-error-retry')) {
+                img.setAttribute('data-error-retry', 'true');
+                
+                // 尝试替代路径
+                const filename = originalSrc.split('/').pop();
+                const alternativePaths = [
+                    `Vault/attachments/${filename}`,
+                    `attachments/${filename}`,
+                    `Vault/attachments/${encodeURIComponent(filename)}`
+                ];
+                
+                // 尝试第一个替代路径
+                if (alternativePaths.length > 0) {
+                    const newPath = alternativePaths[0];
+                    if (newPath !== originalSrc) {
+                        console.log(`图片加载失败，尝试替代路径: "${originalSrc}" -> "${newPath}"`);
+                        img.src = newPath;
+                        return;
+                    }
+                }
+            }
+            
+            // 如果重试失败，显示错误占位符
+            this.showImageErrorPlaceholder(img, originalSrc);
+        }, { once: true });
+    }
+
+    // 显示图片错误占位符
+    showImageErrorPlaceholder(img, originalSrc) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'image-error-placeholder';
+        errorDiv.innerHTML = `
+            <div style="
+                border: 2px dashed #e74c3c;
+                padding: 20px;
+                background: #fdf2f2;
+                color: #e74c3c;
+                border-radius: 8px;
+                text-align: center;
+                font-family: monospace;
+                font-size: 12px;
+                margin: 20px 0;
+            ">
+                <div style="margin-bottom: 10px;">
+                    <strong>❌ 图片加载失败</strong>
+                </div>
+                <div style="word-break: break-all; margin-bottom: 10px;">
+                    路径: ${originalSrc}
+                </div>
+                <div style="font-size: 11px;">
+                    请检查图片文件是否存在于正确位置
+                </div>
+            </div>
+        `;
+        
+        if (img.parentNode) {
+            img.parentNode.replaceChild(errorDiv, img);
+        }
     }
 
     // 处理表格 - 添加横向滚动容器
@@ -831,6 +945,19 @@ let blog;
 document.addEventListener('DOMContentLoaded', () => {
     blog = new BlogApp();
     initTheme(); // 初始化主题
+    
+    // 初始化图片修复工具
+    if (typeof ImageFixUtil !== 'undefined') {
+        ImageFixUtil.init({
+            debug: true,
+            imageBaseDir: 'Vault/attachments/',
+            autoFix: true,
+            checkInterval: 3000 // 3秒检查一次
+        });
+        console.log('✅ ImageFixUtil 已集成到博客系统');
+    } else {
+        console.warn('⚠️ ImageFixUtil 未加载，图片处理功能受限');
+    }
 });
 
 // 添加键盘快捷键支持
