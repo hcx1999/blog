@@ -122,10 +122,10 @@ class BlogApp {
 
     // 提取分类
     extractCategory(filename) {
-        if (filename.includes('AI') || filename.includes('CAMEL')) return 'AI学习';
-        if (filename.includes('JavaScript')) return 'JavaScript';
+        if (filename.includes('AI') || filename.includes('神经网络') || filename.includes('人工智能')) return 'AI';
+        if (filename.includes('JavaScript') || filename.includes('ECMAScript') || filename.includes('js')) return 'JavaScript';
         if (filename.includes('Linux')) return 'Linux';
-        if (filename.includes('数学')) return '数学';
+        if (filename.includes('数学') || filename.includes('Math')) return 'Math';
         return '其他';
     }
 
@@ -616,12 +616,36 @@ class BlogApp {
                 }
             }
         });
-    }
-
-    // 按分类过滤
+    }    // 按分类过滤
     filterByCategory(category) {
         const filteredArticles = this.articles.filter(article => article.category === category);
-        this.showFilteredArticles(filteredArticles, `分类: ${category}`);
+        this.showCategoryView(filteredArticles, category);
+    }
+
+    // 显示分类视图
+    showCategoryView(articles, category) {
+        this.switchView('category');
+        this.clearActiveLinks();
+        this.clearTableOfContents();
+        closeMobileTableOfContents();
+        
+        const contentDiv = document.getElementById('category-content');
+        
+        const html = `
+            <h1>分类: ${category}</h1>
+            <p class="category-description">共 ${articles.length} 篇文章</p>
+            <div class="article-grid">
+                ${articles.map(article => `
+                    <div class="recent-item" onclick="blog.showArticle('${article.id}')">
+                        <h4>${article.title}</h4>
+                        <p>${article.excerpt}</p>
+                        <div class="date">${article.date}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+        contentDiv.innerHTML = html;
     }
 
     // 显示过滤后的文章
@@ -683,9 +707,7 @@ class BlogApp {
         const contentDiv = document.getElementById('article-content');
         contentDiv.innerHTML = `<div class="error">${message}</div>`;
         this.switchView('article');
-    }
-
-    // 搜索功能
+    }    // 搜索功能
     search(query) {
         if (!query.trim()) {
             this.showHome();
@@ -698,7 +720,34 @@ class BlogApp {
             article.category.toLowerCase().includes(query.toLowerCase())
         );
 
-        this.showFilteredArticles(results, `搜索结果: "${query}"`);
+        this.showSearchView(results, query);
+    }
+
+    // 显示搜索视图
+    showSearchView(articles, query) {
+        this.switchView('search');
+        this.clearActiveLinks();
+        this.clearTableOfContents();
+        closeMobileTableOfContents();
+        
+        const contentDiv = document.getElementById('search-content');
+        
+        const html = `
+            <h1>搜索结果: "${query}"</h1>
+            <p class="search-description">找到 ${articles.length} 篇相关文章</p>
+            <div class="article-grid">
+                ${articles.length > 0 ? articles.map(article => `
+                    <div class="recent-item" onclick="blog.showArticle('${article.id}')">
+                        <h4>${article.title}</h4>
+                        <p>${article.excerpt}</p>
+                        <div class="date">${article.date}</div>
+                        <div class="category-tag">${article.category}</div>
+                    </div>
+                `).join('') : '<div class="no-results">没有找到相关文章</div>'}
+            </div>
+        `;
+        
+        contentDiv.innerHTML = html;
     }
 
     // 更新阅读进度
