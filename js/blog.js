@@ -55,7 +55,8 @@ class BlogApp {
             'JavaScript-zw.md',
             'Linux配置笔记.md',
             '数学公式测试.md',
-            '目录功能测试.md'
+            '目录功能测试.md',
+            '代码块溢出测试.md'
         ];
 
         const loadPromises = markdownFiles.map(async (filename) => {
@@ -254,12 +255,14 @@ class BlogApp {
                 smartLists: true,
                 smartypants: false
             });
-            
-            // 使用marked.js渲染Markdown
+              // 使用marked.js渲染Markdown
             const htmlContent = marked.parse(processedContent);
             contentDiv.innerHTML = htmlContent;
               // 处理图片路径
             this.processImages(contentDiv);
+            
+            // 处理表格 - 添加横向滚动容器
+            this.processTables(contentDiv);
             
             // 渲染KaTeX数学公式
             this.renderMath(contentDiv);
@@ -601,9 +604,7 @@ class BlogApp {
                 backToTopBtn.classList.remove('visible');
             }
         }
-    }
-
-    // 处理图片路径
+    }    // 处理图片路径
     processImages(container) {
         const images = container.querySelectorAll('img');
         images.forEach(img => {
@@ -616,7 +617,24 @@ class BlogApp {
                 }
             }
         });
-    }    // 按分类过滤
+    }
+
+    // 处理表格 - 添加横向滚动容器
+    processTables(container) {
+        const tables = container.querySelectorAll('table');
+        tables.forEach(table => {
+            // 检查表格是否已经被容器包装
+            if (!table.parentElement.classList.contains('table-container')) {
+                // 创建表格容器
+                const tableContainer = document.createElement('div');
+                tableContainer.classList.add('table-container');
+                
+                // 将表格包装在容器中
+                table.parentNode.insertBefore(tableContainer, table);
+                tableContainer.appendChild(table);
+            }
+        });
+    }// 按分类过滤
     filterByCategory(category) {
         const filteredArticles = this.articles.filter(article => article.category === category);
         this.showCategoryView(filteredArticles, category);

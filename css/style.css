@@ -311,6 +311,9 @@ body.view-search .toc-toggle {
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--border-light);
     backdrop-filter: blur(10px);
+    /* 防止横向溢出 */
+    overflow-x: hidden;
+    min-width: 0; /* 允许flex子元素收缩 */
 }
 
 /* 目录侧边栏 */
@@ -546,6 +549,9 @@ body.view-about .toc-toggle {
 .article-content {
     max-width: none;
     line-height: 1.8;
+    /* 防止横向溢出 */
+    overflow-x: hidden;
+    word-wrap: break-word;
 }
 
 .article-content h1 {
@@ -617,6 +623,9 @@ body.view-about .toc-toggle {
     font-family: 'Fira Code', 'Monaco', 'Menlo', monospace;
     font-size: 0.875rem;
     border: 1px solid var(--border-light);
+    /* 防止行内代码过长破坏布局 */
+    word-break: break-all;
+    white-space: pre-wrap;
 }
 
 .article-content pre {
@@ -628,6 +637,33 @@ body.view-about .toc-toggle {
     margin: 24px 0;
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow-sm);
+    /* 强制横向滚动而不是拉伸页面 */
+    max-width: 100%;
+    white-space: pre;
+    word-wrap: normal;
+    /* 自定义滚动条样式 */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-medium) var(--bg-secondary);
+}
+
+/* Webkit浏览器滚动条样式 */
+.article-content pre::-webkit-scrollbar {
+    height: 8px;
+}
+
+.article-content pre::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.article-content pre::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.article-content pre::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
 }
 
 .article-content pre code {
@@ -648,14 +684,44 @@ body.view-about .toc-toggle {
     color: var(--text-secondary);
 }
 
+/* 表格容器 - 支持横向滚动 */
+.article-content .table-container {
+    overflow-x: auto;
+    margin: 24px 0;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    /* 自定义滚动条样式 */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-medium) var(--bg-secondary);
+}
+
+.article-content .table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.article-content .table-container::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.article-content .table-container::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.article-content .table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
 .article-content table {
     width: 100%;
+    min-width: 500px; /* 确保表格有最小宽度 */
     border-collapse: collapse;
-    margin: 24px 0;
+    margin: 0; /* 移除margin，由容器控制 */
     background: var(--bg-primary);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
 }
 
 .article-content th,
