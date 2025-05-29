@@ -2,17 +2,19 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>hcx1999</title>
     <link rel="stylesheet" href="css/style.css">
+    <!-- 网站图标 -->
+    <link rel="icon" href="src/avatar.svg" type="image/svg+xml">
     <!-- KaTeX CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
 </head>
-<body>
-    <header class="header">
+<body>    <header class="header">
         <nav class="navbar">
-            <div class="nav-brand">
-                <h1>我的博客</h1>
+            <div class="nav-brand">                <h1>
+                    <img src="src/avatar.svg" alt="avatar" class="blog-icon" width="28" height="28">
+                    HCX1999
+                </h1>
             </div>            <div class="nav-menu">
                 <a href="#" class="nav-link" onclick="showHome()">首页</a>
                 <a href="#" class="nav-link" onclick="showAbout()">关于</a>
@@ -22,10 +24,14 @@
         </nav>
     </header>
 
-    <main class="main">
-        <aside class="sidebar">
+    <main class="main">        <aside class="sidebar">
             <div class="sidebar-section">
-                <h3>文章列表</h3>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <h3>文章列表</h3>
+                    <button id="refresh-articles-btn" class="refresh-btn" 
+                            onclick="blog.refreshArticles()" 
+                            title="刷新文章列表">🔄</button>
+                </div>
                 <ul id="article-list" class="article-list">
                     <li class="loading">加载中...</li>
                 </ul>
@@ -35,7 +41,7 @@
                 <ul id="category-list" class="category-list">
                 </ul>
             </div>
-        </aside>        <div class="content-wrapper">
+        </aside><div class="content-wrapper">
             <div class="content">
                 <div id="home-view" class="view active">
                     <h2>欢迎来到我的博客</h2>
