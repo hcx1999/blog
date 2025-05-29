@@ -266,9 +266,8 @@ class BlogApp {
         try {
             const cachedFiles = localStorage.getItem('markdown_files_cache');
             if (cachedFiles) {
-                const cache = JSON.parse(cachedFiles);
-                // 检查缓存是否在24小时内且版本号匹配
-                const currentVersion = "1.1"; // 当修改缓存结构时更新此版本号
+                const cache = JSON.parse(cachedFiles);                // 检查缓存是否在24小时内且版本号匹配
+                const currentVersion = "1.2"; // 当修改缓存结构时更新此版本号
                 if (cache.timestamp && 
                    (Date.now() - cache.timestamp) < this.cacheDuration && 
                    (!cache.version || cache.version === currentVersion)) {
