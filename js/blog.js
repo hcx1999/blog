@@ -260,23 +260,29 @@ class BlogApp {
             console.error('文件探测过程中出现错误:', error);
             return [];
         }
-    }// 获取备用文件列表
+    }    // 获取备用文件列表
     async getFallbackFileList() {
         // 尝试从本地存储获取之前缓存的文件列表
         try {
             const cachedFiles = localStorage.getItem('markdown_files_cache');
             if (cachedFiles) {
                 const cache = JSON.parse(cachedFiles);
-                // 检查缓存是否在24小时内
-                if (cache.timestamp && (Date.now() - cache.timestamp) < 86400000) {
+                // 检查缓存是否在24小时内且版本号匹配
+                const currentVersion = "1.1"; // 当修改缓存结构时更新此版本号
+                if (cache.timestamp && 
+                   (Date.now() - cache.timestamp) < this.cacheDuration && 
+                   (!cache.version || cache.version === currentVersion)) {
                     console.log('使用本地缓存的文件列表:', cache.files.length, '个文件');
                     return cache.files;
+                } else {
+                    console.log('缓存已过期或版本不匹配，不使用缓存');
                 }
             }
         } catch (error) {
             console.warn('无法读取缓存的文件列表', error);
         }
-          // 如果没有缓存，返回空列表        console.log('没有缓存的文件列表，返回空列表');
+          // 如果没有缓存，返回空列表
+        console.log('没有可用的缓存文件列表，返回空列表');
         return [];
     }
     
@@ -1375,3 +1381,16 @@ document.addEventListener('click', function(e) {
         closeMobileTableOfContents();
     }
 });
+
+// 添加清除缓存功能
+function clearBlogCache() {
+    try {
+        localStorage.removeItem('markdown_files_cache');
+        console.log('博客缓存已清除');
+        alert('缓存已清除，页面将重新加载');
+        location.reload();
+    } catch (error) {
+        console.error('清除缓存失败:', error);
+        alert('清除缓存失败: ' + error.message);
+    }
+}

@@ -1,7 +1,13 @@
 {
   "markdownFiles": [
+    "AI基础笔记.md",
+    "CAMEL.md",
+    "JavaScript-tds.md",
+    "JavaScript-zw.md",
+    "Linux配置笔记.md",
+    "未命名.md"
   ],
-  "lastUpdated": "2025-05-30T02:28:00.000Z",
+  "lastUpdated": "2025-05-30T02:51:00.000Z",
   "totalFiles": 6,
   "description": "Vault 文件夹中的 Markdown 文件索引",
   "version": "1.0.0"
