@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的博客</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>我的博客</h1>
+            </div>            <div class="nav-menu">
+                <a href="#" class="nav-link" onclick="showHome()">首页</a>
+                <a href="#" class="nav-link" onclick="showAbout()">关于</a>
+                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()">🌙</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>文章列表</h3>
+                <ul id="article-list" class="article-list">
+                    <li class="loading">加载中...</li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <h3>分类</h3>
+                <ul id="category-list" class="category-list">
+                </ul>
+            </div>
+        </aside>
+
+        <div class="content">
+            <div id="home-view" class="view active">
+                <h2>欢迎来到我的博客</h2>
+                <p>这里记录了我的学习笔记和技术分享。</p>
+                <div id="recent-articles">
+                    <h3>最新文章</h3>
+                    <div id="recent-list" class="recent-list">
+                        <div class="loading">加载中...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="article-view" class="view">
+                <article id="article-content" class="article-content">
+                </article>
+            </div>
+
+            <div id="about-view" class="view">
+                <h2>关于我</h2>
+                <p>这是一个基于静态文件的博客系统，支持Markdown文件的动态渲染。</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 我的博客. 保留所有权利.</p>
+    </footer>    <script src="js/markdown.min.js"></script>
+    <!-- KaTeX JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    <script src="js/blog.js"></script>    <script>
+        // 页面加载完成后初始化主题
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                if (typeof initTheme === 'function') {
+                    initTheme();
+                } else {
+                    console.error('initTheme function not found');
+                }
+            } catch (error) {
+                console.error('Error initializing theme:', error);
+            }
+        });
+    </script>
+</body>
+</html>

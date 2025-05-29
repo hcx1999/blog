@@ -1,0 +1,197 @@
+{
+  "main": {
+    "id": "7a4edb3332ac73a4",
+    "type": "split",
+    "children": [
+      {
+        "id": "c5be9ba271c74319",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "cc108bdd6937fd81",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "数学公式测试.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "数学公式测试"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "69874e31d0e2323e",
+    "type": "split",
+    "children": [
+      {
+        "id": "541f0a69192dd51e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7afd8a3fa1280e4f",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "32b81d3af6ce6a54",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "cd780f2aab48bd0e",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "right": {
+    "id": "a653e5076f42554b",
+    "type": "split",
+    "children": [
+      {
+        "id": "3c862e134fbb2775",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3f7547d73b19c722",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Welcome.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": false
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Welcome"
+            }
+          },
+          {
+            "id": "29abd8fdf756347d",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Welcome.md",
+                "linksCollapsed": true,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Welcome"
+            }
+          },
+          {
+            "id": "f495a9467761dc73",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "606ec845ee39483d",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Welcome.md",
+                "followCursor": false,
+                "showSearch": true,
+                "searchQuery": "LaTeX suite"
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Welcome"
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false
+    }
+  },
+  "active": "cc108bdd6937fd81",
+  "lastOpenFiles": [
+    "Linux配置笔记.md",
+    "JavaScript-zw.md",
+    "JavaScript-tds.md",
+    "CAMEL.md",
+    "AI基础作业笔记.md",
+    "AI基础笔记.md",
+    "高级数学公式测试.md",
+    "attachments/Pasted image 20250419170637.png",
+    "attachments/Pasted image 20250528181903.png",
+    "attachments",
+    "attachments/Pasted image 20250525102449.png",
+    "imgs",
+    "attachments/Pasted image 20250513142149.png",
+    "attachments/Pasted image 20250513142047.png",
+    "attachments/Pasted image 20250513142019.png",
+    "attachments/Pasted image 20250513141236.png",
+    "attachments/Pasted image 20250513141232.png",
+    "attachments/Pasted image 20250513141209.png",
+    "attachments/Pasted image 20250513141153.png",
+    "2025-04-19.md",
+    "Welcome.md",
+    "create a link.md"
+  ]
+}

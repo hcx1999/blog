@@ -1,0 +1,173 @@
+# 博客项目 - 支持KaTeX数学公式
+
+这是一个基于静态文件的博客系统，支持从Markdown文件动态生成博客内容，并完整支持KaTeX数学公式渲染。
+
+## ✨ 功能特性
+
+- 📝 支持Markdown文件自动解析和渲染
+- 🧮 **完整支持KaTeX数学公式渲染**
+- 🌙 **浅色/深色主题切换**
+- 🎨 响应式设计，适配桌面和移动端
+- 🔍 支持文章搜索和分类过滤
+- 📱 现代化UI设计
+- ⚡ 纯前端实现，无需后端服务器
+- 🖼️ 自动处理图片路径
+- ⌨️ 键盘快捷键支持
+- 💾 主题偏好自动保存
+
+## 🚀 快速开始
+
+### 方法1：使用启动脚本（推荐）
+```bash
+./start-server.sh
+```
+
+### 方法2：手动启动服务器
+
+#### 使用Python内置服务器
+```bash
+# Python 3
+python -m http.server 8000
+
+# Python 2  
+python -m SimpleHTTPServer 8000
+```
+
+#### 使用Node.js http-server
+```bash
+npm install -g http-server
+http-server
+```
+
+#### 使用PHP内置服务器
+```bash
+php -S localhost:8000
+```
+
+然后在浏览器中访问 `http://localhost:8000`
+
+## 📁 项目结构
+
+```
+blog/
+├── index.html              # 主页面
+├── start-server.sh         # 启动脚本
+├── README.md              # 项目说明
+├── css/
+│   └── style.css          # 样式文件（包含KaTeX样式）
+├── js/
+│   ├── blog.js            # 主要逻辑（包含KaTeX渲染）
+│   └── markdown.min.js    # Markdown解析库
+└── Vault/                 # 文章目录
+    ├── *.md               # Markdown文章
+    └── attachments/       # 图片资源
+```
+
+## 📝 使用说明
+
+### 基本功能
+1. 在 `Vault/` 目录下创建新的 `.md` 文件
+2. 文件会自动被博客系统识别和显示
+3. 点击侧边栏的文章标题查看文章内容
+4. 使用分类过滤查看特定类型的文章
+5. 支持键盘快捷键 `Ctrl+K` 或 `Cmd+K` 进行搜索
+
+### 主题切换
+- 点击导航栏右侧的 🌙/☀️ 按钮切换浅色/深色主题
+- 主题偏好会自动保存到本地存储
+- 支持跟随系统主题设置
+
+### Markdown语法支持
+
+支持以下Markdown语法：
+   - 标题 (`#`, `##`, `###`)
+   - 粗体 (`**文本**`)
+   - 斜体 (`*文本*`)
+   - 代码 (`` `代码` ``)
+   - 代码块 (三个反引号)
+   - 链接 (`[文本](URL)`)
+   - 图片 (`![描述](路径)`)
+   - 列表
+   - 引用 (`> 文本`)
+   - 数学公式：
+     - 行内公式：`$E=mc^2$`
+     - 块级公式：`$$\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}$$`
+
+### 图片处理
+
+- 图片文件放在 `Vault/attachments/` 目录下
+- Markdown中使用相对路径引用：`![描述](attachments/图片.png)`
+
+### 快捷键
+
+- `Ctrl+K` (或 `Cmd+K`)：打开搜索
+
+## 自定义
+
+### 修改样式
+编辑 `css/style.css` 文件来自定义外观。
+
+### 修改功能
+编辑 `js/blog.js` 文件来添加新功能或修改现有行为。
+
+### 分类规则
+当前分类规则在 `blog.js` 的 `extractCategory` 方法中定义，可以根据需要修改。
+
+## 依赖库
+
+本项目使用以下CDN资源：
+
+- **Marked.js**: Markdown解析器
+- **KaTeX**: 数学公式渲染引擎
+  - katex.min.css (样式)
+  - katex.min.js (核心库)
+  - auto-render.min.js (自动渲染插件)
+
+## 数学公式语法
+
+支持标准的LaTeX数学公式语法：
+
+### 行内公式
+使用单个`$`包围公式：`$E=mc^2$` 
+
+### 块级公式
+使用双`$$`包围公式：
+```
+$$
+\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
+$$
+```
+
+### 常用公式示例
+- 分数：`$\frac{a}{b}$`
+- 上下标：`$x^2$`, `$x_1$`
+- 根号：`$\sqrt{x}$`, `$\sqrt[3]{x}$`
+- 求和：`$\sum_{i=1}^{n} x_i$`
+- 积分：`$\int_a^b f(x)dx$`
+- 希腊字母：`$\alpha$`, `$\beta$`, `$\gamma$`
+- 矩阵：
+```
+$$
+\begin{pmatrix}
+a & b \\
+c & d
+\end{pmatrix}
+$$
+```
+
+## 浏览器兼容性
+
+- Chrome 60+
+- Firefox 55+
+- Safari 10+
+- Edge 79+
+
+## 注意事项
+
+1. 由于使用fetch API读取本地文件，必须通过HTTP服务器访问
+2. 图片路径使用相对路径，确保图片文件在正确位置
+3. Markdown文件编码建议使用UTF-8
+
+## 许可证
+
+MIT License
