@@ -149,7 +149,7 @@ body {
     margin: 32px auto;
     padding: 0 24px;
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 260px 1fr;
     gap: 40px;
     min-height: calc(100vh - 200px);
 }
@@ -158,17 +158,38 @@ body {
 .sidebar {
     background: var(--bg-primary);
     border-radius: 16px;
-    padding: 24px;
+    padding: 20px;
     box-shadow: var(--shadow-lg);
-    height: fit-content;
+    height: calc(100vh - 140px);
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
     position: sticky;
     top: 100px;
     border: 1px solid var(--border-light);
     backdrop-filter: blur(10px);
 }
 
+/* 侧边栏滚动条样式 */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
 .sidebar-section {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 }
 
 .sidebar-section:last-child {
@@ -177,11 +198,11 @@ body {
 
 .sidebar-section h3 {
     color: var(--text-primary);
-    margin-bottom: 16px;
-    font-size: 1.125rem;
+    margin-bottom: 12px;
+    font-size: 1rem;
     font-weight: 600;
     position: relative;
-    padding-bottom: 8px;
+    padding-bottom: 6px;
 }
 
 .sidebar-section h3::after {
@@ -206,14 +227,15 @@ body {
     display: block;
     text-decoration: none;
     color: var(--text-secondary);
-    padding: 12px 16px;
-    border-radius: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
     transition: var(--transition);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 500;
     border: 1px solid transparent;
     position: relative;
     overflow: hidden;
+    line-height: 1.4;
 }
 
 .article-link:hover, .category-link:hover {
