@@ -278,6 +278,9 @@ class BlogApp {
 
     // 预处理Markdown内容（修复标题格式）
     preprocessMarkdown(content) {
+        // 首先处理 Obsidian 格式的图片引用
+        content = this.processObsidianImages(content);
+        
         // 确保标题前有空行（除了文档开头）
         // 匹配标题行（# ## ### 等）
         const lines = content.split('\n');
@@ -304,6 +307,17 @@ class BlogApp {
         }
         
         return processedLines.join('\n');
+    }
+
+    // 处理 Obsidian 格式的图片引用
+    processObsidianImages(content) {
+        // 匹配 Obsidian 格式的图片: ![[attachments/filename.png]] 或 ![[filename.png]]
+        return content.replace(/!\[\[(attachments\/)?([^\]]+\.(png|jpg|jpeg|gif|svg|webp))\]\]/gi, (match, attachmentsPath, filename, ext) => {
+            // 如果已经包含 attachments/ 路径，直接使用；否则添加 attachments/ 前缀
+            const imagePath = attachmentsPath ? `attachments/${filename}` : `attachments/${filename}`;
+            // 转换为标准 Markdown 图片语法
+            return `![${filename}](${imagePath})`;
+        });
     }
 
     // 预处理数学公式
@@ -603,20 +617,43 @@ class BlogApp {
             } else {
                 backToTopBtn.classList.remove('visible');
             }
-        }
-    }    // 处理图片路径
+        }    }
+    
+    // 处理图片路径
     processImages(container) {
         const images = container.querySelectorAll('img');
         images.forEach(img => {
             const src = img.getAttribute('src');
             if (src && !src.startsWith('http') && !src.startsWith('/')) {
+                let imagePath;
+                
                 if (src.startsWith('attachments/')) {
-                    img.setAttribute('src', `Vault/${src}`);
+                    imagePath = `Vault/${src}`;
                 } else {
-                    img.setAttribute('src', `Vault/attachments/${src}`);
+                    imagePath = `Vault/attachments/${src}`;
                 }
+                
+                // 对图片路径进行 URL 编码以处理空格和特殊字符
+                const encodedPath = this.encodeImagePath(imagePath);
+                img.setAttribute('src', encodedPath);
+                
+                // 添加错误处理，如果图片加载失败显示占位符
+                img.addEventListener('error', () => {
+                    img.style.border = '2px dashed #ccc';
+                    img.style.padding = '20px';
+                    img.alt = `图片加载失败: ${src}`;
+                    img.title = `图片路径: ${imagePath}`;
+                }, { once: true });
             }
         });
+    }
+    
+    // 编码图片路径以处理空格和特殊字符
+    encodeImagePath(path) {
+        // 分割路径和文件名
+        const parts = path.split('/');
+        // 对每个部分进行编码，但保留路径分隔符
+        return parts.map(part => encodeURIComponent(part)).join('/');
     }
 
     // 处理表格 - 添加横向滚动容器

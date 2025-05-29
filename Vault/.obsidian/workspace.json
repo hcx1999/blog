@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "c5be9ba271c74319",
+        "id": "c84e715c25321223",
         "type": "tabs",
         "children": [
           {
-            "id": "cc108bdd6937fd81",
+            "id": "084362758e89cd92",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "数学公式测试.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "数学公式测试"
+              "title": "新标签页"
             }
           }
         ]
@@ -166,18 +162,21 @@
       "canvas:新建白板": false,
       "daily-notes:打开/创建今天的日记": false,
       "templates:插入模板": false,
-      "command-palette:打开命令面板": false
+      "command-palette:打开命令面板": false,
+      "publish:发布更改": false
     }
   },
-  "active": "cc108bdd6937fd81",
+  "active": "084362758e89cd92",
   "lastOpenFiles": [
+    "代码块溢出测试.md",
+    "数学公式测试.md",
+    "未命名.md",
     "Linux配置笔记.md",
     "JavaScript-zw.md",
     "JavaScript-tds.md",
     "AI基础笔记.md",
     "AI基础作业笔记.md",
     "目录功能测试.md",
-    "数学公式测试.md",
     "CAMEL.md",
     "高级数学公式测试.md",
     "attachments/Pasted image 20250419170637.png",
