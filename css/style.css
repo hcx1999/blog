@@ -117,7 +117,7 @@ body {
 }
 
 /* 主题切换按钮 */
-.theme-toggle {
+.theme-toggle, .toc-toggle {
     background: var(--bg-secondary);
     border: 1px solid var(--border-light);
     border-radius: 8px;
@@ -129,11 +129,16 @@ body {
     justify-content: center;
     width: 40px;
     height: 40px;
+    font-size: 16px;
 }
 
-.theme-toggle:hover {
+.theme-toggle:hover, .toc-toggle:hover {
     background: var(--bg-tertiary);
     transform: scale(1.05);
+}
+
+.toc-toggle {
+    display: none; /* 默认隐藏，只在小屏幕显示 */
 }
 
 .theme-icon {
@@ -145,13 +150,31 @@ body {
 
 /* 主要内容区 */
 .main {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 32px auto;
     padding: 0 24px;
     display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: 40px;
+    grid-template-columns: 260px 1fr 220px;
+    gap: 30px;
     min-height: calc(100vh - 200px);
+}
+
+/* 在首页和关于页面时调整布局 */
+body.view-home .main,
+body.view-about .main {
+    grid-template-columns: 260px 1fr;
+}
+
+/* 在首页和关于页面隐藏目录 */
+body.view-home .toc-sidebar,
+body.view-about .toc-sidebar {
+    display: none;
+}
+
+/* 在首页和关于页面隐藏目录切换按钮 */
+body.view-home .toc-toggle,
+body.view-about .toc-toggle {
+    display: none;
 }
 
 /* 侧边栏 */
@@ -269,6 +292,11 @@ body {
     transform: scaleY(1);
 }
 
+/* 内容包装器 */
+.content-wrapper {
+    display: contents;
+}
+
 /* 内容区 */
 .content {
     background: var(--bg-primary);
@@ -277,6 +305,163 @@ body {
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--border-light);
     backdrop-filter: blur(10px);
+}
+
+/* 目录侧边栏 */
+.toc-sidebar {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--shadow-lg);
+    height: calc(100vh - 140px);
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+    position: sticky;
+    top: 100px;
+    border: 1px solid var(--border-light);
+    backdrop-filter: blur(10px);
+}
+
+/* 在首页和关于页面隐藏目录 */
+body.view-home .toc-sidebar,
+body.view-about .toc-sidebar {
+    display: none;
+}
+
+/* 在首页和关于页面隐藏目录切换按钮 */
+body.view-home .toc-toggle,
+body.view-about .toc-toggle {
+    display: none;
+}
+
+.toc-wrapper h3 {
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.toc-wrapper h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+    height: 3px;
+    background: var(--accent-gradient);
+    border-radius: 2px;
+}
+
+/* 阅读进度条 */
+.reading-progress {
+    margin-bottom: 16px;
+}
+
+.progress-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--border-light);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent-gradient);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.toc-nav {
+    font-size: 0.85rem;
+}
+
+.toc-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.toc-nav li {
+    margin: 0;
+    padding: 0;
+}
+
+.toc-nav a {
+    display: block;
+    text-decoration: none;
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: var(--transition);
+    line-height: 1.4;
+    position: relative;
+    overflow: hidden;
+}
+
+.toc-nav a:hover {
+    color: var(--accent-primary);
+    background: var(--bg-secondary);
+    transform: translateX(2px);
+}
+
+.toc-nav a.active {
+    color: var(--accent-primary);
+    background: var(--bg-secondary);
+    border-left: 3px solid var(--accent-primary);
+    padding-left: 9px;
+}
+
+.toc-nav .toc-h2 {
+    padding-left: 12px;
+}
+
+.toc-nav .toc-h3 {
+    padding-left: 24px;
+    font-size: 0.8rem;
+}
+
+.toc-nav .toc-h4 {
+    padding-left: 36px;
+    font-size: 0.75rem;
+}
+
+.toc-placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 20px 0;
+}
+
+/* 目录侧边栏滚动条样式 */
+.toc-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.toc-sidebar::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 2px;
+}
+
+.toc-sidebar::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: 2px;
+}
+
+.toc-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
 }
 
 .view {
@@ -547,7 +732,84 @@ body {
     font-size: 0.875rem;
 }
 
+/* 返回顶部按钮 */
+.back-to-top {
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.back-to-top:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px -3px rgb(0 0 0 / 0.2), 0 8px 10px -4px rgb(0 0 0 / 0.1);
+}
+
+.back-to-top.visible {
+    display: block;
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 优化移动端返回顶部按钮 */
+@media (max-width: 768px) {
+    .back-to-top {
+        bottom: 80px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+}
+
 /* 响应式设计 */
+@media (max-width: 1024px) {
+    .main {
+        grid-template-columns: 240px 1fr;
+        gap: 24px;
+    }
+    
+    .toc-sidebar {
+        position: fixed;
+        top: 70px;
+        right: -250px;
+        width: 240px;
+        height: calc(100vh - 70px);
+        z-index: 999;
+        transition: right 0.3s ease;
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .toc-sidebar.mobile-visible {
+        right: 0;
+    }
+    
+    .toc-toggle {
+        display: flex;
+    }
+}
+
 @media (max-width: 768px) {
     .main {
         grid-template-columns: 1fr;
@@ -560,6 +822,25 @@ body {
         position: static;
         order: 2;
         margin-top: 20px;
+    }
+    
+    .toc-sidebar {
+        position: fixed;
+        top: 70px;
+        right: -280px;
+        width: 260px;
+        height: calc(100vh - 70px);
+        z-index: 999;
+        transition: right 0.3s ease;
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .toc-sidebar.mobile-visible {
+        right: 0;
+    }
+    
+    .toc-toggle {
+        display: flex;
     }
     
     .navbar {
@@ -612,6 +893,55 @@ body {
     }
 }
 
+/* 移动端触摸优化 */
+@media (max-width: 768px) {
+    .toc-nav a {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .toc-collapse-btn {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .reading-progress {
+        padding: 8px 0;
+    }
+    
+    .progress-bar {
+        height: 6px;
+    }
+    
+    /* 目录手势提示 */
+    .toc-sidebar::before {
+        content: '👆 点击目录项快速跳转';
+        position: absolute;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        background: var(--bg-primary);
+        padding: 4px 8px;
+        border-radius: 4px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        white-space: nowrap;
+    }
+    
+    .toc-sidebar.mobile-visible::before {
+        opacity: 1;
+    }
+}
+
 /* 滚动条样式 */
 ::-webkit-scrollbar {
     width: 8px;
@@ -639,4 +969,68 @@ body {
 ::-moz-selection {
     background: var(--accent-primary);
     color: white;
+}
+
+/* 移动端目录遮罩层 */
+.toc-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.toc-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 目录折叠功能 */
+.toc-collapse-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: var(--transition);
+    margin-left: auto;
+}
+
+.toc-collapse-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.toc-wrapper.collapsed .toc-nav {
+    display: none;
+}
+
+.toc-wrapper.collapsed .reading-progress {
+    display: none;
+}
+
+/* 目录项计数 */
+.toc-count {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    background: var(--bg-secondary);
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 8px;
+}
+
+/* 目录动画 */
+.toc-nav {
+    transition: all 0.3s ease;
+}
+
+.reading-progress {
+    transition: all 0.3s ease;
 }

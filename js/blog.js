@@ -38,15 +38,14 @@ class BlogApp {
         this.currentView = 'home';
         this.currentArticle = null;
         this.init();
-    }
-
-    async init() {
+    }    async init() {
         await this.loadArticles();
         this.renderSidebar();
         this.renderHomeView();
-    }
-
-    // 加载所有Markdown文件
+        
+        // 设置初始的body class
+        document.body.classList.add('view-home');
+    }    // 加载所有Markdown文件
     async loadArticles() {
         const markdownFiles = [
             'AI基础笔记.md',
@@ -55,7 +54,8 @@ class BlogApp {
             'JavaScript-tds.md',
             'JavaScript-zw.md',
             'Linux配置笔记.md',
-            '数学公式测试.md'
+            '数学公式测试.md',
+            '目录功能测试.md'
         ];
 
         const loadPromises = markdownFiles.map(async (filename) => {
@@ -258,12 +258,14 @@ class BlogApp {
             // 使用marked.js渲染Markdown
             const htmlContent = marked.parse(processedContent);
             contentDiv.innerHTML = htmlContent;
-            
-            // 处理图片路径
+              // 处理图片路径
             this.processImages(contentDiv);
             
             // 渲染KaTeX数学公式
             this.renderMath(contentDiv);
+            
+            // 生成目录
+            this.generateTableOfContents(contentDiv);
             
         } catch (error) {
             console.error('渲染文章失败:', error);
@@ -387,6 +389,217 @@ class BlogApp {
             } catch (error) {
                 console.warn('auto-render数学公式渲染失败:', error);
             }
+        }    }
+
+    // 生成目录
+    generateTableOfContents(container) {
+        const tocContainer = document.getElementById('table-of-contents');
+        if (!tocContainer) return;
+
+        // 查找所有标题元素
+        const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        
+        if (headings.length === 0) {
+            tocContainer.innerHTML = '<div class="toc-placeholder">本文章无标题结构</div>';
+            return;
+        }
+
+        // 为每个标题添加ID（如果没有的话）
+        headings.forEach((heading, index) => {
+            if (!heading.id) {
+                heading.id = `heading-${index}`;
+            }
+        });
+
+        // 生成目录HTML
+        let tocHTML = '<ul>';
+        let currentLevel = 0;
+
+        headings.forEach(heading => {
+            const level = parseInt(heading.tagName.charAt(1));
+            const text = heading.textContent.trim();
+            const id = heading.id;
+
+            // 处理层级变化
+            if (level > currentLevel) {
+                // 需要增加层级
+                for (let i = currentLevel; i < level - 1; i++) {
+                    tocHTML += '<ul>';
+                }
+                if (currentLevel > 0) {
+                    tocHTML += '<ul>';
+                }
+            } else if (level < currentLevel) {
+                // 需要减少层级
+                for (let i = level; i < currentLevel; i++) {
+                    tocHTML += '</ul></li>';
+                }
+            } else if (currentLevel > 0) {
+                // 同级，关闭上一个li
+                tocHTML += '</li>';
+            }
+
+            // 添加当前标题
+            tocHTML += `<li><a href="#${id}" class="toc-h${level}" onclick="return blog.scrollToHeading('${id}')">${text}</a>`;
+            currentLevel = level;
+        });
+
+        // 关闭所有未关闭的标签
+        for (let i = 1; i < currentLevel; i++) {
+            tocHTML += '</ul></li>';
+        }
+        if (currentLevel > 0) {
+            tocHTML += '</li>';
+        }
+        tocHTML += '</ul>';        tocContainer.innerHTML = tocHTML;
+
+        // 更新目录计数
+        this.updateTocCount(headings.length);
+
+        // 显示阅读进度条
+        this.showReadingProgress();
+
+        // 监听滚动事件，高亮当前标题
+        this.setupTocScrollSpy(headings);
+    }
+
+    // 滚动到指定标题
+    scrollToHeading(headingId) {
+        const heading = document.getElementById(headingId);
+        if (heading) {
+            // 计算偏移量（考虑固定头部）
+            const headerHeight = document.querySelector('.header').offsetHeight;
+            const elementPosition = heading.offsetTop;
+            const offsetPosition = elementPosition - headerHeight - 20;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+
+            // 更新目录高亮
+            this.updateTocActiveState(headingId);
+        }
+        return false; // 阻止默认锚点跳转
+    }
+
+    // 设置目录滚动监听
+    setupTocScrollSpy(headings) {
+        if (this.scrollSpyHandler) {
+            window.removeEventListener('scroll', this.scrollSpyHandler);
+        }        this.scrollSpyHandler = () => {
+            const headerHeight = document.querySelector('.header').offsetHeight;
+            const scrollPosition = window.scrollY + headerHeight + 50;
+
+            // 计算阅读进度
+            this.updateReadingProgress();
+
+            // 更新返回顶部按钮
+            this.updateBackToTopButton();
+
+            let activeHeading = null;
+            
+            // 找到当前可见的标题
+            for (let i = headings.length - 1; i >= 0; i--) {
+                if (headings[i].offsetTop <= scrollPosition) {
+                    activeHeading = headings[i];
+                    break;
+                }
+            }
+
+            if (activeHeading) {
+                this.updateTocActiveState(activeHeading.id);
+            }
+        };
+
+        window.addEventListener('scroll', this.scrollSpyHandler, { passive: true });
+    }
+
+    // 更新目录高亮状态
+    updateTocActiveState(activeId) {
+        // 移除所有active类
+        document.querySelectorAll('.toc-nav a').forEach(link => {
+            link.classList.remove('active');
+        });
+
+        // 添加active类到当前标题
+        const activeLink = document.querySelector(`.toc-nav a[href="#${activeId}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    }    // 清理目录
+    clearTableOfContents() {
+        const tocContainer = document.getElementById('table-of-contents');
+        if (tocContainer) {
+            tocContainer.innerHTML = '<div class="toc-placeholder">阅读文章时将显示目录</div>';
+        }
+
+        // 重置目录计数
+        this.updateTocCount(0);
+
+        // 隐藏阅读进度条
+        this.hideReadingProgress();
+
+        // 移除滚动监听
+        if (this.scrollSpyHandler) {
+            window.removeEventListener('scroll', this.scrollSpyHandler);
+            this.scrollSpyHandler = null;
+        }
+    }
+
+    // 切换目录折叠状态
+    toggleTocCollapse() {
+        const tocWrapper = document.querySelector('.toc-wrapper');
+        const collapseBtn = document.getElementById('toc-collapse-btn');
+        
+        if (tocWrapper && collapseBtn) {
+            const isCollapsed = tocWrapper.classList.toggle('collapsed');
+            collapseBtn.textContent = isCollapsed ? '📋' : '📄';
+            collapseBtn.title = isCollapsed ? '展开目录' : '折叠目录';
+        }
+    }
+
+    // 更新目录计数
+    updateTocCount(count) {
+        const tocCount = document.getElementById('toc-count');
+        const collapseBtn = document.getElementById('toc-collapse-btn');
+        
+        if (tocCount) {
+            if (count > 0) {
+                tocCount.textContent = count;
+                tocCount.style.display = 'inline-block';
+                if (collapseBtn) {
+                    collapseBtn.style.display = 'block';
+                }
+            } else {
+                tocCount.style.display = 'none';
+                if (collapseBtn) {
+                    collapseBtn.style.display = 'none';
+                }
+            }
+        }
+    }
+
+    // 返回顶部
+    scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    // 更新返回顶部按钮显示状态
+    updateBackToTopButton() {
+        const backToTopBtn = document.getElementById('back-to-top');
+        if (backToTopBtn) {
+            const scrollTop = window.scrollY;
+            const showThreshold = 300;
+            
+            if (scrollTop > showThreshold) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
         }
     }
 
@@ -430,26 +643,31 @@ class BlogApp {
         `;
         
         contentDiv.innerHTML = html;
-    }
-
-    // 显示首页
+    }    // 显示首页
     showHome() {
         this.switchView('home');
         this.clearActiveLinks();
+        this.clearTableOfContents();
+        closeMobileTableOfContents();
     }
 
     // 显示关于页面
     showAbout() {
         this.switchView('about');
         this.clearActiveLinks();
-    }
-
-    // 切换视图
+        this.clearTableOfContents();
+        closeMobileTableOfContents();
+    }    // 切换视图
     switchView(viewName) {
         document.querySelectorAll('.view').forEach(view => {
             view.classList.remove('active');
         });
         document.getElementById(`${viewName}-view`).classList.add('active');
+        
+        // 更新body的class来控制布局和目录显示
+        document.body.className = document.body.className.replace(/view-\w+/g, '');
+        document.body.classList.add(`view-${viewName}`);
+        
         this.currentView = viewName;
     }
 
@@ -482,6 +700,54 @@ class BlogApp {
 
         this.showFilteredArticles(results, `搜索结果: "${query}"`);
     }
+
+    // 更新阅读进度
+    updateReadingProgress() {
+        const progressContainer = document.getElementById('reading-progress');
+        const progressFill = document.getElementById('progress-fill');
+        const progressPercentage = document.getElementById('progress-percentage');
+        
+        if (!progressContainer || !progressFill || !progressPercentage) return;
+
+        // 计算页面总高度和当前滚动位置
+        const articleContent = document.getElementById('article-content');
+        if (!articleContent) return;
+
+        const headerHeight = document.querySelector('.header').offsetHeight;
+        const windowHeight = window.innerHeight;
+        const documentHeight = articleContent.offsetHeight;
+        const scrollTop = window.scrollY;
+
+        // 计算可阅读区域
+        const readableHeight = documentHeight - windowHeight + headerHeight;
+        const scrollProgress = Math.max(0, scrollTop - headerHeight);
+        
+        // 计算进度百分比
+        let percentage = 0;
+        if (readableHeight > 0) {
+            percentage = Math.min(100, Math.max(0, (scrollProgress / readableHeight) * 100));
+        }
+
+        // 更新进度条和百分比显示
+        progressFill.style.width = `${percentage}%`;
+        progressPercentage.textContent = `${Math.round(percentage)}%`;
+    }
+
+    // 显示阅读进度条
+    showReadingProgress() {
+        const progressContainer = document.getElementById('reading-progress');
+        if (progressContainer) {
+            progressContainer.style.display = 'block';
+        }
+    }
+
+    // 隐藏阅读进度条
+    hideReadingProgress() {
+        const progressContainer = document.getElementById('reading-progress');
+        if (progressContainer) {
+            progressContainer.style.display = 'none';
+        }
+    }
 }
 
 // 全局函数，供HTML调用
@@ -509,5 +775,46 @@ document.addEventListener('keydown', (e) => {
         if (query) {
             blog.search(query);
         }
+    }
+});
+
+// 目录切换功能
+function toggleTableOfContents() {
+    const tocSidebar = document.querySelector('.toc-sidebar');
+    const tocOverlay = document.getElementById('toc-overlay');
+    
+    if (tocSidebar && tocOverlay) {
+        const isVisible = tocSidebar.classList.contains('mobile-visible');
+        
+        if (isVisible) {
+            closeMobileTableOfContents();
+        } else {
+            tocSidebar.classList.add('mobile-visible');
+            tocOverlay.classList.add('visible');
+        }
+    }
+}
+
+// 关闭移动端目录
+function closeMobileTableOfContents() {
+    const tocSidebar = document.querySelector('.toc-sidebar');
+    const tocOverlay = document.getElementById('toc-overlay');
+    
+    if (tocSidebar && tocOverlay) {
+        tocSidebar.classList.remove('mobile-visible');
+        tocOverlay.classList.remove('visible');
+    }
+}
+
+// 点击页面其他区域时隐藏目录
+document.addEventListener('click', function(e) {
+    const tocSidebar = document.querySelector('.toc-sidebar');
+    const tocToggle = document.getElementById('toc-toggle');
+    
+    if (tocSidebar && tocToggle && 
+        !tocSidebar.contains(e.target) && 
+        !tocToggle.contains(e.target) &&
+        tocSidebar.classList.contains('mobile-visible')) {
+        closeMobileTableOfContents();
     }
 });

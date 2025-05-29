@@ -16,6 +16,7 @@
             </div>            <div class="nav-menu">
                 <a href="#" class="nav-link" onclick="showHome()">首页</a>
                 <a href="#" class="nav-link" onclick="showAbout()">关于</a>
+                <button id="toc-toggle" class="toc-toggle" onclick="toggleTableOfContents()" title="切换目录">📋</button>
                 <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()">🌙</button>
             </div>
         </nav>
@@ -34,35 +35,64 @@
                 <ul id="category-list" class="category-list">
                 </ul>
             </div>
-        </aside>
-
-        <div class="content">
-            <div id="home-view" class="view active">
-                <h2>欢迎来到我的博客</h2>
-                <p>这里记录了我的学习笔记和技术分享。</p>
-                <div id="recent-articles">
-                    <h3>最新文章</h3>
-                    <div id="recent-list" class="recent-list">
-                        <div class="loading">加载中...</div>
+        </aside>        <div class="content-wrapper">
+            <div class="content">
+                <div id="home-view" class="view active">
+                    <h2>欢迎来到我的博客</h2>
+                    <p>这里记录了我的学习笔记和技术分享。</p>
+                    <div id="recent-articles">
+                        <h3>最新文章</h3>
+                        <div id="recent-list" class="recent-list">
+                            <div class="loading">加载中...</div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="article-view" class="view">
-                <article id="article-content" class="article-content">
-                </article>
-            </div>
+                <div id="article-view" class="view">
+                    <article id="article-content" class="article-content">
+                    </article>
+                </div>
 
-            <div id="about-view" class="view">
-                <h2>关于我</h2>
-                <p>这是一个基于静态文件的博客系统，支持Markdown文件的动态渲染。</p>
-            </div>
-        </div>
-    </main>
+                <div id="about-view" class="view">
+                    <h2>关于我</h2>
+                    <p>这是一个基于静态文件的博客系统，支持Markdown文件的动态渲染。</p>
+                </div>
+            </div>            <aside class="toc-sidebar">
+                <div class="toc-wrapper">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                        <h3>📋 目录</h3>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="toc-count" class="toc-count" style="display: none;">0</span>
+                            <button id="toc-collapse-btn" class="toc-collapse-btn" onclick="blog.toggleTocCollapse()" style="display: none;" title="折叠/展开目录">
+                                📄
+                            </button>
+                        </div>
+                    </div>
+                    <div class="reading-progress" id="reading-progress" style="display: none;">
+                        <div class="progress-label">
+                            <span>阅读进度</span>
+                            <span id="progress-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                    </div>
+                    <nav id="table-of-contents" class="toc-nav">
+                        <div class="toc-placeholder">阅读文章时将显示目录</div>
+                    </nav>
+                </div>
+            </aside></div>
+    </main>    <!-- 移动端目录遮罩层 -->
+    <div id="toc-overlay" class="toc-overlay" onclick="closeMobileTableOfContents()"></div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" class="back-to-top" onclick="blog.scrollToTop()" title="返回顶部">
+        ↑
+    </button>
 
     <footer class="footer">
         <p>&copy; 2025 我的博客. 保留所有权利.</p>
-    </footer>    <script src="js/markdown.min.js"></script>
+    </footer><script src="js/markdown.min.js"></script>
     <!-- KaTeX JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
