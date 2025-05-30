@@ -15,6 +15,42 @@
 - 🖼️ 自动处理图片路径
 - ⌨️ 键盘快捷键支持
 - 💾 主题偏好自动保存
+- 🚀 **支持 GitHub Pages 自动部署**
+
+## 🌐 GitHub Pages 部署
+
+本项目已配置 GitHub Actions 自动部署到 GitHub Pages：
+
+### 设置步骤
+
+1. **推送代码到 GitHub**
+   ```bash
+   git add .
+   git commit -m "初始博客设置"
+   git push origin main
+   ```
+
+2. **启用 GitHub Pages**
+   - 进入你的 GitHub 仓库
+   - 点击 "Settings" 标签
+   - 滚动到 "Pages" 部分
+   - 在 "Source" 下选择 "GitHub Actions"
+
+3. **自动部署**
+   - 每次推送到 `main` 分支时，GitHub Actions 会自动：
+     - 扫描 `Vault/` 目录中的 Markdown 文件
+     - 生成 `files.json` 文件列表
+     - 部署到 GitHub Pages
+
+4. **访问你的博客**
+   - 部署完成后，访问：`https://[你的用户名].github.io/[仓库名]/`
+
+### 配置文件说明
+
+- `.github/workflows/deploy.yml` - GitHub Actions 工作流配置
+- `package.json` - Node.js 项目配置
+- `_config.yml` - GitHub Pages 配置
+- `.gitignore` - Git 忽略文件配置
 
 ## 🚀 快速开始
 
