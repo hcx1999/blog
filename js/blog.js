@@ -581,15 +581,18 @@ class BlogApp {
                 console.warn(`加载文件 ${filename} 时出错:`, error);
                 return null;
             }
-        });
-
-        const results = await Promise.all(loadPromises);
+        });        const results = await Promise.all(loadPromises);
         this.articles = results.filter(article => article !== null);
         this.articles.sort((a, b) => new Date(b.date) - new Date(a.date));
         
         console.log(`✅ 成功加载了 ${this.articles.length} 篇文章`);
+        
+        // 构建搜索索引
+        if (typeof buildSearchIndex === 'function') {
+            buildSearchIndex(this.articles);
+        }
 
-    }    // 解析Markdown文件
+    }// 解析Markdown文件
     parseMarkdownFile(filename, content) {
         const title = this.extractTitle(content, filename);
         const category = CategoryUtil.extractCategory(filename);
@@ -1083,37 +1086,16 @@ class BlogApp {
             window.removeEventListener('scroll', this.scrollSpyHandler);
             this.scrollSpyHandler = null;
         }
-    }
-
-    // 切换目录折叠状态
-    toggleTocCollapse() {
-        const tocWrapper = document.querySelector('.toc-wrapper');
-        const collapseBtn = document.getElementById('toc-collapse-btn');
-        
-        if (tocWrapper && collapseBtn) {
-            const isCollapsed = tocWrapper.classList.toggle('collapsed');
-            collapseBtn.textContent = isCollapsed ? '📋' : '📄';
-            collapseBtn.title = isCollapsed ? '展开目录' : '折叠目录';
-        }
-    }
-
-    // 更新目录计数
+    }    // 更新目录计数
     updateTocCount(count) {
         const tocCount = document.getElementById('toc-count');
-        const collapseBtn = document.getElementById('toc-collapse-btn');
         
         if (tocCount) {
             if (count > 0) {
                 tocCount.textContent = count;
                 tocCount.style.display = 'inline-block';
-                if (collapseBtn) {
-                    collapseBtn.style.display = 'block';
-                }
             } else {
                 tocCount.style.display = 'none';
-                if (collapseBtn) {
-                    collapseBtn.style.display = 'none';
-                }
             }
         }
     }
@@ -1260,11 +1242,9 @@ class BlogApp {
         const filteredArticles = this.articles.filter(article => article.category === category);
         this.showCategoryView(filteredArticles, category);
     }    // 显示分类视图
-    showCategoryView(articles, category) {
-        this.switchView('category');
+    showCategoryView(articles, category) {        this.switchView('category');
         this.clearActiveLinks();
         this.clearTableOfContents();
-        closeMobileTableOfContents();
         
         const contentDiv = document.getElementById('category-content');
         
@@ -1304,21 +1284,16 @@ class BlogApp {
         
         contentDiv.innerHTML = html;
     }
-    
-    // 显示首页
+      // 显示首页
     showHome() {
         this.switchView('home');
         this.clearActiveLinks();
         this.clearTableOfContents();
-        closeMobileTableOfContents();
-    }
-
-    // 显示关于页面
+    }// 显示关于页面
     showAbout() {
         this.switchView('about');
         this.clearActiveLinks();
         this.clearTableOfContents();
-        closeMobileTableOfContents();
     }
     
     // 切换视图
@@ -1363,14 +1338,11 @@ class BlogApp {
         );
 
         this.showSearchView(results, query);
-    }
-
-    // 显示搜索视图
+    }    // 显示搜索视图
     showSearchView(articles, query) {
         this.switchView('search');
         this.clearActiveLinks();
         this.clearTableOfContents();
-        closeMobileTableOfContents();
         
         const contentDiv = document.getElementById('search-content');
         
@@ -1475,53 +1447,26 @@ document.addEventListener('keydown', (e) => {
     // Ctrl+K 或 Cmd+K 打开搜索
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
-        const query = prompt('请输入搜索关键词:');
-        if (query) {
-            blog.search(query);
-        }
-    }
-});
-
-// 目录切换功能
-function toggleTableOfContents() {
-    const tocSidebar = document.querySelector('.toc-sidebar');
-    const tocOverlay = document.getElementById('toc-overlay');
-    
-    if (tocSidebar && tocOverlay) {
-        const isVisible = tocSidebar.classList.contains('mobile-visible');
-        
-        if (isVisible) {
-            closeMobileTableOfContents();
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
         } else {
-            tocSidebar.classList.add('mobile-visible');
-            tocOverlay.classList.add('visible');
+            const query = prompt('请输入搜索关键词:');
+            if (query) {
+                if (typeof searchEngine !== 'undefined' && searchEngine) {
+                    searchEngine.performSearch(query);
+                } else {
+                    blog.search(query);
+                }
+            }
         }
     }
-}
-
-// 关闭移动端目录
-function closeMobileTableOfContents() {
-    const tocSidebar = document.querySelector('.toc-sidebar');
-    const tocOverlay = document.getElementById('toc-overlay');
-    
-    if (tocSidebar && tocOverlay) {
-        tocSidebar.classList.remove('mobile-visible');
-        tocOverlay.classList.remove('visible');
-    }
-}
-
-// 点击页面其他区域时隐藏目录
-document.addEventListener('click', function(e) {
-    const tocSidebar = document.querySelector('.toc-sidebar');
-    const tocToggle = document.getElementById('toc-toggle');
-    
-    if (tocSidebar && tocToggle && 
-        !tocSidebar.contains(e.target) && 
-        !tocToggle.contains(e.target) &&
-        tocSidebar.classList.contains('mobile-visible')) {
-        closeMobileTableOfContents();
-    }
 });
+
+
+
+
 
 // 添加清除缓存功能
 function clearBlogCache() {
