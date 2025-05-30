@@ -169,8 +169,10 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "084362758e89cd92",
+  "active": "7afd8a3fa1280e4f",
   "lastOpenFiles": [
+    "index.json",
+    "file-index.json",
     "JavaScript-tds.md",
     "CAMEL.md",
     "AI基础笔记.md",

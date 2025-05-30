@@ -4,13 +4,12 @@ const BlogConfig = {
     contentDir: 'Vault',
     
     // 附件目录配置
-    attachmentsDir: 'attachments',
-      // 缓存设置
+    attachmentsDir: 'attachments',    // 缓存设置
     cache: {
         // 本地存储键名
         filesKey: 'markdown_files_cache',
         // 缓存有效期（毫秒）
-        maxAge: 86400000, // 24小时
+        duration: 86400000, // 24小时
         // 当前版本号 - 修改此版本号会强制清除旧缓存
         version: '2.0'
     },
