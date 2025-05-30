@@ -32,11 +32,11 @@ function initTheme() {
 }
 
 // 博客应用主类
-class BlogApp {
-    constructor() {
+class BlogApp {    constructor() {
         this.articles = [];
         this.currentView = 'home';
         this.currentArticle = null;
+        this.sidebarHidden = localStorage.getItem('sidebar-hidden') === 'true'; // 侧边栏状态
         this.checkProtocol(); // 检查协议
         this.init();
     }
@@ -52,9 +52,7 @@ class BlogApp {
         // 记录当前运行环境
         console.log(`🌐 当前协议: ${location.protocol}`);
         console.log(`🌐 当前域名: ${location.hostname || 'localhost'}`);
-    }
-
-    async init() {
+    }    async init() {
         console.log('🚀 博客系统初始化开始...');
         console.log('📋 步骤 1: 强制更新文件列表...');
         
@@ -72,6 +70,11 @@ class BlogApp {
         
         // 设置初始的body class
         document.body.classList.add('view-home');
+          console.log('📋 步骤 5: 初始化响应式侧边栏...');
+        this.initResponsiveSidebar();
+        
+        console.log('📋 步骤 6: 初始化侧边栏状态...');
+        this.initSidebarState();
         
         console.log('✅ 博客系统初始化完成');
     }
@@ -771,9 +774,11 @@ class BlogApp {
             
             // 渲染KaTeX数学公式
             this.renderMath(contentDiv);
-            
-            // 生成目录
+              // 生成目录
             this.generateTableOfContents(contentDiv);
+            
+            // 显示目录切换按钮（在移动端）
+            this.updateTocButtonVisibility(true);
             
         } catch (error) {
             console.error('渲染文章失败:', error);            this.showError('文章渲染失败');
@@ -1402,13 +1407,300 @@ class BlogApp {
         if (progressContainer) {
             progressContainer.style.display = 'block';
         }
-    }
-
-    // 隐藏阅读进度条
+    }    // 隐藏阅读进度条
     hideReadingProgress() {
         const progressContainer = document.getElementById('reading-progress');
         if (progressContainer) {
             progressContainer.style.display = 'none';
+        }
+    }    // 初始化响应式侧边栏
+    initResponsiveSidebar() {
+        this.setupSidebarToggle();
+        this.setupResponsiveBreakpoints();
+        
+        // 防抖处理窗口大小变化
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                this.handleWindowResize();
+            }, 150); // 150ms防抖
+        });
+        
+        // 初始检查
+        this.handleWindowResize();
+    }// 设置侧边栏切换功能
+    setupSidebarToggle() {
+        // 获取已存在的侧边栏切换按钮
+        const toggleBtn = document.getElementById('sidebar-toggle');
+        if (toggleBtn) {
+            // 移除可能已存在的事件监听器，避免重复绑定
+            toggleBtn.removeEventListener('click', this.toggleSidebarHandler);
+            
+            // 创建绑定的事件处理函数
+            this.toggleSidebarHandler = () => {
+                this.toggleSidebar();
+            };
+            
+            // 绑定新的点击事件
+            toggleBtn.addEventListener('click', this.toggleSidebarHandler);
+            
+            console.log('侧边栏切换按钮事件已绑定');
+        } else {
+            console.warn('未找到侧边栏切换按钮');
+        }
+    }// 切换侧边栏遮罩层
+    toggleSidebarOverlay() {
+        let overlay = document.getElementById('sidebar-overlay');
+        
+        // 创建遮罩层（如果不存在）
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'sidebar-overlay';
+            overlay.className = 'sidebar-overlay';
+            overlay.addEventListener('click', () => {
+                this.closeSidebar();
+            });
+            document.body.appendChild(overlay);
+        }
+        
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar && sidebar.classList.contains('mobile-visible')) {
+            overlay.classList.add('visible');
+        } else {
+            overlay.classList.remove('visible');
+        }
+    }// 关闭侧边栏
+    closeSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        if (sidebar) {
+            sidebar.classList.remove('mobile-visible');
+        }
+        if (overlay) {
+            overlay.classList.remove('visible');
+        }
+    }    // 初始化侧边栏状态
+    initSidebarState() {
+        // 确保响应式断点已设置
+        if (!this.breakpoints) {
+            this.setupResponsiveBreakpoints();
+        }
+        
+        // 应用初始状态
+        this.applySidebarState();
+        
+        console.log(`侧边栏初始状态: ${this.sidebarHidden ? '隐藏' : '显示'}`);
+    }    // 应用侧边栏状态
+    applySidebarState() {
+        const body = document.body;
+        const width = window.innerWidth;
+        
+        // 只有在桌面端才应用sidebar-hidden状态
+        if (width > this.breakpoints.tablet) {
+            if (this.sidebarHidden) {
+                body.classList.add('sidebar-hidden');
+                console.log('应用桌面端侧边栏隐藏状态');
+            } else {
+                body.classList.remove('sidebar-hidden');
+                console.log('显示桌面端侧边栏');
+            }
+        } else {
+            // 移动端和平板端强制清除sidebar-hidden状态
+            body.classList.remove('sidebar-hidden');
+            console.log('清除非桌面端的sidebar-hidden状态');
+        }
+    }    // 切换侧边栏显示/隐藏（智能检测屏幕大小）
+    toggleSidebar() {
+        const width = window.innerWidth;
+        
+        console.log(`切换侧边栏，当前屏幕宽度: ${width}px`);
+        
+        if (width <= this.breakpoints.tablet) {
+            // 移动端和平板端：使用浮动侧边栏逻辑
+            console.log('使用移动端侧边栏逻辑');
+            this.toggleMobileSidebar();
+        } else {
+            // 桌面端：使用隐藏侧边栏逻辑
+            console.log('使用桌面端侧边栏逻辑');
+            this.toggleDesktopSidebar();
+        }
+    }
+
+    // 切换移动端浮动侧边栏
+    toggleMobileSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+            sidebar.classList.toggle('mobile-visible');
+            this.toggleSidebarOverlay();
+        }
+    }    // 切换桌面端侧边栏隐藏状态
+    toggleDesktopSidebar() {
+        this.sidebarHidden = !this.sidebarHidden;
+        
+        // 保存状态到localStorage
+        localStorage.setItem('sidebar-hidden', this.sidebarHidden.toString());
+        
+        // 应用状态
+        this.applySidebarState();
+        
+        console.log(`侧边栏${this.sidebarHidden ? '已隐藏' : '已显示'}`);
+    }
+
+    // 切换侧边栏遮罩层（移动端）
+    toggleSidebarOverlay() {
+        let overlay = document.getElementById('sidebar-overlay');
+        
+        // 创建遮罩层（如果不存在）
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'sidebar-overlay';
+            overlay.className = 'sidebar-overlay';
+            overlay.addEventListener('click', () => {
+                this.closeSidebar();
+            });
+            document.body.appendChild(overlay);
+        }
+        
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar && sidebar.classList.contains('mobile-visible')) {
+            overlay.classList.add('visible');
+        } else {
+            overlay.classList.remove('visible');
+        }
+    }    // 设置响应式断点
+    setupResponsiveBreakpoints() {
+        this.breakpoints = {
+            mobile: 767,
+            tablet: 899,
+            smallDesktop: 1023,
+            desktop: 1199
+        };
+    }    // 处理窗口大小变化
+    handleWindowResize() {
+        const width = window.innerWidth;
+        const toggleBtn = document.getElementById('sidebar-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        const body = document.body;
+        
+        // 清理防止状态冲突
+        this.closeSidebar(); // 清除移动端浮动状态
+        this.clearAllSidebarStates(); // 清除所有状态类
+        
+        if (width <= this.breakpoints.mobile) {
+            // 移动端：显示切换按钮，侧边栏变为浮动
+            if (toggleBtn) {
+                toggleBtn.style.display = 'block';
+            }
+            body.classList.add('mobile-layout');
+            body.classList.remove('tablet-layout', 'desktop-layout');
+        } else if (width <= this.breakpoints.tablet) {
+            // 平板端：显示切换按钮，侧边栏变为浮动
+            if (toggleBtn) {
+                toggleBtn.style.display = 'block';
+            }
+            body.classList.add('tablet-layout');
+            body.classList.remove('mobile-layout', 'desktop-layout');
+        } else {
+            // 桌面端：显示切换按钮，支持侧边栏隐藏功能
+            if (toggleBtn) {
+                toggleBtn.style.display = 'block';
+            }
+            body.classList.add('desktop-layout');
+            body.classList.remove('mobile-layout', 'tablet-layout');
+            
+            // 只在桌面端应用侧边栏隐藏状态
+            setTimeout(() => {
+                this.applySidebarState();
+            }, 100); // 延迟应用，避免与CSS过渡冲突
+        }
+        
+        // 同时检查目录按钮的显示
+        this.updateTocButtonVisibility();
+    }
+    
+    // 清除所有侧边栏状态类
+    clearAllSidebarStates() {
+        const body = document.body;
+        const sidebar = document.querySelector('.sidebar');
+        
+        // 清除桌面端隐藏状态
+        body.classList.remove('sidebar-hidden');
+        
+        // 清除移动端可见状态
+        if (sidebar) {
+            sidebar.classList.remove('mobile-visible');
+        }
+        
+        // 清除遮罩层
+        const overlay = document.getElementById('sidebar-overlay');
+        if (overlay) {
+            overlay.classList.remove('visible');
+        }
+    }
+
+    // 切换目录侧边栏显示状态
+    toggleTocSidebar() {
+        const tocSidebar = document.querySelector('.toc-sidebar');
+        if (tocSidebar) {
+            tocSidebar.classList.toggle('mobile-visible');
+            
+            // 添加目录遮罩层
+            this.toggleTocOverlay();
+        }
+    }
+
+    // 切换目录遮罩层
+    toggleTocOverlay() {
+        let overlay = document.getElementById('toc-overlay');
+        
+        // 创建遮罩层（如果不存在）
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'toc-overlay';
+            overlay.className = 'toc-overlay';
+            overlay.addEventListener('click', () => {
+                this.closeTocSidebar();
+            });
+            document.body.appendChild(overlay);
+        }
+        
+        const tocSidebar = document.querySelector('.toc-sidebar');
+        if (tocSidebar && tocSidebar.classList.contains('mobile-visible')) {
+            overlay.classList.add('visible');
+        } else {
+            overlay.classList.remove('visible');
+        }
+    }
+
+    // 关闭目录侧边栏
+    closeTocSidebar() {
+        const tocSidebar = document.querySelector('.toc-sidebar');
+        const overlay = document.getElementById('toc-overlay');
+        
+        if (tocSidebar) {
+            tocSidebar.classList.remove('mobile-visible');
+        }
+        if (overlay) {
+            overlay.classList.remove('visible');
+        }
+    }
+
+    // 更新目录切换按钮的显示状态
+    updateTocButtonVisibility(isArticlePage = false) {
+        const tocToggleBtn = document.getElementById('toc-toggle');
+        const width = window.innerWidth;
+        
+        if (!tocToggleBtn) return;
+        
+        // 只在文章页面且屏幕较小时显示目录切换按钮
+        if (isArticlePage && width <= 899) {
+            tocToggleBtn.style.display = 'block';
+        } else {
+            tocToggleBtn.style.display = 'none';
+            // 同时关闭可能打开的目录栏
+            this.closeTocSidebar();
         }
     }
 }
@@ -1420,6 +1712,12 @@ function showHome() {
 
 function showAbout() {
     blog.showAbout();
+}
+
+function toggleTocSidebar() {
+    if (blog) {
+        blog.toggleTocSidebar();
+    }
 }
 
 // 初始化博客应用
