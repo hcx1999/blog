@@ -97,29 +97,44 @@ class BlogApp {
         // 设置初始的body class
         document.body.classList.add('view-home');
     }
-    
-    // 加载所有Markdown文件
+      // 加载所有Markdown文件
     async loadArticles() {
         let markdownFiles = [];
         
         try {
             console.log('开始加载文章...');
             
-            // 首先尝试从文件索引获取文件列表
+            // 首先尝试从生成的 files.json 获取文件列表
             try {
-                markdownFiles = await this.getMarkdownFileList();
-                
-                // 验证我们有一个有效的数组
-                if (Array.isArray(markdownFiles) && markdownFiles.length > 0) {
-                    console.log(`成功获取动态文件列表: ${markdownFiles.length} 个文件`);
+                const response = await fetch('js/files.json');
+                if (response.ok) {
+                    const fileData = await response.json();
+                    if (fileData.files && Array.isArray(fileData.files)) {
+                        markdownFiles = fileData.files.map(file => file.filename);
+                        console.log(`从 files.json 加载了 ${markdownFiles.length} 个文件`);
+                        console.log(`文件列表生成时间: ${fileData.generated}`);
+                    } else {
+                        throw new Error('files.json 格式无效');
+                    }
                 } else {
-                    console.warn('动态文件列表为空，尝试使用备用方案');
-                    markdownFiles = await this.getFallbackFileList();
+                    throw new Error(`无法加载 files.json: ${response.status}`);
                 }
             } catch (error) {
-                console.warn('无法获取动态文件列表，使用备用方案', error);
-                // 备用方案：使用备用方法获取文件列表
-                markdownFiles = await this.getFallbackFileList();
+                console.warn('无法从 files.json 获取文件列表，尝试动态发现:', error);
+                // 如果 files.json 不可用，回退到动态文件发现
+                try {
+                    markdownFiles = await this.getMarkdownFileList();
+                    
+                    if (Array.isArray(markdownFiles) && markdownFiles.length > 0) {
+                        console.log(`成功获取动态文件列表: ${markdownFiles.length} 个文件`);
+                    } else {
+                        console.warn('动态文件列表为空，尝试使用缓存备用方案');
+                        markdownFiles = await this.getFallbackFileList();
+                    }
+                } catch (dynamicError) {
+                    console.warn('动态文件发现也失败，使用缓存备用方案', dynamicError);
+                    markdownFiles = await this.getFallbackFileList();
+                }
             }
 
             // 确保 markdownFiles 始终是一个数组，即使是空数组
