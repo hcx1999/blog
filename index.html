@@ -9,12 +9,14 @@
     <!-- KaTeX CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
 </head>
-<body>    <header class="header">
-        <nav class="navbar">
-            <div class="nav-brand">                <h1>
-                    <img src="src/avatar.svg" alt="avatar" class="blog-icon" width="28" height="28">
-                    HCX1999
-                </h1>
+<body>    <header class="header">        <nav class="navbar">
+            <div class="nav-brand">
+                <a href="#" onclick="showHome()" class="brand-link">
+                    <h1>
+                        <img src="src/avatar.svg" alt="avatar" class="blog-icon" width="24" height="24">
+                        HCX1999
+                    </h1>
+                </a>
             </div>            <div class="nav-menu">
                 <a href="#" class="nav-link" onclick="showHome()">首页</a>
                 <a href="#" class="nav-link" onclick="showAbout()">关于</a>
@@ -22,9 +24,12 @@
                 <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()">🌙</button>
             </div>
         </nav>
-    </header>
-
-    <main class="main">        <aside class="sidebar">
+    </header>    <main class="main">        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>分类</h3>
+                <ul id="category-list" class="category-list">
+                </ul>
+            </div>
             <div class="sidebar-section">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <h3>文章列表</h3>
@@ -34,11 +39,6 @@
                 </div>
                 <ul id="article-list" class="article-list">
                     <li class="loading">加载中...</li>
-                </ul>
-            </div>
-            <div class="sidebar-section">
-                <h3>分类</h3>
-                <ul id="category-list" class="category-list">
                 </ul>
             </div>
         </aside><div class="content-wrapper">
