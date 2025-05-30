@@ -260,8 +260,7 @@ class BlogApp {
             return true; // 出错时默认需要更新
         }
     }
-    
-    // 静默更新文件列表（不弹出下载提示）
+      // 静默更新文件列表（不弹出下载提示）
     async updateFileListSilently(files) {
         try {
             const fileListData = await this.generateUpdatedFileListData(files);
@@ -276,67 +275,13 @@ class BlogApp {
             // 可选：存储到localStorage中供后续使用
             localStorage.setItem('latest_files_json', jsonString);
             
-            // 显示更新提示（但不强制下载）
-            this.showSilentUpdateNotification(files.length);
+            // 不再显示文件列表同步的弹窗提示
             
         } catch (error) {
             console.error('静默更新文件列表失败:', error);
         }
     }
-    
-    // 显示静默更新提示
-    showSilentUpdateNotification(fileCount) {
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #2196F3;
-            color: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 10000;
-            max-width: 320px;
-            font-size: 14px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        `;
-        
-        notification.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 16px;">🔄</span>
-                <div>
-                    <strong>文件列表已同步</strong><br>
-                    <small>发现 ${fileCount} 个文件，列表已更新</small>
-                </div>
-            </div>
-        `;
-        
-        // 点击显示详细信息
-        notification.addEventListener('click', () => {
-            const latestJson = localStorage.getItem('latest_files_json');
-            if (latestJson) {
-                console.log('📋 当前files.json应包含的内容:');
-                console.log(latestJson);
-                alert('最新的files.json内容已输出到控制台，请查看开发者工具。');
-            }
-        });
-        
-        document.body.appendChild(notification);
-        
-        // 3秒后自动淡出
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
-        }, 3000);
-    }
+      // 显示静默更新提示方法已移除 - 不再需要文件列表同步的弹窗提示
     
     // 动态获取Markdown文件列表
     async getMarkdownFileList() {
@@ -764,13 +709,10 @@ class BlogApp {
         if (recentArticles.length === 0) {
             recentList.innerHTML = '<div class="error">暂无文章</div>';
             return;
-        }
-
-        const html = recentArticles.map(article => `
+        }        const html = recentArticles.map(article => `
             <div class="recent-item" onclick="blog.showArticle('${article.id}')">
                 <h4>${article.title}</h4>
                 <p>${article.excerpt}</p>
-                <div class="date">${article.date}</div>
             </div>
         `).join('');
 
@@ -1317,9 +1259,7 @@ class BlogApp {
     filterByCategory(category) {
         const filteredArticles = this.articles.filter(article => article.category === category);
         this.showCategoryView(filteredArticles, category);
-    }
-
-    // 显示分类视图
+    }    // 显示分类视图
     showCategoryView(articles, category) {
         this.switchView('category');
         this.clearActiveLinks();
@@ -1336,7 +1276,6 @@ class BlogApp {
                     <div class="recent-item" onclick="blog.showArticle('${article.id}')">
                         <h4>${article.title}</h4>
                         <p>${article.excerpt}</p>
-                        <div class="date">${article.date}</div>
                     </div>
                 `).join('')}
             </div>

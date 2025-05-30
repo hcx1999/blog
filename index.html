@@ -14,7 +14,7 @@
                 <a href="#" onclick="showHome()" class="brand-link">
                     <h1>
                         <img src="src/avatar.svg" alt="avatar" class="blog-icon" width="24" height="24">
-                        HCX1999
+                        hcx1999
                     </h1>
                 </a>
             </div>            <div class="nav-menu">
@@ -41,12 +41,8 @@
                     <li class="loading">加载中...</li>
                 </ul>
             </div>
-        </aside><div class="content-wrapper">
-            <div class="content">                <div id="home-view" class="view active">
-                    <h2>欢迎来到我的博客</h2>
-                    <p>这里记录了我的学习笔记和技术分享。</p>
+        </aside><div class="content-wrapper">            <div class="content">                <div id="home-view" class="view active">
                     <div id="recent-articles">
-                        <h3>全部文章</h3>
                         <div id="recent-list" class="recent-list">
                             <div class="loading">加载中...</div>
                         </div>
@@ -57,8 +53,98 @@
                     <article id="article-content" class="article-content">
                     </article>
                 </div>                <div id="about-view" class="view">
-                    <h2>关于我</h2>
-                    <p>这是一个基于静态文件的博客系统，支持Markdown文件的动态渲染。</p>
+                    <div class="about-container">
+                        <div class="about-header">
+                            <img src="src/avatar.svg" alt="个人头像" class="about-avatar">
+                            <div class="about-info">
+                                <h2>HCX1999</h2>
+                                <p>👨‍💻 技术探索者 | 终身学习者</p>
+                                <p>热爱编程、人工智能、Linux开发、数学。</p>
+                            </div>
+                        </div>
+                        
+                        <div class="about-section">
+                            <h3>个人简介</h3>
+                            <p>你好，我说hcx1999，既不叫hcx也不是出生于1999。</p>
+                            <p>目前就读于北京大学信息科学技术学院2024级，今年大一。</p>
+                            <p>欢迎互换友链。</p>
+                        </div>
+                        
+                        <div class="about-section">
+                            <h3>联系方式</h3>
+                            <p>如果您有任何问题或合作意向，欢迎通过以下方式联系我：</p>
+                            <div class="contact-list">
+                                <div class="contact-item">
+                                    <span class="contact-icon">✉️</span>
+                                    <span>2300019816@stu.pku.edu.cn</span>
+                                </div>
+                                <div class="contact-item">
+                                    <span class="contact-icon">🔗</span>
+                                    <span>GitHub: @hcx1999</span>
+                                </div>
+                                <!-- <div class="contact-item">
+                                    <span class="contact-icon">💬</span>
+                                    <span>微信: hcx1999</span>
+                                </div> -->
+                            </div>
+                        </div>
+                        
+                        <div class="about-section">
+                            <h3>友情链接</h3>
+                            <!-- <p>以下是一些我欣赏的博客和网站，欢迎访问：</p> -->                            <div class="friend-links">
+                                <!-- <a href="https://lytqwq.top" target="_blank" class="friend-link">
+                                    <div class="friend-avatar">
+                                        <img src="src/avatar.svg" alt="lytqwq头像">
+                                    </div>
+                                    <div class="friend-info">
+                                        <strong>lytqwq</strong>
+                                        <small></small>
+                                    </div>
+                                </a> -->
+                                <a href="https://iculizhi.github.io/" target="_blank" class="friend-link">
+                                    <div class="friend-avatar">
+                                        <img src="src/xj.svg" alt="ICUlizhi头像">
+                                    </div>
+                                    <div class="friend-info">
+                                        <strong>ICUlizhi</strong>
+                                        <small>p大22级图灵班&经双，爱好中国哲学</small>
+                                    </div>
+                                </a>
+                                <!-- <a href="https://www.freecodecamp.org" target="_blank" class="friend-link">
+                                    <div class="friend-avatar">
+                                        <img src="src/avatar.svg" alt="freeCodeCamp头像">
+                                    </div>
+                                    <div class="friend-info">
+                                        <strong>freeCodeCamp</strong>
+                                        <small>免费学习编程的社区</small>
+                                    </div>
+                                </a>
+                                <a href="https://css-tricks.com" target="_blank" class="friend-link">
+                                    <div class="friend-avatar">
+                                        <img src="src/avatar.svg" alt="CSS-Tricks头像">
+                                    </div>
+                                    <div class="friend-info">
+                                        <strong>CSS-Tricks</strong>
+                                        <small>CSS技巧和前端开发资源</small>
+                                    </div>
+                                </a> -->
+                            </div>
+                        </div>
+                        
+                        <div class="about-section">
+                            <h3>关于本站</h3>
+                            <p>起因是博主用Obsidian记笔记，但是不太容易发布到网页上跨设备观看，于是用脚本将Vault里面的md文档直接渲染到了网页上。</p>
+                            <p>本站完全由ai构建，博主并未直接写过一行代码，主要使用Claude sonnet 4完成构建。</p>
+                            <p>博客特性：</p>
+                            <ul>
+                                <li>纯静态页面，加载速度快</li>
+                                <li>支持深色/浅色主题切换</li>
+                                <li>自动生成文章目录</li>
+                                <li>支持数学公式渲染</li>
+                                <li>响应式设计，适配多种设备</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="category-view" class="view">
@@ -102,7 +188,7 @@
     <button id="back-to-top" class="back-to-top" onclick="blog.scrollToTop()" title="返回顶部">
         ↑
     </button>    <footer class="footer">
-        <p>&copy; 2025 我的博客. 保留所有权利.</p>
+        <p>&copy; 2025 hcx1999. 保留所有权利.</p>
         <p><a href="#" onclick="clearBlogCache()" style="color: var(--text-muted); text-decoration: underline; font-size: 0.8rem;">清除网站缓存</a></p>
     </footer>    <script src="js/markdown.min.js"></script>
     <!-- KaTeX JavaScript -->
