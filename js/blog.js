@@ -37,9 +37,9 @@ class BlogApp {
         this.articles = [];
         this.currentView = 'home';
         this.currentArticle = null;
-        this.init();
-    }
-      async init() {
+        this.init();    }
+    
+    async init() {
         await this.loadArticles();
         this.renderSidebar();
         this.renderHomeView();
@@ -129,9 +129,7 @@ class BlogApp {
         console.log('开始获取 Markdown 文件列表...');
         
         try {
-            // 尝试多种方法获取文件列表
-            
-            // 方法1: 尝试通过目录遍历（需要服务器支持）
+            // 尝试通过目录遍历获取文件列表（需要服务器支持）
             try {
                 const response = await fetch(BlogConfig.getContentDirPath() + '/');
                 if (response.ok) {
@@ -143,56 +141,10 @@ class BlogApp {
                     }
                 }
             } catch (error) {
-                console.log('目录列表不可用，尝试探测文件');
+                console.log('无法获取目录列表');
             }
             
-            // 方法2: 通过已知模式探测文件
-            return await this.detectMarkdownFiles();
-        } catch (error) {
-            console.error('获取文件列表失败:', error);
-            // 确保即使出现未捕获的异常也返回空数组
-            return [];
-        }
-    }
-
-    // 解析目录列表HTML
-    parseDirectoryListing(htmlText) {
-        const markdownFiles = [];
-        // 匹配 .md 文件链接
-        const mdFileRegex = /<a[^>]*href=["']([^"']*\.md)["'][^>]*>/gi;
-        let match;
-        
-        while ((match = mdFileRegex.exec(htmlText)) !== null) {
-            const filename = match[1];
-            // 排除路径前缀，只保留文件名
-            const cleanFilename = filename.replace(/^.*\//, '');
-            if (cleanFilename && !markdownFiles.includes(cleanFilename)) {
-                markdownFiles.push(cleanFilename);
-            }
-        }
-          return markdownFiles;
-    }
-      // 探测可能存在的 Markdown 文件
-    async detectMarkdownFiles() {
-        try {
-            console.log('开始探测 Markdown 文件...');
-              
-            // 方法1: 尝试获取目录下的所有文件列表
-            try {
-                const response = await fetch(BlogConfig.getContentDirPath() + '/');
-                if (response.ok) {
-                    const htmlText = await response.text();
-                    const markdownFiles = this.parseDirectoryListing(htmlText);
-                    if (markdownFiles.length > 0) {
-                        console.log(`通过目录列表找到 ${markdownFiles.length} 个文件`);
-                        return markdownFiles;
-                    }
-                }
-            } catch (error) {
-                console.log('无法获取目录列表，尝试其他方法');
-            }
-            
-            // 方法2: 尝试使用 fetch API 获取目录下的文件（需要服务器支持 CORS 和目录列表）
+            // 尝试使用 fetch API 获取目录下的文件（需要服务器支持 CORS 和目录列表）
             try {
                 const response = await fetch(BlogConfig.getContentDirPath() + '/', {
                     method: 'GET',
@@ -222,112 +174,33 @@ class BlogApp {
                 console.log('无法使用 API 获取文件列表');
             }
             
-            // 方法3: 智能探测常见的文件名模式
-            console.log('尝试智能探测文件...');
-            return await this.intelligentFileDetection();
-            
+            // 如果都失败了，返回空数组
+            console.log('无法获取文件列表，请检查服务器配置或手动管理文件');
+            return [];
         } catch (error) {
-            console.error('文件探测过程中出现错误:', error);
+            console.error('获取文件列表失败:', error);
             return [];
         }
     }
-    
-    // 智能文件探测方法
-    async intelligentFileDetection() {
-        const detectedFiles = [];
+
+    // 解析目录列表HTML
+    parseDirectoryListing(htmlText) {
+        const markdownFiles = [];
+        // 匹配 .md 文件链接
+        const mdFileRegex = /<a[^>]*href=["']([^"']*\.md)["'][^>]*>/gi;
+        let match;
         
-        // 生成常见的文件名模式进行探测
-        const commonPatterns = [
-            // 基于日期的文件
-            () => {
-                const patterns = [];
-                const currentYear = new Date().getFullYear();
-                const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
-                const currentDay = String(new Date().getDate()).padStart(2, '0');
-                
-                // 尝试当前日期的各种格式
-                patterns.push(`${currentYear}-${currentMonth}-${currentDay}.md`);
-                patterns.push(`${currentYear}${currentMonth}${currentDay}.md`);
-                
-                // 尝试最近几天的日期
-                for (let i = 1; i <= 10; i++) {
-                    const date = new Date();
-                    date.setDate(date.getDate() - i);
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
-                    patterns.push(`${year}-${month}-${day}.md`);
-                }
-                
-                return patterns;
-            },
-            
-            // 基于主题的常见文件名
-            () => [
-                'README.md', 'readme.md',
-                'index.md', 'Index.md',
-                'notes.md', 'Notes.md', '笔记.md',
-                'blog.md', 'Blog.md', '博客.md',
-                'diary.md', 'Diary.md', '日记.md',
-                'todo.md', 'TODO.md', '待办.md',
-                'learning.md', 'Learning.md', '学习.md',
-                'work.md', 'Work.md', '工作.md',
-                'project.md', 'Project.md', '项目.md',
-            ],
-            
-            // 基于技术主题的文件名
-            () => [
-                'JavaScript.md', 'javascript.md', 'JS.md', 'js.md',
-                'Python.md', 'python.md',
-                'Java.md', 'java.md',
-                'React.md', 'react.md',
-                'Vue.md', 'vue.md',
-                'Node.md', 'node.md', 'NodeJS.md',
-                'HTML.md', 'html.md',
-                'CSS.md', 'css.md',
-                'Git.md', 'git.md',
-                'Linux.md', 'linux.md',
-                'Docker.md', 'docker.md',
-                'AI.md', 'ai.md', 'ML.md', 'ml.md',
-                'Database.md', 'database.md', '数据库.md',
-                'Algorithm.md', 'algorithm.md', '算法.md',
-                'DataStructure.md', 'datastructure.md', '数据结构.md',
-            ],
-            
-            // 基于学科的文件名
-            () => [
-                'Math.md', 'math.md', '数学.md',
-                'Physics.md', 'physics.md', '物理.md',
-                'Chemistry.md', 'chemistry.md', '化学.md',
-                'Biology.md', 'biology.md', '生物.md',
-                'History.md', 'history.md', '历史.md',
-                'English.md', 'english.md', '英语.md',
-                'Chinese.md', 'chinese.md', '语文.md',
-            ]
-        ];
-        
-        // 执行探测
-        for (const patternGenerator of commonPatterns) {
-            const patterns = patternGenerator();
-            for (const filename of patterns) {
-                try {
-                    const response = await fetch(BlogConfig.getContentFilePath(filename));
-                    if (response.ok) {
-                        console.log(`发现文件: ${filename}`);
-                        detectedFiles.push(filename);
-                    }
-                } catch (error) {
-                    // 文件不存在，继续尝试下一个
-                }
+        while ((match = mdFileRegex.exec(htmlText)) !== null) {
+            const filename = match[1];
+            // 排除路径前缀，只保留文件名
+            const cleanFilename = filename.replace(/^.*\//, '');
+            if (cleanFilename && !markdownFiles.includes(cleanFilename)) {
+                markdownFiles.push(cleanFilename);
             }
         }
-        
-        // 去重
-        const uniqueFiles = [...new Set(detectedFiles)];
-        console.log(`智能探测完成，找到 ${uniqueFiles.length} 个文件:`, uniqueFiles);
-        
-        return uniqueFiles;
-    }// 获取备用文件列表
+          return markdownFiles;
+    }
+    // 获取备用文件列表
     async getFallbackFileList() {
         // 尝试从本地存储获取之前缓存的文件列表
         try {
