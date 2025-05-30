@@ -255,7 +255,7 @@ source $ZSH/oh-my-zsh.sh
 ```
 完成。
 ## git和github
-## git commit提交规范
+### git commit提交规范
 ```
 feat: 新功能（feature）
 fix: 修补bug

@@ -644,12 +644,10 @@ class BlogApp {
         
         console.log(`✅ 成功加载了 ${this.articles.length} 篇文章`);
 
-    }
-
-    // 解析Markdown文件
+    }    // 解析Markdown文件
     parseMarkdownFile(filename, content) {
         const title = this.extractTitle(content, filename);
-        const category = this.extractCategory(filename);
+        const category = CategoryUtil.extractCategory(filename);
         const date = new Date().toISOString().split('T')[0];
         const excerpt = this.extractExcerpt(content);
 
@@ -688,16 +686,7 @@ class BlogApp {
         
         // 如果文档为空，使用文件名作为后备标题
         return filename.replace('.md', '').replace(/-/g, ' ');
-    }
-
-    // 提取分类
-    extractCategory(filename) {
-        if (filename.includes('AI') || filename.includes('神经网络') || filename.includes('人工智能')) return 'AI';
-        if (filename.includes('JavaScript') || filename.includes('ECMAScript') || filename.includes('js')) return 'JavaScript';
-        if (filename.includes('Linux')) return 'Linux';
-        if (filename.includes('数学') || filename.includes('Math')) return 'Math';
-        return '其他';
-    }
+    }    // 提取分类函数已移至 category.js
 
     // 提取摘要
     extractExcerpt(content) {
