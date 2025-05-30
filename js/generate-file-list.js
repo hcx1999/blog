@@ -1,18 +1,10 @@
 #!/usr/bin/env node
 
-/**
- * 文件列表生成器
- * 扫描 Vault 目录中的所有 .md 文件，生成 files.json
- * 使用方法：node js/generate-file-list.js
- */
-
 const fs = require('fs');
 const path = require('path');
 
-// 配置
 const VAULT_DIR = 'Vault';
 const OUTPUT_FILE = 'js/files.json';
-
 /**
  * 递归扫描目录，查找所有 .md 文件
  * @param {string} dir - 要扫描的目录
@@ -82,6 +74,7 @@ function generateFileList() {
     
     // 生成输出数据
     const output = {
+
         generated: new Date().toISOString(),
         generator: 'generate-file-list.js',
         version: '1.0',

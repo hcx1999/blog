@@ -8,11 +8,10 @@
  * 3. 或者调用特定函数手动修复特定问题
  */
 var ImageFixUtil = (function() {
-    
-    // 配置选项
+      // 配置选项
     var config = {
         debug: true,
-        imageBaseDir: 'Vault/attachments/',
+        imageBaseDir: (typeof BlogConfig !== 'undefined' ? BlogConfig.getAttachmentsDirPath() + '/' : 'Vault/attachments/'),
         autoFix: true,
         checkInterval: 2000 // 毫秒
     };
@@ -96,19 +95,21 @@ var ImageFixUtil = (function() {
         if (!path) return false;
         if (path.indexOf('http') === 0) return false;
         if (path.indexOf('data:') === 0) return false;
+          var baseDir = (typeof BlogConfig !== 'undefined' ? BlogConfig.getAttachmentsDirPath() : 'Vault/attachments');
+        var attachmentsDir = (typeof BlogConfig !== 'undefined' ? BlogConfig.attachmentsDir : 'attachments');
         
-        // 检查是否已经正确指向Vault/attachments目录
-        if (path.indexOf('Vault/attachments/') !== -1) return false;
+        // 检查是否已经正确指向attachments目录
+        if (path.indexOf(baseDir + '/') !== -1) return false;
         
         // 检查是否需要添加attachments路径
-        if (path.indexOf('attachments/') !== -1) {
-            if (path.indexOf('attachments/') !== 0 && path.indexOf('/attachments/') !== 0) {
+        if (path.indexOf(attachmentsDir + '/') !== -1) {
+            if (path.indexOf(attachmentsDir + '/') !== 0 && path.indexOf('/' + attachmentsDir + '/') !== 0) {
                 return true;
             }
         }
         
         // 检查是否需要添加基础路径
-        if (path.indexOf('attachments/') === -1) {
+        if (path.indexOf(attachmentsDir + '/') === -1) {
             return true;
         }
         
@@ -126,16 +127,17 @@ var ImageFixUtil = (function() {
      * @returns {string} 修复后的路径
      */    function fixImagePath(path) {
         if (!path) return path;
-        
-        var fixedPath = path;
+          var fixedPath = path;
+        var contentDir = (typeof BlogConfig !== 'undefined' ? BlogConfig.contentDir : 'Vault');
+        var attachmentsDir = (typeof BlogConfig !== 'undefined' ? BlogConfig.attachmentsDir : 'attachments');
         
         // 处理各种路径格式
-        if (path.indexOf('attachments/') === 0) {
-            fixedPath = 'Vault/' + path;
-        } else if (path.indexOf('attachments/') !== -1) {
+        if (path.indexOf(attachmentsDir + '/') === 0) {
+            fixedPath = contentDir + '/' + path;
+        } else if (path.indexOf(attachmentsDir + '/') !== -1) {
             // 提取attachments及其之后的部分
-            var parts = path.split('attachments/');
-            fixedPath = 'Vault/attachments/' + parts[parts.length - 1];
+            var parts = path.split(attachmentsDir + '/');
+            fixedPath = contentDir + '/' + attachmentsDir + '/' + parts[parts.length - 1];
         } else if (path.indexOf('/') === -1) {
             // 只有文件名
             fixedPath = config.imageBaseDir + path;
@@ -235,34 +237,34 @@ var ImageFixUtil = (function() {
      * @returns {string[]} 替代路径列表
      */    function generateAlternativePaths(originalPath) {
         var paths = [];
+          if (!originalPath) return paths;
         
-        if (!originalPath) return paths;
+        var attachmentPath = (typeof BlogConfig !== 'undefined' ? BlogConfig.getAttachmentPath : function(filename) { return 'Vault/attachments/' + filename; });
         
         // 提取文件名
         var pathParts = originalPath.split('/');
         var fileName = pathParts[pathParts.length - 1];
         
         // 基础目录形式
-        paths.push('Vault/attachments/' + fileName);
+        paths.push(attachmentPath(fileName));
         
         // 编码形式
         if (fileName.indexOf(' ') !== -1) {
             fileName = encodeURIComponent(fileName);
-            paths.push('Vault/attachments/' + fileName);
+            paths.push(attachmentPath(fileName));
         } else if (fileName.indexOf('%20') !== -1) {
             // 如果已编码，尝试解码形式
             try {
                 var decodedFileName = decodeURIComponent(fileName);
-                paths.push('Vault/attachments/' + decodedFileName);
+                paths.push(attachmentPath(decodedFileName));
             } catch(e) {}
         }
         
         // 相对路径形式
         paths.push('attachments/' + fileName);
-        
-        // 尝试不同的大小写组合
+          // 尝试不同的大小写组合
         if (/[A-Z]/.test(fileName)) {
-            paths.push('Vault/attachments/' + fileName.toLowerCase());
+            paths.push(attachmentPath(fileName.toLowerCase()));
         }
         
         // 去重并过滤掉原始路径

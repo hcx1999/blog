@@ -37,6 +37,7 @@ class BlogApp {
         this.articles = [];
         this.currentView = 'home';
         this.currentArticle = null;
+        this.checkProtocol(); // 检查协议
         this.init();
     }
 
@@ -52,7 +53,7 @@ class BlogApp {
         
         console.log('📋 步骤 3: 渲染侧边栏...');
         this.renderSidebar();
-        
+
         console.log('📋 步骤 4: 渲染首页视图...');
         this.renderHomeView();
           // 设置初始的body class
@@ -608,22 +609,43 @@ class BlogApp {
 
         const loadPromises = markdownFiles.map(async (filename) => {
             try {
-                const response = await fetch(`Vault/${filename}`);
+                const response = await fetch('js/files.json');
                 if (response.ok) {
-                    const content = await response.text();
-                    return this.parseMarkdownFile(filename, content);
+                    const fileData = await response.json();
+                    if (fileData.files && Array.isArray(fileData.files)) {
+                        markdownFiles = fileData.files.map(file => file.filename);
+                        console.log(`从 files.json 加载了 ${markdownFiles.length} 个文件`);
+                        console.log(`文件列表生成时间: ${fileData.generated}`);
+                    } else {
+                        throw new Error('files.json 格式无效');
+                    }
+                } else {
+                    throw new Error(`无法加载 files.json: ${response.status}`);
                 }
             } catch (error) {
-                console.warn(`无法加载文件: ${filename}`, error);
-                return null;
+                console.warn('无法从 files.json 获取文件列表，尝试动态发现:', error);
+                // 如果 files.json 不可用，回退到动态文件发现
+                try {
+                    markdownFiles = await this.getMarkdownFileList();
+                    
+                    if (Array.isArray(markdownFiles) && markdownFiles.length > 0) {
+                        console.log(`成功获取动态文件列表: ${markdownFiles.length} 个文件`);
+                    } else {
+                        console.warn('动态文件列表为空，尝试使用缓存备用方案');
+                        markdownFiles = await this.getFallbackFileList();
+                    }
+                } catch (dynamicError) {
+                    console.warn('动态文件发现也失败，使用缓存备用方案', dynamicError);
+                    markdownFiles = await this.getFallbackFileList();
+                }
             }
-        });
 
         const results = await Promise.all(loadPromises);
         this.articles = results.filter(article => article !== null);
         this.articles.sort((a, b) => new Date(b.date) - new Date(a.date));
         
         console.log(`✅ 成功加载了 ${this.articles.length} 篇文章`);
+
     }
 
     // 解析Markdown文件
@@ -744,12 +766,11 @@ class BlogApp {
         }).join('');
 
         categoryList.innerHTML = html;
-    }
-
-    // 渲染首页视图
+    }    // 渲染首页视图
     renderHomeView() {
         const recentList = document.getElementById('recent-list');
-        const recentArticles = this.articles.slice(0, 5);
+        // 显示全部文章而不只是前5篇
+        const recentArticles = this.articles;
 
         if (recentArticles.length === 0) {
             recentList.innerHTML = '<div class="error">暂无文章</div>';
@@ -820,10 +841,11 @@ class BlogApp {
             this.generateTableOfContents(contentDiv);
             
         } catch (error) {
-            console.error('渲染文章失败:', error);
-            this.showError('文章渲染失败');
+            console.error('渲染文章失败:', error);            this.showError('文章渲染失败');
         }
-    }    // 预处理Markdown内容（修复标题格式和Obsidian图片语法）
+    }
+    
+    // 预处理Markdown内容（修复标题格式和Obsidian图片语法）
     preprocessMarkdown(content) {
         // 1. 处理 Obsidian 图片语法
         content = this.processObsidianImages(content);
@@ -863,13 +885,12 @@ class BlogApp {
         
         return content.replace(obsidianImageRegex, (match, attachmentsPath, filename, extension) => {
             // 构建图片路径
-            let imagePath;
-            if (attachmentsPath) {
+            let imagePath;            if (attachmentsPath) {
                 // 如果已经包含 attachments/ 路径
-                imagePath = `Vault/attachments/${filename}`;
+                imagePath = BlogConfig.getAttachmentPath(filename);
             } else {
                 // 如果只有文件名，添加 attachments/ 前缀
-                imagePath = `Vault/attachments/${filename}`;
+                imagePath = BlogConfig.getAttachmentPath(filename);
             }
             
             // 处理文件名中的空格，进行 URL 编码
@@ -1104,10 +1125,11 @@ class BlogApp {
 
         // 添加active类到当前标题
         const activeLink = document.querySelector(`.toc-nav a[href="#${activeId}"]`);
-        if (activeLink) {
-            activeLink.classList.add('active');
+        if (activeLink) {            activeLink.classList.add('active');
         }
-    }    // 清理目录
+    }
+    
+    // 清理目录
     clearTableOfContents() {
         const tocContainer = document.getElementById('table-of-contents');
         if (tocContainer) {
@@ -1178,22 +1200,22 @@ class BlogApp {
             if (scrollTop > showThreshold) {
                 backToTopBtn.classList.add('visible');
             } else {
-                backToTopBtn.classList.remove('visible');
-            }
+                backToTopBtn.classList.remove('visible');            }
         }
-    }    // 处理图片路径（增强版，集成 ImageFixUtil）
+    }
+    
+    // 处理图片路径（增强版，集成 ImageFixUtil）
     processImages(container) {
         const images = container.querySelectorAll('img');
         images.forEach(img => {
             const src = img.getAttribute('src');
             if (src && !src.startsWith('http') && !src.startsWith('/')) {
                 let newSrc = src;
-                
-                // 基本路径处理
+                  // 基本路径处理
                 if (src.startsWith('attachments/')) {
-                    newSrc = `Vault/${src}`;
-                } else if (!src.startsWith('Vault/')) {
-                    newSrc = `Vault/attachments/${src}`;
+                    newSrc = `${BlogConfig.contentDir}/${src}`;
+                } else if (!src.startsWith(`${BlogConfig.contentDir}/`)) {
+                    newSrc = BlogConfig.getAttachmentPath(src);
                 }
                 
                 // 使用 ImageFixUtil 进一步优化路径
@@ -1224,13 +1246,12 @@ class BlogApp {
         img.addEventListener('error', (e) => {
             if (!img.hasAttribute('data-error-retry')) {
                 img.setAttribute('data-error-retry', 'true');
-                
-                // 尝试替代路径
+                  // 尝试替代路径
                 const filename = originalSrc.split('/').pop();
                 const alternativePaths = [
-                    `Vault/attachments/${filename}`,
-                    `attachments/${filename}`,
-                    `Vault/attachments/${encodeURIComponent(filename)}`
+                    BlogConfig.getAttachmentPath(filename),
+                    `${BlogConfig.attachmentsDir}/${filename}`,
+                    BlogConfig.getAttachmentPath(encodeURIComponent(filename))
                 ];
                 
                 // 尝试第一个替代路径
@@ -1494,12 +1515,11 @@ let blog;
 document.addEventListener('DOMContentLoaded', () => {
     blog = new BlogApp();
     initTheme(); // 初始化主题
-    
-    // 初始化图片修复工具
+      // 初始化图片修复工具
     if (typeof ImageFixUtil !== 'undefined') {
         ImageFixUtil.init({
-            debug: true,
-            imageBaseDir: 'Vault/attachments/',
+            debug: BlogConfig.debug.enabled,
+            imageBaseDir: BlogConfig.getAttachmentsDirPath() + '/',
             autoFix: true,
             checkInterval: 3000 // 3秒检查一次
         });
@@ -1561,3 +1581,16 @@ document.addEventListener('click', function(e) {
         closeMobileTableOfContents();
     }
 });
+
+// 添加清除缓存功能
+function clearBlogCache() {
+    try {
+        localStorage.removeItem(BlogConfig.cache.filesKey);
+        console.log('博客缓存已清除');
+        alert('缓存已清除，页面将重新加载');
+        location.reload();
+    } catch (error) {
+        console.error('清除缓存失败:', error);
+        alert('清除缓存失败: ' + error.message);
+    }
+}
