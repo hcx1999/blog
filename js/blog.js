@@ -41,6 +41,19 @@ class BlogApp {
         this.init();
     }
 
+    // 检查协议（确保在合适的环境中运行）
+    checkProtocol() {
+        // 如果是在本地文件系统中运行，提示用户使用HTTP服务器
+        if (location.protocol === 'file:') {
+            console.warn('⚠️ 正在使用 file:// 协议访问，某些功能可能受限');
+            console.warn('💡 建议使用 HTTP 服务器运行，例如：python -m http.server 8000');
+        }
+        
+        // 记录当前运行环境
+        console.log(`🌐 当前协议: ${location.protocol}`);
+        console.log(`🌐 当前域名: ${location.hostname || 'localhost'}`);
+    }
+
     async init() {
         console.log('🚀 博客系统初始化开始...');
         console.log('📋 步骤 1: 强制更新文件列表...');
@@ -56,7 +69,8 @@ class BlogApp {
 
         console.log('📋 步骤 4: 渲染首页视图...');
         this.renderHomeView();
-          // 设置初始的body class
+        
+        // 设置初始的body class
         document.body.classList.add('view-home');
         
         console.log('✅ 博客系统初始化完成');
@@ -372,9 +386,9 @@ class BlogApp {
                     return cachedFiles;
                 }
             } catch (error) {
-                console.warn('无法从本地缓存获取文件列表');
-            }
-              // 如果所有方法都失败，返回空数组
+                console.warn('无法从本地缓存获取文件列表');            }
+            
+            // 如果所有方法都失败，返回空数组
             console.warn('无法获取文件列表，将显示空的文章列表');
             return [];
             
@@ -397,9 +411,9 @@ class BlogApp {
             const cleanFilename = filename.replace(/^.*\//, '');
             if (cleanFilename && !markdownFiles.includes(cleanFilename)) {
                 markdownFiles.push(cleanFilename);
-            }
-        }
-          return markdownFiles;
+            }        }
+        
+        return markdownFiles;
     }
     
     // 缓存文件列表到 localStorage
@@ -431,10 +445,11 @@ class BlogApp {
                     console.log('本地缓存已过期，清除缓存');
                     localStorage.removeItem('blog_file_cache');
                 }
-            }
-        } catch (error) {
+            }        } catch (error) {
             console.warn('读取本地缓存失败:', error);
-        }        return null;
+        }
+        
+        return null;
     }
     
     // 生成更新的 files.json 数据
@@ -536,10 +551,10 @@ class BlogApp {
         document.body.appendChild(notification);
         
         // 5秒后自动消失
-        setTimeout(() => {
-            if (notification.parentNode) {
+        setTimeout(() => {            if (notification.parentNode) {
                 notification.parentNode.removeChild(notification);
-            }        }, 5000);
+            }
+        }, 5000);
     }
     
     // 检查并更新文件列表
@@ -586,9 +601,10 @@ class BlogApp {
                 return true;
             }
         }
-        
-        return false;
-    }      // 加载所有Markdown文件
+          return false;
+    }
+    
+    // 加载所有Markdown文件
     async loadArticles() {
         // 使用之前在 forceUpdateFileList 中已经获取并缓存的文件列表
         let markdownFiles = this.getCachedFileList();
@@ -600,45 +616,27 @@ class BlogApp {
         } else {
             console.log(`使用已缓存的文件列表: ${markdownFiles.length} 个文件`);
         }
-        
-        if (markdownFiles.length === 0) {
+          if (markdownFiles.length === 0) {
             console.log('没有找到 Markdown 文件');
             this.articles = [];
             return;
         }
-
+        
         const loadPromises = markdownFiles.map(async (filename) => {
             try {
-                const response = await fetch('js/files.json');
+                const response = await fetch(`Vault/${filename}`);
                 if (response.ok) {
-                    const fileData = await response.json();
-                    if (fileData.files && Array.isArray(fileData.files)) {
-                        markdownFiles = fileData.files.map(file => file.filename);
-                        console.log(`从 files.json 加载了 ${markdownFiles.length} 个文件`);
-                        console.log(`文件列表生成时间: ${fileData.generated}`);
-                    } else {
-                        throw new Error('files.json 格式无效');
-                    }
+                    const content = await response.text();
+                    return this.parseMarkdownFile(filename, content);
                 } else {
-                    throw new Error(`无法加载 files.json: ${response.status}`);
+                    console.warn(`无法加载文件: ${filename}`);
+                    return null;
                 }
             } catch (error) {
-                console.warn('无法从 files.json 获取文件列表，尝试动态发现:', error);
-                // 如果 files.json 不可用，回退到动态文件发现
-                try {
-                    markdownFiles = await this.getMarkdownFileList();
-                    
-                    if (Array.isArray(markdownFiles) && markdownFiles.length > 0) {
-                        console.log(`成功获取动态文件列表: ${markdownFiles.length} 个文件`);
-                    } else {
-                        console.warn('动态文件列表为空，尝试使用缓存备用方案');
-                        markdownFiles = await this.getFallbackFileList();
-                    }
-                } catch (dynamicError) {
-                    console.warn('动态文件发现也失败，使用缓存备用方案', dynamicError);
-                    markdownFiles = await this.getFallbackFileList();
-                }
+                console.warn(`加载文件 ${filename} 时出错:`, error);
+                return null;
             }
+        });
 
         const results = await Promise.all(loadPromises);
         this.articles = results.filter(article => article !== null);
@@ -766,7 +764,9 @@ class BlogApp {
         }).join('');
 
         categoryList.innerHTML = html;
-    }    // 渲染首页视图
+    }
+    
+    // 渲染首页视图
     renderHomeView() {
         const recentList = document.getElementById('recent-list');
         // 显示全部文章而不只是前5篇
@@ -823,12 +823,13 @@ class BlogApp {
                 pedantic: false,
                 sanitize: false,
                 smartLists: true,
-                smartypants: false
-            });
-              // 使用marked.js渲染Markdown
+                smartypants: false            });
+            
+            // 使用marked.js渲染Markdown
             const htmlContent = marked.parse(processedContent);
             contentDiv.innerHTML = htmlContent;
-              // 处理图片路径
+            
+            // 处理图片路径
             this.processImages(contentDiv);
             
             // 处理表格 - 添加横向滚动容器
@@ -882,10 +883,11 @@ class BlogApp {
     processObsidianImages(content) {
         // 匹配 Obsidian 格式图片引用: ![[attachments/filename.png]] 或 ![[filename.png]]
         const obsidianImageRegex = /!\[\[(attachments\/)?([^\]]+\.(png|jpg|jpeg|gif|svg|webp|bmp|tiff))\]\]/gi;
-        
-        return content.replace(obsidianImageRegex, (match, attachmentsPath, filename, extension) => {
+          return content.replace(obsidianImageRegex, (match, attachmentsPath, filename, extension) => {
             // 构建图片路径
-            let imagePath;            if (attachmentsPath) {
+            let imagePath;
+            
+            if (attachmentsPath) {
                 // 如果已经包含 attachments/ 路径
                 imagePath = BlogConfig.getAttachmentPath(filename);
             } else {
@@ -986,11 +988,11 @@ class BlogApp {
                     ],
                     throwOnError: false,
                     errorColor: '#e74c3c'
-                });
-            } catch (error) {
+                });        } catch (error) {
                 console.warn('auto-render数学公式渲染失败:', error);
             }
-        }    }
+        }
+    }
 
     // 生成目录
     generateTableOfContents(container) {
@@ -1052,7 +1054,9 @@ class BlogApp {
         if (currentLevel > 0) {
             tocHTML += '</li>';
         }
-        tocHTML += '</ul>';        tocContainer.innerHTML = tocHTML;
+        tocHTML += '</ul>';
+        
+        tocContainer.innerHTML = tocHTML;
 
         // 更新目录计数
         this.updateTocCount(headings.length);
@@ -1125,7 +1129,8 @@ class BlogApp {
 
         // 添加active类到当前标题
         const activeLink = document.querySelector(`.toc-nav a[href="#${activeId}"]`);
-        if (activeLink) {            activeLink.classList.add('active');
+        if (activeLink) {
+            activeLink.classList.add('active');
         }
     }
     
@@ -1196,11 +1201,11 @@ class BlogApp {
         if (backToTopBtn) {
             const scrollTop = window.scrollY;
             const showThreshold = 300;
-            
-            if (scrollTop > showThreshold) {
+              if (scrollTop > showThreshold) {
                 backToTopBtn.classList.add('visible');
             } else {
-                backToTopBtn.classList.remove('visible');            }
+                backToTopBtn.classList.remove('visible');
+            }
         }
     }
     
@@ -1208,10 +1213,10 @@ class BlogApp {
     processImages(container) {
         const images = container.querySelectorAll('img');
         images.forEach(img => {
-            const src = img.getAttribute('src');
-            if (src && !src.startsWith('http') && !src.startsWith('/')) {
+            const src = img.getAttribute('src');            if (src && !src.startsWith('http') && !src.startsWith('/')) {
                 let newSrc = src;
-                  // 基本路径处理
+                
+                // 基本路径处理
                 if (src.startsWith('attachments/')) {
                     newSrc = `${BlogConfig.contentDir}/${src}`;
                 } else if (!src.startsWith(`${BlogConfig.contentDir}/`)) {
@@ -1243,10 +1248,10 @@ class BlogApp {
     addImageErrorHandler(img) {
         const originalSrc = img.getAttribute('src');
         
-        img.addEventListener('error', (e) => {
-            if (!img.hasAttribute('data-error-retry')) {
+        img.addEventListener('error', (e) => {            if (!img.hasAttribute('data-error-retry')) {
                 img.setAttribute('data-error-retry', 'true');
-                  // 尝试替代路径
+                
+                // 尝试替代路径
                 const filename = originalSrc.split('/').pop();
                 const alternativePaths = [
                     BlogConfig.getAttachmentPath(filename),
@@ -1315,10 +1320,11 @@ class BlogApp {
                 
                 // 将表格包装在容器中
                 table.parentNode.insertBefore(tableContainer, table);
-                tableContainer.appendChild(table);
-            }
+                tableContainer.appendChild(table);            }
         });
-    }// 按分类过滤
+    }
+    
+    // 按分类过滤
     filterByCategory(category) {
         const filteredArticles = this.articles.filter(article => article.category === category);
         this.showCategoryView(filteredArticles, category);
@@ -1369,7 +1375,9 @@ class BlogApp {
         `;
         
         contentDiv.innerHTML = html;
-    }    // 显示首页
+    }
+    
+    // 显示首页
     showHome() {
         this.switchView('home');
         this.clearActiveLinks();
@@ -1383,7 +1391,9 @@ class BlogApp {
         this.clearActiveLinks();
         this.clearTableOfContents();
         closeMobileTableOfContents();
-    }    // 切换视图
+    }
+    
+    // 切换视图
     switchView(viewName) {
         document.querySelectorAll('.view').forEach(view => {
             view.classList.remove('active');
@@ -1409,7 +1419,9 @@ class BlogApp {
         const contentDiv = document.getElementById('article-content');
         contentDiv.innerHTML = `<div class="error">${message}</div>`;
         this.switchView('article');
-    }    // 搜索功能
+    }
+    
+    // 搜索功能
     search(query) {
         if (!query.trim()) {
             this.showHome();
@@ -1515,7 +1527,8 @@ let blog;
 document.addEventListener('DOMContentLoaded', () => {
     blog = new BlogApp();
     initTheme(); // 初始化主题
-      // 初始化图片修复工具
+    
+    // 初始化图片修复工具
     if (typeof ImageFixUtil !== 'undefined') {
         ImageFixUtil.init({
             debug: BlogConfig.debug.enabled,
