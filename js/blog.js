@@ -38,7 +38,9 @@ class BlogApp {
         this.currentView = 'home';
         this.currentArticle = null;
         this.init();
-    }    async init() {
+    }
+
+    async init() {
         console.log('🚀 博客系统初始化开始...');
         console.log('📋 步骤 1: 强制更新文件列表...');
         
@@ -53,43 +55,161 @@ class BlogApp {
         
         console.log('📋 步骤 4: 渲染首页视图...');
         this.renderHomeView();
-        
-        // 设置初始的body class
+          // 设置初始的body class
         document.body.classList.add('view-home');
         
         console.log('✅ 博客系统初始化完成');
-    }// 强制更新文件列表（每次页面刷新时调用）
+    }
+
+    // 强制更新文件列表（每次页面刷新时调用）
     async forceUpdateFileList() {
         try {
             console.log('🔄 强制检查文件列表更新...');
             
-            // 实时扫描Vault目录获取最新文件列表
-            const currentFiles = await this.scanVaultDirectory();
+            // 检测是否在静态托管环境中（如GitHub Pages）
+            const isStaticHosting = this.detectStaticHostingEnvironment();
             
-            if (currentFiles.length === 0) {
-                console.warn('⚠️ 未发现任何Markdown文件');
-                return;
-            }
-            
-            console.log(`📁 发现 ${currentFiles.length} 个Markdown文件:`, currentFiles);
-            
-            // 检查是否需要更新files.json
-            const needsUpdate = await this.checkIfFileListNeedsUpdate(currentFiles);
-            
-            if (needsUpdate) {
-                console.log('🔄 检测到文件变更，自动更新files.json...');
-                await this.updateFileListSilently(currentFiles);
-                console.log('✅ files.json已更新');
+            if (isStaticHosting) {
+                console.log('📡 检测到静态托管环境，使用files.json作为主要数据源');
+                await this.handleStaticHostingEnvironment();
             } else {
-                console.log('✅ 文件列表无变化，无需更新');
+                console.log('🖥️ 检测到本地开发环境，使用目录扫描');
+                await this.handleLocalEnvironment();
             }
-            
-            // 更新本地缓存
-            this.cacheFileList(currentFiles);
             
         } catch (error) {
             console.error('❌ 强制更新文件列表失败:', error);
+            // 降级到使用现有的 files.json
+            await this.fallbackToExistingFilesList();
         }
+    }
+    
+    // 检测是否在静态托管环境中
+    detectStaticHostingEnvironment() {
+        const hostname = window.location.hostname;
+        const protocol = window.location.protocol;
+        
+        // 检测常见的静态托管域名
+        const staticHostingDomains = [
+            'github.io',
+            'netlify.app',
+            'vercel.app',
+            'surge.sh',
+            'firebase.app',
+            'pages.dev'
+        ];
+        
+        // 如果是 file:// 协议，则是本地文件
+        if (protocol === 'file:') {
+            return false;
+        }
+        
+        // 如果是 localhost 或 127.0.0.1，则是本地开发
+        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.')) {
+            return false;
+        }
+        
+        // 检查是否匹配静态托管域名
+        return staticHostingDomains.some(domain => hostname.includes(domain));
+    }
+    
+    // 处理静态托管环境
+    async handleStaticHostingEnvironment() {
+        try {
+            // 优先从 files.json 获取文件列表
+            const response = await fetch('js/files.json');
+            if (response.ok) {
+                const fileData = await response.json();
+                if (fileData.files && Array.isArray(fileData.files)) {
+                    const markdownFiles = fileData.files.map(file => file.filename);
+                    console.log(`✅ 从 files.json 加载了 ${markdownFiles.length} 个文件`);
+                    
+                    // 验证文件是否真实存在（可选，避免过多请求）
+                    const validFiles = await this.validateFiles(markdownFiles.slice(0, 3)); // 只验证前3个文件
+                    if (validFiles.length > 0) {
+                        this.cacheFileList(markdownFiles);
+                        console.log('📋 静态托管环境下文件列表已更新');
+                        return;
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn('无法从 files.json 获取文件列表:', error);
+        }
+        
+        // 如果 files.json 不可用，使用缓存
+        await this.fallbackToExistingFilesList();
+    }
+    
+    // 处理本地开发环境
+    async handleLocalEnvironment() {
+        // 实时扫描Vault目录获取最新文件列表
+        const currentFiles = await this.scanVaultDirectory();
+        
+        if (currentFiles.length === 0) {
+            console.warn('⚠️ 未发现任何Markdown文件，尝试使用files.json');
+            await this.fallbackToExistingFilesList();
+            return;
+        }
+        
+        console.log(`📁 发现 ${currentFiles.length} 个Markdown文件:`, currentFiles);
+        
+        // 检查是否需要更新files.json
+        const needsUpdate = await this.checkIfFileListNeedsUpdate(currentFiles);
+        
+        if (needsUpdate) {
+            console.log('🔄 检测到文件变更，自动更新files.json...');
+            await this.updateFileListSilently(currentFiles);
+            console.log('✅ files.json已更新');
+        } else {
+            console.log('✅ 文件列表无变化，无需更新');
+        }
+        
+        // 更新本地缓存
+        this.cacheFileList(currentFiles);
+    }
+    
+    // 降级处理：使用现有的files.json或缓存
+    async fallbackToExistingFilesList() {
+        try {
+            // 尝试从 files.json 获取
+            const response = await fetch('js/files.json');
+            if (response.ok) {
+                const fileData = await response.json();
+                if (fileData.files && Array.isArray(fileData.files)) {
+                    const markdownFiles = fileData.files.map(file => file.filename);
+                    console.log(`📄 降级使用 files.json，加载了 ${markdownFiles.length} 个文件`);
+                    this.cacheFileList(markdownFiles);
+                    return;
+                }
+            }
+        } catch (error) {
+            console.warn('无法从 files.json 获取文件列表:', error);
+        }
+        
+        // 最后尝试从缓存获取
+        const cachedFiles = this.getCachedFileList();
+        if (cachedFiles && cachedFiles.length > 0) {
+            console.log(`💾 使用本地缓存，加载了 ${cachedFiles.length} 个文件`);
+        } else {
+            console.error('❌ 无法获取任何文件列表！');
+        }
+    }
+    
+    // 验证文件是否存在（用于静态托管环境）
+    async validateFiles(filenames) {
+        const validFiles = [];
+        for (const filename of filenames) {
+            try {
+                const response = await fetch(`Vault/${filename}`, { method: 'HEAD' });
+                if (response.ok) {
+                    validFiles.push(filename);
+                }
+            } catch (error) {
+                console.warn(`文件验证失败: ${filename}`);
+            }
+        }
+        return validFiles;
     }
     
     // 直接扫描Vault目录
