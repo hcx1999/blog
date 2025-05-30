@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "c84e715c25321223",
+        "id": "32d0e3cf57f6e9b6",
         "type": "tabs",
         "children": [
           {
-            "id": "084362758e89cd92",
+            "id": "580370762f101a56",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Linux配置笔记.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Linux配置笔记"
+              "title": "新标签页"
             }
           }
         ]
@@ -53,7 +49,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "tag:#人工智能基础",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -61,7 +57,7 @@
                 "sortOrder": "alphabetical"
               },
               "icon": "lucide-search",
-              "title": "Search"
+              "title": "搜索"
             }
           },
           {
@@ -169,23 +165,28 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "084362758e89cd92",
+  "active": "580370762f101a56",
   "lastOpenFiles": [
-    "未命名.md",
+    "Linux Linux环境配置笔记.md",
+    "AI ai基础作业笔记.md",
+    "AI 07-Transformer.md",
+    "AI 06-循环神经网络.md",
+    "AI 05-对抗神经网络.md",
+    "AI 04-卷积神经网络.md",
+    "AI 03-神经网络.md",
+    "AI 02-机器学习.md",
+    "AI 01-数学基础.md",
+    "js JavaScript-zw.md",
+    "js JavaScript-tds.md",
     "未命名",
-    "JavaScript-zw.md",
     "测试自动更新.md",
     "目录功能测试.md",
     "数学公式测试.md",
     "代码块溢出测试.md",
     "index.json",
     "file-index.json",
-    "JavaScript-tds.md",
     "CAMEL.md",
-    "AI基础笔记.md",
-    "AI基础作业笔记.md",
     "2025-05-30.md",
-    "Linux配置笔记.md",
     "attachments/Pasted image 20250419170637.png",
     "attachments/Pasted image 20250528181903.png",
     "attachments",

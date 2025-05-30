@@ -9,10 +9,13 @@
  * @returns {string} - 分类名称
  */
 function extractCategory(filename) {
-    if (filename.includes('AI') || filename.includes('神经网络') || filename.includes('人工智能')) return 'AI';
-    if (filename.includes('JavaScript') || filename.includes('ECMAScript') || filename.includes('js')) return 'JavaScript';
+    if (filename.includes('AI')) return 'AI';
+    if (filename.includes('js')) return 'JavaScript';
     if (filename.includes('Linux')) return 'Linux';
-    if (filename.includes('数学') || filename.includes('Math')) return 'Math';
+    if (filename.includes('Math')) return 'Math';
+    if (filename.includes('Python')) return 'Python';
+    if (filename.includes('C++')) return 'C&C++';
+    if (filename.includes('AI')) return 'AI';
     return '其他';
 }
 

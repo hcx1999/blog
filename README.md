@@ -1,241 +1,59 @@
-# 博客项目 - 支持KaTeX数学公式
+# HCX1999 Blog
 
-这是一个基于静态文件的博客系统，支持从Markdown文件动态生成博客内容，并完整支持KaTeX数学公式渲染。
+<div align="center">
 
-## ✨ 功能特性
+![Logo](src/avatar.svg)
 
-- 📝 支持Markdown文件自动解析和渲染
-- 🧮 **完整支持KaTeX数学公式渲染**
-- 🌙 **浅色/深色主题切换**
-- 📑 **智能目录生成和导航**
-- 🎨 响应式设计，适配桌面和移动端
-- 🔍 支持文章搜索和分类过滤
-- 📱 现代化UI设计
-- ⚡ 纯前端实现，无需后端服务器
-- 🖼️ 自动处理图片路径
-- ⌨️ 键盘快捷键支持
-- 💾 主题偏好自动保存
-- 🚀 **支持 GitHub Pages 自动部署**
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Static Badge](https://img.shields.io/badge/Build_with-Claude_AI-purple)](https://www.anthropic.com/claude)
+![Static Badge](https://img.shields.io/badge/Platform-Static_HTML-orange)
 
-## 🌐 GitHub Pages 部署
+</div>
 
-本项目已配置 GitHub Actions 自动部署到 GitHub Pages：
+> 🚀 一个由AI驱动构建的轻量级静态博客系统，为Obsidian用户打造
 
-### 设置步骤
+## ✨ 特性
 
-1. **推送代码到 GitHub**
-   ```bash
-   git add .
-   git commit -m "初始博客设置"
-   git push origin main
-   ```
+- **💡 极简部署** - 纯静态页面，无需后端，加载速度快
+- **🌙 主题切换** - 支持明暗主题模式自由切换
+- **📋 自动目录** - 智能解析文章结构，自动生成目录
+- **📊 数学渲染** - 完美支持LaTeX数学公式显示
+- **🔍 智能分类** - 自动从文件名中提取分类信息
+- **📱 响应式设计** - 完美适配桌面端和移动端
+- **🔄 自动同步** - 自动扫描Vault目录，更新文章列表
 
-2. **启用 GitHub Pages**
-   - 进入你的 GitHub 仓库
-   - 点击 "Settings" 标签
-   - 滚动到 "Pages" 部分
-   - 在 "Source" 下选择 "GitHub Actions"
+## 🎯 项目灵感
 
-3. **自动部署**
-   - 每次推送到 `main` 分支时，GitHub Actions 会自动：
-     - 扫描 `Vault/` 目录中的 Markdown 文件
-     - 生成 `files.json` 文件列表
-     - 部署到 GitHub Pages
+这个博客系统起源于一个简单的需求：将Obsidian笔记发布到网页以便跨设备访问。通过AI辅助开发，我们创建了一个优雅且功能丰富的静态博客系统，无需依赖任何复杂的框架或构建工具。
 
-4. **访问你的博客**
-   - 部署完成后，访问：`https://[你的用户名].github.io/[仓库名]/`
+## 🛠️ 技术栈
 
-### 配置文件说明
+- **前端框架**: 原生HTML/CSS/JavaScript
+- **Markdown渲染**: marked.js
+- **数学公式**: KaTeX
+- **构建辅助**: Claude Sonnet 4 AI
 
-- `.github/workflows/deploy.yml` - GitHub Actions 工作流配置
-- `package.json` - Node.js 项目配置
-- `_config.yml` - GitHub Pages 配置
-- `.gitignore` - Git 忽略文件配置
+## 📖 使用方法
 
-## 🚀 快速开始
+1. 将Markdown笔记放入`Vault`目录
+2. 文件会自动被扫描并添加到博客中
+3. 支持从文件名中提取分类（如`AI 01-数学基础.md`会被归类为"AI"）
+4. 文件内容会被解析并显示，支持内部链接和图像引用
 
-### 方法1：使用启动脚本（推荐）
-```bash
-./start-server.sh
-```
+## 🎨 主要功能
 
-### 方法2：手动启动服务器
+- **动态扫描文件**: 自动检测并添加新的Markdown文件
+- **智能分类系统**: 根据文件名自动创建分类
+- **深色/浅色主题**: 提供舒适的阅读体验
+- **响应式布局**: 在不同设备上保持最佳显示效果
+- **文章目录**: 自动生成并支持点击跳转
+- **数学公式渲染**: 完美支持复杂的LaTeX公式
+- **图片路径修复**: 智能处理Obsidian图片链接
 
-#### 使用Python内置服务器
-```bash
-# Python 3
-python -m http.server 8000
+## 👨‍💻 关于作者
 
-# Python 2  
-python -m SimpleHTTPServer 8000
-```
+北京大学信息科学技术学院2024级学生，热爱编程、人工智能、Linux开发和数学。
 
-#### 使用Node.js http-server
-```bash
-npm install -g http-server
-http-server
-```
+## 📝 License
 
-#### 使用PHP内置服务器
-```bash
-php -S localhost:8000
-```
-
-然后在浏览器中访问 `http://localhost:8000`
-
-## 📁 项目结构
-
-```
-blog/
-├── index.html              # 主页面
-├── start-server.sh         # 启动脚本
-├── README.md              # 项目说明
-├── css/
-│   └── style.css          # 样式文件（包含KaTeX样式）
-├── js/
-│   ├── blog.js            # 主要逻辑（包含KaTeX渲染）
-│   └── markdown.min.js    # Markdown解析库
-└── Vault/                 # 文章目录
-    ├── *.md               # Markdown文章
-    └── attachments/       # 图片资源
-```
-
-## 📝 使用说明
-
-### 基本功能
-1. 在 `Vault/` 目录下创建新的 `.md` 文件
-2. 文件会自动被博客系统识别和显示
-3. 点击侧边栏的文章标题查看文章内容
-4. 使用分类过滤查看特定类型的文章
-5. 支持键盘快捷键 `Ctrl+K` 或 `Cmd+K` 进行搜索
-
-### 主题切换
-- 点击导航栏右侧的 🌙/☀️ 按钮切换浅色/深色主题
-- 主题偏好会自动保存到本地存储
-- 支持跟随系统主题设置
-
-### Markdown语法支持
-
-支持以下Markdown语法：
-   - 标题 (`#`, `##`, `###`)
-   - 粗体 (`**文本**`)
-   - 斜体 (`*文本*`)
-   - 代码 (`` `代码` ``)
-   - 代码块 (三个反引号)
-   - 链接 (`[文本](URL)`)
-   - 图片 (`![描述](路径)`)
-   - 列表
-   - 引用 (`> 文本`)
-   - 数学公式：
-     - 行内公式：`$E=mc^2$`
-     - 块级公式：`$$\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}$$`
-
-### 图片处理
-
-- 图片文件放在 `Vault/attachments/` 目录下
-- Markdown中使用相对路径引用：`![描述](attachments/图片.png)`
-
-### 目录功能
-
-系统会自动为文章生成目录（Table of Contents），基于文章中的标题结构：
-
-- **桌面端**：目录固定显示在右侧边栏
-- **移动端**：点击导航栏中的📋按钮可显示/隐藏目录
-- **自动高亮**：滚动时自动高亮当前阅读位置对应的目录项
-- **快速跳转**：点击目录项可快速跳转到对应标题
-- **多级支持**：支持H1-H6多级标题的嵌套显示
-
-### 快捷键
-
-- `Ctrl+K` (或 `Cmd+K`)：打开搜索
-
-## 自定义
-
-### 修改样式
-编辑 `css/style.css` 文件来自定义外观。
-
-### 修改功能
-编辑 `js/blog.js` 文件来添加新功能或修改现有行为。
-
-### 分类规则
-当前分类规则在 `blog.js` 的 `extractCategory` 方法中定义，可以根据需要修改。
-
-## 依赖库
-
-本项目使用以下CDN资源：
-
-- **Marked.js**: Markdown解析器
-- **KaTeX**: 数学公式渲染引擎
-  - katex.min.css (样式)
-  - katex.min.js (核心库)
-  - auto-render.min.js (自动渲染插件)
-
-## 数学公式语法
-
-支持标准的LaTeX数学公式语法：
-
-### 行内公式
-使用单个`$`包围公式：`$E=mc^2$` 
-
-### 块级公式
-使用双`$$`包围公式：
-```
-$$
-\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
-$$
-```
-
-### 常用公式示例
-- 分数：`$\frac{a}{b}$`
-- 上下标：`$x^2$`, `$x_1$`
-- 根号：`$\sqrt{x}$`, `$\sqrt[3]{x}$`
-- 求和：`$\sum_{i=1}^{n} x_i$`
-- 积分：`$\int_a^b f(x)dx$`
-- 希腊字母：`$\alpha$`, `$\beta$`, `$\gamma$`
-- 矩阵：
-```
-$$
-\begin{pmatrix}
-a & b \\
-c & d
-\end{pmatrix}
-$$
-```
-
-## 浏览器兼容性
-
-- Chrome 60+
-- Firefox 55+
-- Safari 10+
-- Edge 79+
-
-## 📋 目录功能增强
-
-博客系统现已配备完整的目录导航功能，大幅提升阅读体验：
-
-### 核心功能
-- **智能目录生成**: 自动解析H1-H6标题生成多级目录结构
-- **实时滚动同步**: 阅读时自动高亮当前位置的目录项
-- **一键快速跳转**: 点击目录项平滑滚动到对应章节
-- **阅读进度显示**: 实时展示文章阅读进度百分比
-- **目录折叠功能**: 支持展开/收起目录以优化空间利用
-- **标题计数显示**: 显示文章标题总数，便于了解文章结构
-- **返回顶部按钮**: 提供便捷的页面顶部快速返回功能
-
-### 响应式体验
-- **桌面端**: 目录固定显示在页面右侧，始终可见便于导航
-- **移动端**: 点击导航栏📋按钮呼出滑入式目录面板
-- **触摸优化**: 移动端提供触摸友好的交互体验和手势提示
-
-### 使用示例
-查看项目中的 `toc-demo.html` 文件可体验完整的目录功能演示。
-
-## 注意事项
-
-1. 由于使用fetch API读取本地文件，必须通过HTTP服务器访问
-2. 图片路径使用相对路径，确保图片文件在正确位置
-3. Markdown文件编码建议使用UTF-8
-
-## 许可证
-
-MIT License
+MIT

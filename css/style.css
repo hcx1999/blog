@@ -160,12 +160,11 @@ body {
 }
 
 /* 主要内容区 */
-.main {
-    max-width: 1400px;
+.main {    max-width: 1400px;
     margin: 32px auto;
     padding: 0 24px;
     display: grid;
-    grid-template-columns: 200px 1fr 180px;
+    grid-template-columns: 220px 1fr 180px;
     gap: 24px;
     min-height: calc(100vh - 200px);
 }
@@ -175,7 +174,7 @@ body.view-home .main,
 body.view-about .main,
 body.view-category .main,
 body.view-search .main {
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: 220px 1fr;
 }
 
 /* 在首页、关于页面、分类页面和搜索页面隐藏目录 */
@@ -198,13 +197,13 @@ body.view-search .toc-toggle {
 .sidebar {
     background: var(--bg-primary);
     border-radius: 16px;
-    padding: 16px;
+    padding: 12px 16px;
     box-shadow: var(--shadow-lg);
-    height: calc(100vh - 140px);
-    max-height: calc(100vh - 140px);
+    height: calc(100vh - 160px);
+    max-height: calc(100vh - 160px);
     overflow-y: auto;
     position: sticky;
-    top: 100px;
+    top: 110px;
     border: 1px solid var(--border-light);
     backdrop-filter: blur(10px);
 }
@@ -229,7 +228,7 @@ body.view-search .toc-toggle {
 }
 
 .sidebar-section {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .sidebar-section:last-child {
@@ -238,7 +237,7 @@ body.view-search .toc-toggle {
 
 .sidebar-section h3 {
     color: var(--text-primary);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-size: 0.95rem;
     font-weight: 600;
     position: relative;
@@ -911,7 +910,7 @@ body.view-about .toc-toggle {
 /* 响应式设计 */
 @media (max-width: 1024px) {
     .main {
-        grid-template-columns: 200px 1fr;
+        grid-template-columns: 220px 1fr;
         gap: 20px;
     }
     
