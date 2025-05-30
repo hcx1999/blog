@@ -38,7 +38,8 @@ class BlogApp {
         this.currentView = 'home';
         this.currentArticle = null;
         this.init();
-    }    async init() {
+    }
+      async init() {
         await this.loadArticles();
         this.renderSidebar();
         this.renderHomeView();
@@ -49,7 +50,6 @@ class BlogApp {
     // 加载所有Markdown文件
     async loadArticles() {
         let markdownFiles = [];
-        let success = false;
         
         try {
             console.log('开始加载文章...');
@@ -60,7 +60,6 @@ class BlogApp {
                 
                 // 验证我们有一个有效的数组
                 if (Array.isArray(markdownFiles) && markdownFiles.length > 0) {
-                    success = true;
                     console.log(`成功获取动态文件列表: ${markdownFiles.length} 个文件`);
                 } else {
                     console.warn('动态文件列表为空，尝试使用备用方案');
@@ -81,11 +80,11 @@ class BlogApp {
             console.log(`找到 ${markdownFiles.length} 个 Markdown 文件:`, markdownFiles);
 
             // 缓存文件列表到本地存储
-            if (markdownFiles.length > 0) {
-                try {
-                    localStorage.setItem('markdown_files_cache', JSON.stringify({
+            if (markdownFiles.length > 0) {                try {
+                    localStorage.setItem(BlogConfig.cache.filesKey, JSON.stringify({
                         files: markdownFiles,
-                        timestamp: Date.now()
+                        timestamp: Date.now(),
+                        version: BlogConfig.cache.version
                     }));
                     console.log('文件列表已缓存到本地存储');
                 } catch (error) {
@@ -98,11 +97,9 @@ class BlogApp {
                 console.log('没有找到 Markdown 文件');
                 this.articles = [];
                 return;
-            }
-
-            const loadPromises = markdownFiles.map(async (filename) => {
+            }            const loadPromises = markdownFiles.map(async (filename) => {
                 try {
-                    const response = await fetch(`Vault/${filename}`);
+                    const response = await fetch(BlogConfig.getContentFilePath(filename));
                     if (response.ok) {
                         const content = await response.text();
                         return this.parseMarkdownFile(filename, content);
@@ -118,46 +115,26 @@ class BlogApp {
 
             const results = await Promise.all(loadPromises);
             this.articles = results.filter(article => article !== null);
-            
-            if (this.articles.length > 0) {
+              if (this.articles.length > 0) {
                 this.articles.sort((a, b) => new Date(b.date) - new Date(a.date));
                 console.log(`成功加载 ${this.articles.length} 篇文章`);
-                
-                // 如果使用的是动态文件列表，并且成功获取文件，更新文件索引
-                if (success) {
-                    this.updateFileIndex(markdownFiles);
-                }
             } else {
                 console.log('没有成功加载任何文章');
-            }
-        } catch (error) {
+            }        } catch (error) {
             console.error('加载文章过程中出现错误:', error);
             this.articles = [];
         }
-    }// 获取 Markdown 文件列表的主要方法
+    }
+    
+    // 获取 Markdown 文件列表的主要方法
     async getMarkdownFileList() {
         console.log('开始获取 Markdown 文件列表...');
         
-        try {
-            // 尝试多种方法获取文件列表
+        try {            // 尝试多种方法获取文件列表
             
-            // 方法1: 尝试从文件索引API获取
-            // try {
-            //     const response = await fetch('Vault/file-index.json');
-            //     if (response.ok) {
-            //         const fileIndex = await response.json();
-            //         if (fileIndex && Array.isArray(fileIndex.markdownFiles) && fileIndex.markdownFiles.length > 0) {
-            //             console.log(`从文件索引中找到 ${fileIndex.markdownFiles.length} 个文件`);
-            //             return fileIndex.markdownFiles;
-            //         }
-            //     }
-            // } catch (error) {
-            //     console.log('文件索引不存在或无效，尝试其他方法');
-            // }
-
-            // 方法2: 尝试通过目录遍历（需要服务器支持）
+            // 方法1: 尝试通过目录遍历（需要服务器支持）
             try {
-                const response = await fetch('Vault/');
+                const response = await fetch(BlogConfig.getContentDirPath() + '/');
                 if (response.ok) {
                     const htmlText = await response.text();
                     const markdownFiles = this.parseDirectoryListing(htmlText);
@@ -168,9 +145,7 @@ class BlogApp {
                 }
             } catch (error) {
                 console.log('目录列表不可用，尝试探测文件');
-            }
-
-            // 方法3: 通过已知模式探测文件
+            }            // 方法2: 通过已知模式探测文件
             return await this.detectMarkdownFiles();
         } catch (error) {
             console.error('获取文件列表失败:', error);
@@ -202,12 +177,11 @@ class BlogApp {
         try {
             // 使用通用方法探测 .md 文件
             // 这种方法不依赖预定义的文件列表，而是真正扫描目录
-            
-            console.log('开始探测 Markdown 文件...');
-            
-            // 方法1: 尝试获取 Vault 目录下的所有文件列表
+              console.log('开始探测 Markdown 文件...');
+              
+            // 方法1: 尝试获取目录下的所有文件列表
             try {
-                const response = await fetch('Vault/');
+                const response = await fetch(BlogConfig.getContentDirPath() + '/');
                 if (response.ok) {
                     const htmlText = await response.text();
                     const markdownFiles = this.parseDirectoryListing(htmlText);
@@ -223,7 +197,7 @@ class BlogApp {
             // 方法2: 尝试使用 fetch API 获取目录下的文件（需要服务器支持 CORS 和目录列表）
             try {
                 // 这是一个通用方法，尝试探测目录下是否有文件
-                const response = await fetch('Vault/', {
+                const response = await fetch(BlogConfig.getContentDirPath() + '/', {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json'
@@ -264,13 +238,13 @@ class BlogApp {
     async getFallbackFileList() {
         // 尝试从本地存储获取之前缓存的文件列表
         try {
-            const cachedFiles = localStorage.getItem('markdown_files_cache');
+            const cachedFiles = localStorage.getItem(BlogConfig.cache.filesKey);
             if (cachedFiles) {
-                const cache = JSON.parse(cachedFiles);                // 检查缓存是否在24小时内且版本号匹配
-                const currentVersion = "1.2"; // 当修改缓存结构时更新此版本号
+                const cache = JSON.parse(cachedFiles);
+                // 检查缓存是否在24小时内且版本号匹配
                 if (cache.timestamp && 
-                   (Date.now() - cache.timestamp) < this.cacheDuration && 
-                   (!cache.version || cache.version === currentVersion)) {
+                   (Date.now() - cache.timestamp) < BlogConfig.cache.duration && 
+                   (!cache.version || cache.version === BlogConfig.cache.version)) {
                     console.log('使用本地缓存的文件列表:', cache.files.length, '个文件');
                     return cache.files;
                 } else {
@@ -283,66 +257,7 @@ class BlogApp {
           // 如果没有缓存，返回空列表
         console.log('没有可用的缓存文件列表，返回空列表');
         return [];
-    }
-    
-    // 文件索引管理功能
-    async updateFileIndex(filesArray = null) {
-        console.log('正在更新文件索引...');
-        
-        try {
-            // 使用传入的文件列表或尝试检测文件
-            const files = filesArray || await this.detectMarkdownFiles();
-            
-            const fileIndex = {
-                markdownFiles: files,
-                lastUpdated: new Date().toISOString(),
-                totalFiles: files.length,
-                description: "Vault 文件夹中的 Markdown 文件索引"
-            };
-            
-            console.log('文件索引已更新,', files.length, '个文件');
-            // console.log('建议将文件索引保存到 Vault/file-index.json');
-            
-            // 尝试保存文件索引（如果支持的话）
-            // try {
-            //     // 创建一个下载链接以保存 JSON 文件
-            //     const jsonContent = JSON.stringify(fileIndex, null, 2);
-            //     const blob = new Blob([jsonContent], { type: 'application/json' });
-            //     const url = URL.createObjectURL(blob);
-                
-            //     // 创建一个消息通知用户
-            //     const notification = document.createElement('div');
-            //     notification.className = 'file-index-notification';
-            //     notification.innerHTML = `
-            //         <div style="position: fixed; bottom: 20px; right: 20px; background: #4caf50; color: white; 
-            //                     padding: 12px 20px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 9999;">
-            //             <div style="display: flex; align-items: center; justify-content: space-between;">
-            //                 <span>文件索引已更新 (${files.length} 个文件)</span>
-            //                 <a href="${url}" download="file-index.json" 
-            //                    style="margin-left: 16px; color: white; text-decoration: underline;">
-            //                    下载索引文件</a>
-            //             </div>
-            //         </div>
-            //     `;
-                
-            //     document.body.appendChild(notification);
-                
-            //     // 5秒后自动移除通知
-            //     setTimeout(() => {
-            //         document.body.removeChild(notification);
-            //         URL.revokeObjectURL(url);
-            //     }, 5000);
-                
-            // } catch (saveError) {
-            //     console.warn('无法创建文件索引的下载链接:', saveError);
-            // }
-            
-            return fileIndex;
-        } catch (error) {
-            console.error('更新文件索引失败:', error);            return null;
-        }
-    }
-    
+    }    
     // 手动刷新文章列表
     async refreshArticles() {
         console.log('正在刷新文章列表...');
@@ -355,10 +270,9 @@ class BlogApp {
             refreshBtn.disabled = true;
             refreshBtn.style.animation = 'spin 1s linear infinite';
         }
-        
-        // 清除本地缓存，确保重新获取文件列表
+          // 清除本地缓存，确保重新获取文件列表
         try {
-            localStorage.removeItem('markdown_files_cache');
+            localStorage.removeItem(BlogConfig.cache.filesKey);
         } catch (e) {
             // 忽略缓存清除错误
         }
@@ -680,13 +594,12 @@ class BlogApp {
         
         return content.replace(obsidianImageRegex, (match, attachmentsPath, filename, extension) => {
             // 构建图片路径
-            let imagePath;
-            if (attachmentsPath) {
+            let imagePath;            if (attachmentsPath) {
                 // 如果已经包含 attachments/ 路径
-                imagePath = `Vault/attachments/${filename}`;
+                imagePath = BlogConfig.getAttachmentPath(filename);
             } else {
                 // 如果只有文件名，添加 attachments/ 前缀
-                imagePath = `Vault/attachments/${filename}`;
+                imagePath = BlogConfig.getAttachmentPath(filename);
             }
             
             // 处理文件名中的空格，进行 URL 编码
@@ -1007,12 +920,11 @@ class BlogApp {
             const src = img.getAttribute('src');
             if (src && !src.startsWith('http') && !src.startsWith('/')) {
                 let newSrc = src;
-                
-                // 基本路径处理
+                  // 基本路径处理
                 if (src.startsWith('attachments/')) {
-                    newSrc = `Vault/${src}`;
-                } else if (!src.startsWith('Vault/')) {
-                    newSrc = `Vault/attachments/${src}`;
+                    newSrc = `${BlogConfig.contentDir}/${src}`;
+                } else if (!src.startsWith(`${BlogConfig.contentDir}/`)) {
+                    newSrc = BlogConfig.getAttachmentPath(src);
                 }
                 
                 // 使用 ImageFixUtil 进一步优化路径
@@ -1043,13 +955,12 @@ class BlogApp {
         img.addEventListener('error', (e) => {
             if (!img.hasAttribute('data-error-retry')) {
                 img.setAttribute('data-error-retry', 'true');
-                
-                // 尝试替代路径
+                  // 尝试替代路径
                 const filename = originalSrc.split('/').pop();
                 const alternativePaths = [
-                    `Vault/attachments/${filename}`,
-                    `attachments/${filename}`,
-                    `Vault/attachments/${encodeURIComponent(filename)}`
+                    BlogConfig.getAttachmentPath(filename),
+                    `${BlogConfig.attachmentsDir}/${filename}`,
+                    BlogConfig.getAttachmentPath(encodeURIComponent(filename))
                 ];
                 
                 // 尝试第一个替代路径
@@ -1313,12 +1224,11 @@ let blog;
 document.addEventListener('DOMContentLoaded', () => {
     blog = new BlogApp();
     initTheme(); // 初始化主题
-    
-    // 初始化图片修复工具
+      // 初始化图片修复工具
     if (typeof ImageFixUtil !== 'undefined') {
         ImageFixUtil.init({
-            debug: true,
-            imageBaseDir: 'Vault/attachments/',
+            debug: BlogConfig.debug.enabled,
+            imageBaseDir: BlogConfig.getAttachmentsDirPath() + '/',
             autoFix: true,
             checkInterval: 3000 // 3秒检查一次
         });
@@ -1384,7 +1294,7 @@ document.addEventListener('click', function(e) {
 // 添加清除缓存功能
 function clearBlogCache() {
     try {
-        localStorage.removeItem('markdown_files_cache');
+        localStorage.removeItem(BlogConfig.cache.filesKey);
         console.log('博客缓存已清除');
         alert('缓存已清除，页面将重新加载');
         location.reload();
