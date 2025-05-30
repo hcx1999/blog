@@ -40,71 +40,574 @@ class BlogApp {
         this.checkProtocol(); // 检查协议
         this.init();
     }
-    
-    // 检查当前访问协议
-    checkProtocol() {
-        if (window.location.protocol === 'file:') {
-            console.warn('⚠️ 检测到file://协议访问，这可能导致功能异常');
-            this.showProtocolWarning();
+
+    async init() {
+        console.log('🚀 博客系统初始化开始...');
+        console.log('📋 步骤 1: 强制更新文件列表...');
+        
+        // 每次刷新都先检查并更新文件列表
+        await this.forceUpdateFileList();
+        
+        console.log('📋 步骤 2: 加载文章内容...');
+        await this.loadArticles();
+        
+        console.log('📋 步骤 3: 渲染侧边栏...');
+        this.renderSidebar();
+
+        console.log('📋 步骤 4: 渲染首页视图...');
+        this.renderHomeView();
+          // 设置初始的body class
+        document.body.classList.add('view-home');
+        
+        console.log('✅ 博客系统初始化完成');
+    }
+
+    // 强制更新文件列表（每次页面刷新时调用）
+    async forceUpdateFileList() {
+        try {
+            console.log('🔄 强制检查文件列表更新...');
+            
+            // 检测是否在静态托管环境中（如GitHub Pages）
+            const isStaticHosting = this.detectStaticHostingEnvironment();
+            
+            if (isStaticHosting) {
+                console.log('📡 检测到静态托管环境，使用files.json作为主要数据源');
+                await this.handleStaticHostingEnvironment();
+            } else {
+                console.log('🖥️ 检测到本地开发环境，使用目录扫描');
+                await this.handleLocalEnvironment();
+            }
+            
+        } catch (error) {
+            console.error('❌ 强制更新文件列表失败:', error);
+            // 降级到使用现有的 files.json
+            await this.fallbackToExistingFilesList();
         }
     }
     
-    // 显示协议警告
-    showProtocolWarning() {
-        const warningDiv = document.createElement('div');
-        warningDiv.style.cssText = `
+    // 检测是否在静态托管环境中
+    detectStaticHostingEnvironment() {
+        const hostname = window.location.hostname;
+        const protocol = window.location.protocol;
+        
+        // 检测常见的静态托管域名
+        const staticHostingDomains = [
+            'github.io',
+            'netlify.app',
+            'vercel.app',
+            'surge.sh',
+            'firebase.app',
+            'pages.dev'
+        ];
+        
+        // 如果是 file:// 协议，则是本地文件
+        if (protocol === 'file:') {
+            return false;
+        }
+        
+        // 如果是 localhost 或 127.0.0.1，则是本地开发
+        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.')) {
+            return false;
+        }
+        
+        // 检查是否匹配静态托管域名
+        return staticHostingDomains.some(domain => hostname.includes(domain));
+    }
+    
+    // 处理静态托管环境
+    async handleStaticHostingEnvironment() {
+        try {
+            // 优先从 files.json 获取文件列表
+            const response = await fetch('js/files.json');
+            if (response.ok) {
+                const fileData = await response.json();
+                if (fileData.files && Array.isArray(fileData.files)) {
+                    const markdownFiles = fileData.files.map(file => file.filename);
+                    console.log(`✅ 从 files.json 加载了 ${markdownFiles.length} 个文件`);
+                    
+                    // 验证文件是否真实存在（可选，避免过多请求）
+                    const validFiles = await this.validateFiles(markdownFiles.slice(0, 3)); // 只验证前3个文件
+                    if (validFiles.length > 0) {
+                        this.cacheFileList(markdownFiles);
+                        console.log('📋 静态托管环境下文件列表已更新');
+                        return;
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn('无法从 files.json 获取文件列表:', error);
+        }
+        
+        // 如果 files.json 不可用，使用缓存
+        await this.fallbackToExistingFilesList();
+    }
+    
+    // 处理本地开发环境
+    async handleLocalEnvironment() {
+        // 实时扫描Vault目录获取最新文件列表
+        const currentFiles = await this.scanVaultDirectory();
+        
+        if (currentFiles.length === 0) {
+            console.warn('⚠️ 未发现任何Markdown文件，尝试使用files.json');
+            await this.fallbackToExistingFilesList();
+            return;
+        }
+        
+        console.log(`📁 发现 ${currentFiles.length} 个Markdown文件:`, currentFiles);
+        
+        // 检查是否需要更新files.json
+        const needsUpdate = await this.checkIfFileListNeedsUpdate(currentFiles);
+        
+        if (needsUpdate) {
+            console.log('🔄 检测到文件变更，自动更新files.json...');
+            await this.updateFileListSilently(currentFiles);
+            console.log('✅ files.json已更新');
+        } else {
+            console.log('✅ 文件列表无变化，无需更新');
+        }
+        
+        // 更新本地缓存
+        this.cacheFileList(currentFiles);
+    }
+    
+    // 降级处理：使用现有的files.json或缓存
+    async fallbackToExistingFilesList() {
+        try {
+            // 尝试从 files.json 获取
+            const response = await fetch('js/files.json');
+            if (response.ok) {
+                const fileData = await response.json();
+                if (fileData.files && Array.isArray(fileData.files)) {
+                    const markdownFiles = fileData.files.map(file => file.filename);
+                    console.log(`📄 降级使用 files.json，加载了 ${markdownFiles.length} 个文件`);
+                    this.cacheFileList(markdownFiles);
+                    return;
+                }
+            }
+        } catch (error) {
+            console.warn('无法从 files.json 获取文件列表:', error);
+        }
+        
+        // 最后尝试从缓存获取
+        const cachedFiles = this.getCachedFileList();
+        if (cachedFiles && cachedFiles.length > 0) {
+            console.log(`💾 使用本地缓存，加载了 ${cachedFiles.length} 个文件`);
+        } else {
+            console.error('❌ 无法获取任何文件列表！');
+        }
+    }
+    
+    // 验证文件是否存在（用于静态托管环境）
+    async validateFiles(filenames) {
+        const validFiles = [];
+        for (const filename of filenames) {
+            try {
+                const response = await fetch(`Vault/${filename}`, { method: 'HEAD' });
+                if (response.ok) {
+                    validFiles.push(filename);
+                }
+            } catch (error) {
+                console.warn(`文件验证失败: ${filename}`);
+            }
+        }
+        return validFiles;
+    }
+    
+    // 直接扫描Vault目录
+    async scanVaultDirectory() {
+        try {
+            const response = await fetch('Vault/');
+            if (response.ok) {
+                const htmlText = await response.text();
+                const markdownFiles = this.parseDirectoryListing(htmlText);
+                return markdownFiles;
+            }
+        } catch (error) {
+            console.warn('目录扫描失败:', error);
+        }
+        return [];
+    }
+    
+    // 检查文件列表是否需要更新
+    async checkIfFileListNeedsUpdate(currentFiles) {
+        try {
+            const response = await fetch('js/files.json');
+            if (!response.ok) {
+                console.log('files.json不存在，需要创建');
+                return true;
+            }
+            
+            const existingData = await response.json();
+            const existingFiles = existingData.files ? existingData.files.map(f => f.filename) : [];
+            
+            return this.compareFileLists(currentFiles, existingFiles);
+        } catch (error) {
+            console.warn('检查文件列表时出错:', error);
+            return true; // 出错时默认需要更新
+        }
+    }
+    
+    // 静默更新文件列表（不弹出下载提示）
+    async updateFileListSilently(files) {
+        try {
+            const fileListData = await this.generateUpdatedFileListData(files);
+            
+            // 将更新的数据存储到临时存储中，供开发者参考
+            const jsonString = JSON.stringify(fileListData, null, 2);
+            
+            // 在控制台输出最新的files.json内容
+            console.log('📄 最新的files.json内容:');
+            console.log(jsonString);
+            
+            // 可选：存储到localStorage中供后续使用
+            localStorage.setItem('latest_files_json', jsonString);
+            
+            // 显示更新提示（但不强制下载）
+            this.showSilentUpdateNotification(files.length);
+            
+        } catch (error) {
+            console.error('静默更新文件列表失败:', error);
+        }
+    }
+    
+    // 显示静默更新提示
+    showSilentUpdateNotification(fileCount) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            top: 20px;
+            right: 20px;
+            background: #2196F3;
             color: white;
-            padding: 12px 20px;
-            text-align: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 10000;
+            max-width: 320px;
             font-size: 14px;
-            border-bottom: 3px solid rgba(255,255,255,0.3);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
         `;
         
-        warningDiv.innerHTML = `
-            <div style="max-width: 1200px; margin: 0 auto;">
-                <strong>⚠️ 协议警告：</strong>
-                当前使用file://协议访问，博客功能可能无法正常工作。
-                <br>
-                <strong>建议解决方案：</strong>
-                启动HTTP服务器访问此页面，例如使用 
-                <code style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px; margin: 0 4px;">python -m http.server 8000</code>
-                或 
-                <code style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px; margin: 0 4px;">npx serve .</code>
-                <button onclick="this.parentElement.parentElement.style.display='none'" 
-                        style="margin-left: 15px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 4px 12px; border-radius: 4px; cursor: pointer;">
-                    知道了
-                </button>
+        notification.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 16px;">🔄</span>
+                <div>
+                    <strong>文件列表已同步</strong><br>
+                    <small>发现 ${fileCount} 个文件，列表已更新</small>
+                </div>
             </div>
         `;
         
-        document.body.insertBefore(warningDiv, document.body.firstChild);
+        // 点击显示详细信息
+        notification.addEventListener('click', () => {
+            const latestJson = localStorage.getItem('latest_files_json');
+            if (latestJson) {
+                console.log('📋 当前files.json应包含的内容:');
+                console.log(latestJson);
+                alert('最新的files.json内容已输出到控制台，请查看开发者工具。');
+            }
+        });
         
-        // 调整页面内容的顶部边距，避免被警告栏遮挡
-        document.body.style.paddingTop = '70px';
+        document.body.appendChild(notification);
+        
+        // 3秒后自动淡出
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
     }
     
-    async init() {
-        await this.loadArticles();
-        this.renderSidebar();
-        this.renderHomeView();
-        // 设置初始的body class
-        document.body.classList.add('view-home');
-    }
-      // 加载所有Markdown文件
-    async loadArticles() {
-        let markdownFiles = [];
-        
+    // 动态获取Markdown文件列表
+    async getMarkdownFileList() {
         try {
-            console.log('开始加载文章...');
+            console.log('正在动态扫描 Vault 目录...');
             
-            // 首先尝试从生成的 files.json 获取文件列表
+            // 首先尝试实时扫描目录（确保获取最新文件列表）
+            try {
+                const response = await fetch('Vault/');
+                if (response.ok) {
+                    const htmlText = await response.text();
+                    const markdownFiles = this.parseDirectoryListing(htmlText);                    if (markdownFiles.length > 0) {
+                        console.log(`通过实时目录扫描找到 ${markdownFiles.length} 个文件`);
+                        
+                        // 检查是否需要更新 files.json
+                        await this.checkAndUpdateFileList(markdownFiles);
+                        
+                        // 缓存到 localStorage
+                        this.cacheFileList(markdownFiles);
+                        return markdownFiles;
+                    }
+                }
+            } catch (error) {
+                console.warn('无法通过目录扫描获取文件列表，尝试缓存数据');
+            }
+            
+            // 如果目录扫描失败，尝试从 files.json 获取
+            try {
+                const response = await fetch('js/files.json');
+                if (response.ok) {
+                    const fileData = await response.json();
+                    if (fileData.files && Array.isArray(fileData.files)) {
+                        const markdownFiles = fileData.files.map(file => file.filename);
+                        console.log(`从 files.json 加载了 ${markdownFiles.length} 个文件`);
+                        return markdownFiles;
+                    }
+                }
+            } catch (error) {
+                console.warn('无法从 files.json 获取文件列表，尝试本地缓存');
+            }
+            
+            // 最后尝试从 localStorage 获取缓存
+            try {
+                const cachedFiles = this.getCachedFileList();
+                if (cachedFiles && cachedFiles.length > 0) {
+                    console.log(`从本地缓存加载了 ${cachedFiles.length} 个文件`);
+                    return cachedFiles;
+                }
+            } catch (error) {
+                console.warn('无法从本地缓存获取文件列表');
+            }
+              // 如果所有方法都失败，返回空数组
+            console.warn('无法获取文件列表，将显示空的文章列表');
+            return [];
+            
+        } catch (error) {
+            console.error('获取文件列表失败:', error);
+            return [];
+        }
+    }
+    
+    // 解析目录列表HTML
+    parseDirectoryListing(htmlText) {
+        const markdownFiles = [];
+        // 匹配 .md 文件链接
+        const mdFileRegex = /<a[^>]*href=["']([^"']*\.md)["'][^>]*>/gi;
+        let match;
+        
+        while ((match = mdFileRegex.exec(htmlText)) !== null) {
+            const filename = match[1];
+            // 排除路径前缀，只保留文件名
+            const cleanFilename = filename.replace(/^.*\//, '');
+            if (cleanFilename && !markdownFiles.includes(cleanFilename)) {
+                markdownFiles.push(cleanFilename);
+            }
+        }
+          return markdownFiles;
+    }
+    
+    // 缓存文件列表到 localStorage
+    cacheFileList(files) {
+        try {
+            const cacheData = {
+                files: files,
+                timestamp: Date.now(),
+                version: '1.0'
+            };
+            localStorage.setItem('blog_file_cache', JSON.stringify(cacheData));
+            console.log('文件列表已缓存到本地存储');
+        } catch (error) {
+            console.warn('无法缓存文件列表:', error);
+        }
+    }
+    
+    // 从 localStorage 获取缓存的文件列表
+    getCachedFileList() {
+        try {
+            const cached = localStorage.getItem('blog_file_cache');
+            if (cached) {
+                const cacheData = JSON.parse(cached);
+                // 检查缓存是否过期（24小时）
+                const maxAge = 24 * 60 * 60 * 1000; // 24小时
+                if (Date.now() - cacheData.timestamp < maxAge) {
+                    return cacheData.files;
+                } else {
+                    console.log('本地缓存已过期，清除缓存');
+                    localStorage.removeItem('blog_file_cache');
+                }
+            }
+        } catch (error) {
+            console.warn('读取本地缓存失败:', error);
+        }        return null;
+    }
+    
+    // 生成更新的 files.json 数据
+    async generateUpdatedFileListData(files) {
+        const fileListData = {
+            generated: new Date().toISOString(),
+            generator: 'blog.js (browser)',
+            version: '1.0',
+            totalFiles: files.length,
+            files: []
+        };
+        
+        // 尝试获取每个文件的详细信息
+        for (const filename of files) {
+            try {
+                const response = await fetch(`Vault/${filename}`, { method: 'HEAD' });
+                if (response.ok) {
+                    const lastModified = response.headers.get('Last-Modified');
+                    const contentLength = response.headers.get('Content-Length');
+                    
+                    fileListData.files.push({
+                        filename: filename,
+                        size: contentLength ? parseInt(contentLength) : 0,
+                        modified: lastModified || new Date().toISOString(),
+                        created: lastModified || new Date().toISOString()
+                    });
+                } else {
+                    // 如果无法获取详细信息，至少包含文件名
+                    fileListData.files.push({
+                        filename: filename,
+                        size: 0,
+                        modified: new Date().toISOString(),
+                        created: new Date().toISOString()
+                    });
+                }
+            } catch (error) {
+                console.warn(`无法获取文件 ${filename} 的信息:`, error);
+                fileListData.files.push({
+                    filename: filename,
+                    size: 0,
+                    modified: new Date().toISOString(),
+                    created: new Date().toISOString()
+                });
+            }
+        }
+        
+        return fileListData;
+    }
+    
+    // 提供下载更新的 files.json 的功能
+    async downloadUpdatedFileList(files) {
+        try {
+            const fileListData = await this.generateUpdatedFileListData(files);
+            const jsonString = JSON.stringify(fileListData, null, 2);
+            
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'files.json';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            console.log('📥 已生成最新的 files.json 文件，请下载并替换 js/files.json');
+            
+            // 显示提示信息
+            this.showUpdateNotification();
+        } catch (error) {
+            console.error('生成文件列表失败:', error);
+        }
+    }
+    
+    // 显示文件更新提示
+    showUpdateNotification() {
+        // 创建提示元素
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 10000;
+            max-width: 300px;
+            font-size: 14px;
+        `;
+        notification.innerHTML = `
+            <strong>📥 文件列表已更新</strong><br>
+            已下载最新的 files.json，请替换 js/files.json 文件
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // 5秒后自动消失
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }        }, 5000);
+    }
+    
+    // 检查并更新文件列表
+    async checkAndUpdateFileList(currentFiles) {
+        try {
+            // 尝试获取现有的 files.json
+            const response = await fetch('js/files.json');
+            if (response.ok) {
+                const existingData = await response.json();
+                const existingFiles = existingData.files ? existingData.files.map(f => f.filename) : [];
+                
+                // 比较文件列表
+                const hasChanges = this.compareFileLists(currentFiles, existingFiles);
+                
+                if (hasChanges) {
+                    console.log('🔄 检测到文件列表变更，准备更新 files.json');
+                    await this.downloadUpdatedFileList(currentFiles);
+                } else {
+                    console.log('✅ 文件列表无变化');
+                }
+            } else {
+                console.log('📝 首次创建 files.json');
+                await this.downloadUpdatedFileList(currentFiles);
+            }
+        } catch (error) {
+            console.warn('检查文件列表时出错:', error);
+            // 如果检查失败，仍然生成新的文件列表
+            await this.downloadUpdatedFileList(currentFiles);
+        }
+    }
+    
+    // 比较两个文件列表是否有差异
+    compareFileLists(current, existing) {
+        if (current.length !== existing.length) {
+            return true;
+        }
+        
+        // 排序后比较
+        const sortedCurrent = [...current].sort();
+        const sortedExisting = [...existing].sort();
+        
+        for (let i = 0; i < sortedCurrent.length; i++) {
+            if (sortedCurrent[i] !== sortedExisting[i]) {
+                return true;
+            }
+        }
+        
+        return false;
+    }      // 加载所有Markdown文件
+    async loadArticles() {
+        // 使用之前在 forceUpdateFileList 中已经获取并缓存的文件列表
+        let markdownFiles = this.getCachedFileList();
+        
+        // 如果缓存中没有文件列表，则通过动态扫描获取
+        if (!markdownFiles || markdownFiles.length === 0) {
+            console.log('缓存中没有文件列表，重新获取...');
+            markdownFiles = await this.getMarkdownFileList();
+        } else {
+            console.log(`使用已缓存的文件列表: ${markdownFiles.length} 个文件`);
+        }
+        
+        if (markdownFiles.length === 0) {
+            console.log('没有找到 Markdown 文件');
+            this.articles = [];
+            return;
+        }
+
+        const loadPromises = markdownFiles.map(async (filename) => {
             try {
                 const response = await fetch('js/files.json');
                 if (response.ok) {
@@ -137,407 +640,12 @@ class BlogApp {
                 }
             }
 
-            // 确保 markdownFiles 始终是一个数组，即使是空数组
-            if (!Array.isArray(markdownFiles)) {
-                console.warn('文件列表无效，使用空数组');
-                markdownFiles = [];
-            }
-
-            console.log(`找到 ${markdownFiles.length} 个 Markdown 文件:`, markdownFiles);
-
-            // 缓存文件列表到本地存储
-            if (markdownFiles.length > 0) {                try {
-                    localStorage.setItem(BlogConfig.cache.filesKey, JSON.stringify({
-                        files: markdownFiles,
-                        timestamp: Date.now(),
-                        version: BlogConfig.cache.version
-                    }));
-                    console.log('文件列表已缓存到本地存储');
-                } catch (error) {
-                    console.warn('无法缓存文件列表', error);
-                }
-            }
-
-            // 如果没有文件，直接返回
-            if (markdownFiles.length === 0) {
-                console.log('没有找到 Markdown 文件');
-                this.articles = [];
-                return;
-            }            const loadPromises = markdownFiles.map(async (filename) => {
-                try {
-                    const response = await fetch(BlogConfig.getContentFilePath(filename));
-                    if (response.ok) {
-                        const content = await response.text();
-                        return this.parseMarkdownFile(filename, content);
-                    } else {
-                        console.warn(`文件不存在或无法访问: ${filename} (${response.status})`);
-                        return null;
-                    }
-                } catch (error) {
-                    // 如果是file协议导致的网络错误，给出特殊提示
-                    if (window.location.protocol === 'file:' && error.name === 'TypeError') {
-                        console.warn(`无法加载文件 ${filename}: file:// 协议限制`);
-                    } else {
-                        console.warn(`无法加载文件: ${filename}`, error);
-                    }
-                    return null;
-                }
-            });
-
-            const results = await Promise.all(loadPromises);
-            this.articles = results.filter(article => article !== null);
-              if (this.articles.length > 0) {
-                this.articles.sort((a, b) => new Date(b.date) - new Date(a.date));
-                console.log(`成功加载 ${this.articles.length} 篇文章`);
-            } else {
-                console.log('没有成功加载任何文章');
-            }        } catch (error) {
-            console.error('加载文章过程中出现错误:', error);
-            
-            // 如果是file协议访问导致的错误，给出特殊提示
-            if (window.location.protocol === 'file:' && error.name === 'TypeError') {
-                this.showError(`
-                    <div style="text-align: center; padding: 20px;">
-                        <h3 style="color: #e74c3c;">❌ 无法加载文章</h3>
-                        <p>检测到您正在使用 <strong>file://</strong> 协议访问此博客。</p>
-                        <p>由于浏览器安全限制，fetch API 无法在 file:// 协议下读取本地文件。</p>
-                        <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid #17a2b8; border-radius: 4px;">
-                            <strong>解决方案：</strong><br>
-                            1. 使用 HTTP 服务器访问此页面<br>
-                            2. 在项目目录下运行：<br>
-                            <code style="background: #e9ecef; padding: 4px 8px; border-radius: 3px; margin: 0 4px;">python -m http.server 8000</code><br>
-                            或<br>
-                            <code style="background: #e9ecef; padding: 4px 8px; border-radius: 3px; margin: 0 4px;">npx serve .</code><br>
-                            3. 然后访问 <code>http://localhost:8000</code>
-                        </div>
-                    </div>
-                `);
-            } else {
-                this.showError('加载文章失败，请检查网络连接或刷新页面重试');
-            }
-            
-            this.articles = [];
-        }
-    }    // 获取 Markdown 文件列表的主要方法
-    async getMarkdownFileList() {
-        console.log('开始获取 Markdown 文件列表...');
+        const results = await Promise.all(loadPromises);
+        this.articles = results.filter(article => article !== null);
+        this.articles.sort((a, b) => new Date(b.date) - new Date(a.date));
         
-        try {
-            // 方法1: 尝试通过目录遍历获取文件列表（本地服务器支持）
-            const directoryFiles = await this.tryDirectoryListing();
-            if (directoryFiles.length > 0) {
-                console.log(`通过目录列表找到 ${directoryFiles.length} 个文件`);
-                return directoryFiles;
-            }
-            
-            // 方法2: GitHub Pages兼容 - 通过探测已知文件扩展名模式
-            console.log('目录列表不可用，尝试GitHub Pages兼容模式...');
-            const discoveredFiles = await this.discoverFilesForGitHubPages();
-            if (discoveredFiles.length > 0) {
-                console.log(`通过文件探测找到 ${discoveredFiles.length} 个文件`);
-                return discoveredFiles;
-            }
-            
-            // 如果都失败了，返回空数组
-            console.log('无法获取文件列表，请检查部署配置');
-            return [];
-        } catch (error) {
-            console.error('获取文件列表失败:', error);
-            return [];
-        }
-    }
+        console.log(`✅ 成功加载了 ${this.articles.length} 篇文章`);
 
-    // 尝试传统目录列表方法
-    async tryDirectoryListing() {
-        try {
-            // 尝试HTML目录列表
-            const response = await fetch(BlogConfig.getContentDirPath() + '/');
-            if (response.ok) {
-                const htmlText = await response.text();
-                const markdownFiles = this.parseDirectoryListing(htmlText);
-                if (markdownFiles.length > 0) {
-                    return markdownFiles;
-                }
-            }
-        } catch (error) {
-            console.log('HTML目录列表不可用');
-        }
-
-        try {
-            // 尝试JSON API
-            const response = await fetch(BlogConfig.getContentDirPath() + '/', {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            });
-            
-            if (response.ok) {
-                const dirContents = await response.json();
-                if (Array.isArray(dirContents)) {
-                    const mdFiles = dirContents
-                        .filter(item => typeof item === 'string' && item.endsWith('.md'))
-                        .map(file => file.replace(/^\//, ''));
-                    return mdFiles;
-                }
-            }
-        } catch (error) {
-            console.log('JSON API不可用');
-        }
-
-        return [];
-    }
-
-    // GitHub Pages兼容的文件发现机制
-    async discoverFilesForGitHubPages() {
-        console.log('启动GitHub Pages兼容的文件发现...');
-        
-        // 通过sitemap.xml或robots.txt尝试发现文件
-        const sitemapFiles = await this.tryDiscoverFromSitemap();
-        if (sitemapFiles.length > 0) {
-            return sitemapFiles;
-        }
-
-        // 尝试通过README.md中的链接发现其他文件
-        const readmeFiles = await this.tryDiscoverFromReadme();
-        if (readmeFiles.length > 0) {
-            return readmeFiles;
-        }
-
-        // 最后尝试通过常见的GitHub默认分支API
-        const githubFiles = await this.tryGitHubAPI();
-        if (githubFiles.length > 0) {
-            return githubFiles;
-        }
-
-        console.log('所有发现方法都失败了');
-        return [];
-    }
-
-    // 尝试从sitemap.xml发现文件
-    async tryDiscoverFromSitemap() {
-        try {
-            const response = await fetch('/sitemap.xml');
-            if (response.ok) {
-                const xmlText = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-                const urls = xmlDoc.querySelectorAll('url loc');
-                
-                const mdFiles = [];
-                urls.forEach(url => {
-                    const urlText = url.textContent;
-                    const match = urlText.match(/\/Vault\/([^\/]+\.md)$/);
-                    if (match) {
-                        mdFiles.push(match[1]);
-                    }
-                });
-                
-                return mdFiles;
-            }
-        } catch (error) {
-            console.log('sitemap.xml不可用');
-        }
-        return [];
-    }
-
-    // 尝试从README.md发现其他文件
-    async tryDiscoverFromReadme() {
-        try {
-            const response = await fetch('README.md');
-            if (response.ok) {
-                const readmeContent = await response.text();
-                const mdFiles = [];
-                
-                // 查找Markdown链接模式
-                const linkRegex = /\[([^\]]+)\]\((?:\.\/)?Vault\/([^)]+\.md)\)/g;
-                let match;
-                while ((match = linkRegex.exec(readmeContent)) !== null) {
-                    mdFiles.push(match[2]);
-                }
-                
-                // 查找直接提到的.md文件
-                const fileRegex = /(?:^|\s)([\w\-\u4e00-\u9fa5]+\.md)(?:\s|$)/gm;
-                while ((match = fileRegex.exec(readmeContent)) !== null) {
-                    if (!mdFiles.includes(match[1])) {
-                        mdFiles.push(match[1]);
-                    }
-                }
-                
-                return mdFiles;
-            }
-        } catch (error) {
-            console.log('README.md不可用');
-        }
-        return [];
-    }
-
-    // 尝试使用GitHub API发现文件
-    async tryGitHubAPI() {
-        try {
-            // 检查是否在GitHub Pages环境
-            const hostname = window.location.hostname;
-            if (hostname.includes('github.io')) {
-                const pathParts = window.location.pathname.split('/');
-                const repoName = pathParts[1];
-                const username = hostname.split('.')[0];
-                
-                if (username && repoName) {
-                    const apiUrl = `https://api.github.com/repos/${username}/${repoName}/contents/Vault`;
-                    const response = await fetch(apiUrl);
-                    
-                    if (response.ok) {
-                        const contents = await response.json();
-                        const mdFiles = contents
-                            .filter(item => item.type === 'file' && item.name.endsWith('.md'))
-                            .map(item => item.name);
-                        
-                        console.log(`通过GitHub API找到 ${mdFiles.length} 个文件`);
-                        return mdFiles;
-                    }
-                }
-            }
-        } catch (error) {
-            console.log('GitHub API不可用:', error);
-        }
-        return [];
-    }
-
-    // 解析目录列表HTML
-    parseDirectoryListing(htmlText) {
-        const markdownFiles = [];
-        // 匹配 .md 文件链接
-        const mdFileRegex = /<a[^>]*href=["']([^"']*\.md)["'][^>]*>/gi;
-        let match;
-        
-        while ((match = mdFileRegex.exec(htmlText)) !== null) {
-            const filename = match[1];
-            // 排除路径前缀，只保留文件名
-            const cleanFilename = filename.replace(/^.*\//, '');
-            if (cleanFilename && !markdownFiles.includes(cleanFilename)) {
-                markdownFiles.push(cleanFilename);
-            }
-        }
-          return markdownFiles;
-    }
-    // 获取备用文件列表
-    async getFallbackFileList() {
-        // 尝试从本地存储获取之前缓存的文件列表
-        try {
-            const cachedFiles = localStorage.getItem(BlogConfig.cache.filesKey);
-            if (cachedFiles) {
-                const cache = JSON.parse(cachedFiles);
-                // 检查缓存是否在24小时内且版本号匹配
-                if (cache.timestamp && 
-                   (Date.now() - cache.timestamp) < BlogConfig.cache.duration && 
-                   (!cache.version || cache.version === BlogConfig.cache.version)) {
-                    console.log('使用本地缓存的文件列表:', cache.files.length, '个文件');
-                    return cache.files;
-                } else {
-                    console.log('缓存已过期或版本不匹配，不使用缓存');
-                }
-            }
-        } catch (error) {
-            console.warn('无法读取缓存的文件列表', error);
-        }
-          // 如果没有缓存，返回空列表
-        console.log('没有可用的缓存文件列表，返回空列表');
-        return [];
-    }    
-    // 手动刷新文章列表
-    async refreshArticles() {
-        console.log('正在刷新文章列表...');
-        
-        // 更新按钮样式，显示加载状态
-        const refreshBtn = document.getElementById('refresh-articles-btn');
-        if (refreshBtn) {
-            const originalText = refreshBtn.innerHTML;
-            refreshBtn.innerHTML = '⏳';
-            refreshBtn.disabled = true;
-            refreshBtn.style.animation = 'spin 1s linear infinite';
-        }
-          // 清除本地缓存，确保重新获取文件列表
-        try {
-            localStorage.removeItem(BlogConfig.cache.filesKey);
-        } catch (e) {
-            // 忽略缓存清除错误
-        }
-        
-        try {
-            // 重新加载文章
-            await this.loadArticles();
-            this.renderSidebar();
-            
-            // 如果当前在首页，更新首页显示
-            if (this.currentView === 'home') {
-                this.renderHomeView();
-            }
-            
-            // 显示成功消息
-            this.showNotification(`文章列表刷新成功，已加载 ${this.articles.length} 篇文章`, 'success');
-            
-            console.log('文章列表刷新完成');
-            return true;
-        } catch (error) {
-            console.error('刷新文章列表失败:', error);
-            this.showNotification('刷新文章列表失败', 'error');
-            return false;
-        } finally {
-            // 恢复按钮状态
-            if (refreshBtn) {
-                refreshBtn.innerHTML = '🔄';
-                refreshBtn.disabled = false;
-                refreshBtn.style.animation = '';
-            }
-        }
-    }
-    
-    // 显示通知消息
-    showNotification(message, type = 'info') {
-        // 创建通知元素
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        
-        // 设置不同类型的颜色
-        let bgColor = '#2196f3'; // 默认蓝色
-        if (type === 'success') bgColor = '#4caf50';
-        if (type === 'error') bgColor = '#f44336';
-        if (type === 'warning') bgColor = '#ff9800';
-        
-        // 设置通知样式
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            background-color: ${bgColor};
-            color: white;
-            border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 9999;
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateY(-20px);
-        `;
-        
-        notification.textContent = message;
-        
-        // 添加到文档
-        document.body.appendChild(notification);
-        
-        // 动画效果
-        setTimeout(() => {
-            notification.style.opacity = '1';
-            notification.style.transform = 'translateY(0)';
-        }, 10);
-        
-        // 自动关闭
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transform = 'translateY(-20px)';
-            
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 300);
-        }, 3000);
     }
 
     // 解析Markdown文件

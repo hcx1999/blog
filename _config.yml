@@ -1,0 +1,20 @@
+# GitHub Pages 配置
+# 设置基础 URL 和其他页面选项
+
+# 启用 Jekyll 处理（可选）
+# 如果您不想使用 Jekyll，请删除此行
+# jekyll: true
+
+# 强制包含以 . 开头的文件和文件夹（如 .github）
+include:
+  - .github
+  - Vault
+  - js
+  - css
+
+# 排除不需要的文件
+exclude:
+  - README.md
+  - start.sh
+  - node_modules
+  - package*.json

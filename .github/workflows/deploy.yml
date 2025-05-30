@@ -1,0 +1,134 @@
+name: Deploy Blog to GitHub Pages
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Check required files
+        run: |
+          echo "检查必要文件..."
+          required_files=("index.html" "js/blog.js" "css/style.css")
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ 缺少必要文件: $file"
+              exit 1
+            else
+              echo "✅ $file"
+            fi
+          done
+
+      - name: Generate file list
+        run: |
+          echo "生成文件列表..."
+          
+          # 检查 Vault 目录
+          if [ ! -d "Vault" ]; then
+            echo "❌ Vault 目录不存在"
+            exit 1
+          fi
+          
+          # 确保 js 目录存在
+          mkdir -p js
+          
+          # 尝试使用 Node.js 脚本生成
+          if [ -f "js/generate-file-list.js" ]; then
+            echo "使用 Node.js 脚本生成文件列表..."
+            node js/generate-file-list.js
+          fi
+          
+          # 验证或手动生成 files.json
+          if [ ! -f "js/files.json" ] || [ ! -s "js/files.json" ]; then
+            echo "手动生成 files.json..."
+            echo "{" > js/files.json
+            echo "  \"generated\": \"$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")\"," >> js/files.json
+            echo "  \"generator\": \"GitHub Actions\"," >> js/files.json
+            echo "  \"version\": \"1.0\"," >> js/files.json
+            
+            # 计算文件总数
+            total_files=$(find Vault -name "*.md" -type f | wc -l)
+            echo "  \"totalFiles\": $total_files," >> js/files.json
+            echo "  \"files\": [" >> js/files.json
+            
+            # 添加文件信息
+            first=true
+            for file in Vault/*.md; do
+              if [ -f "$file" ]; then
+                filename=$(basename "$file")
+                size=$(stat -c%s "$file" 2>/dev/null || echo 0)
+                modified=$(stat -c%Y "$file" 2>/dev/null || echo $(date +%s))
+                modified_iso=$(date -u -d @$modified +"%Y-%m-%dT%H:%M:%S.000Z" 2>/dev/null || date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+                
+                if [ "$first" = true ]; then
+                  first=false
+                else
+                  echo "    ," >> js/files.json
+                fi
+                
+                echo "    {" >> js/files.json
+                echo "      \"filename\": \"$filename\"," >> js/files.json
+                echo "      \"size\": $size," >> js/files.json
+                echo "      \"modified\": \"$modified_iso\"," >> js/files.json
+                echo "      \"created\": \"$modified_iso\"" >> js/files.json
+                echo -n "    }" >> js/files.json
+              fi
+            done
+            
+            echo "" >> js/files.json
+            echo "  ]" >> js/files.json
+            echo "}" >> js/files.json
+          fi
+
+      - name: Verify build
+        run: |
+          echo "验证构建结果..."
+          echo "生成的 files.json 内容:"
+          cat js/files.json | head -20
+          echo ""
+          echo "Vault 目录中的文件:"
+          ls -la Vault/*.md 2>/dev/null || echo "没有找到 Markdown 文件"
+          echo ""
+          echo "文件大小统计:"
+          du -sh js/files.json css/ js/ Vault/ 2>/dev/null || true
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

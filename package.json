@@ -1,0 +1,22 @@
+{
+  "name": "markdown-blog",
+  "version": "1.0.0",
+  "description": "一个基于Markdown的静态博客系统",
+  "type": "commonjs",
+  "scripts": {
+    "build": "node js/generate-file-list.js",
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000"
+  },
+  "keywords": [
+    "blog",
+    "markdown",
+    "static",
+    "github-pages"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

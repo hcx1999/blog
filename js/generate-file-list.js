@@ -1,18 +1,10 @@
 #!/usr/bin/env node
 
-/**
- * 文件列表生成器
- * 扫描 Vault 目录中的所有 .md 文件，生成 files.json
- * 使用方法：node generate-file-list.js
- */
-
 const fs = require('fs');
 const path = require('path');
 
-// 配置
-const VAULT_DIR = '../Vault';
-const OUTPUT_FILE = 'files.json';
-
+const VAULT_DIR = 'Vault';
+const OUTPUT_FILE = 'js/files.json';
 /**
  * 递归扫描目录，查找所有 .md 文件
  * @param {string} dir - 要扫描的目录
@@ -30,27 +22,29 @@ function scanDirectory(dir, baseDir = dir) {
             const stat = fs.statSync(fullPath);
             
             if (stat.isDirectory()) {
-                // 跳过 attachments 目录和隐藏目录
-                if (item === 'attachments' || item.startsWith('.')) {
+                // 跳过隐藏目录和特殊目录
+                if (item.startsWith('.') || item === 'attachments') {
+                    console.log(`跳过目录: ${item}`);
                     continue;
                 }
+                
                 // 递归扫描子目录
                 files.push(...scanDirectory(fullPath, baseDir));
             } else if (stat.isFile() && item.endsWith('.md')) {
-                // 计算相对于 Vault 目录的路径
+                // 计算相对于基础目录的路径
                 const relativePath = path.relative(baseDir, fullPath);
-                // 将 Windows 路径分隔符转换为 Unix 格式
-                const normalizedPath = relativePath.replace(/\\/g, '/');
                 
-                // 获取文件信息
-                const fileInfo = {
-                    filename: normalizedPath,
+                // 只保留文件名，不包含路径
+                const filename = path.basename(fullPath);
+                
+                files.push({
+                    filename: filename,
                     size: stat.size,
                     modified: stat.mtime.toISOString(),
                     created: stat.birthtime.toISOString()
-                };
+                });
                 
-                files.push(fileInfo);
+                console.log(`找到文件: ${filename} (${stat.size} bytes)`);
             }
         }
     } catch (error) {
@@ -61,31 +55,26 @@ function scanDirectory(dir, baseDir = dir) {
 }
 
 /**
- * 生成文件列表
+ * 生成文件列表JSON
  */
 function generateFileList() {
-    console.log('🔍 开始扫描 Vault 目录...');
+    console.log(`开始扫描 ${VAULT_DIR} 目录...`);
     
-    // 检查 Vault 目录是否存在
+    // 检查输入目录是否存在
     if (!fs.existsSync(VAULT_DIR)) {
-        console.error(`❌ 目录 ${VAULT_DIR} 不存在`);
+        console.error(`错误: 目录 ${VAULT_DIR} 不存在`);
         process.exit(1);
     }
     
     // 扫描文件
     const files = scanDirectory(VAULT_DIR);
     
-    if (files.length === 0) {
-        console.warn('⚠️  未找到任何 .md 文件');
-    } else {
-        console.log(`✅ 找到 ${files.length} 个 Markdown 文件:`);
-        files.forEach(file => {
-            console.log(`   - ${file.filename}`);
-        });
-    }
+    // 按文件名排序
+    files.sort((a, b) => a.filename.localeCompare(b.filename));
     
-    // 生成文件列表数据
-    const fileListData = {
+    // 生成输出数据
+    const output = {
+
         generated: new Date().toISOString(),
         generator: 'generate-file-list.js',
         version: '1.0',
@@ -93,50 +82,41 @@ function generateFileList() {
         files: files
     };
     
-    // 确保 js 目录存在
-    const jsDir = path.dirname(OUTPUT_FILE);
-    if (!fs.existsSync(jsDir)) {
-        fs.mkdirSync(jsDir, { recursive: true });
+    // 确保输出目录存在
+    const outputDir = path.dirname(OUTPUT_FILE);
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+        console.log(`创建输出目录: ${outputDir}`);
     }
     
     // 写入文件
     try {
-        fs.writeFileSync(OUTPUT_FILE, JSON.stringify(fileListData, null, 2), 'utf8');
-        console.log(`📝 文件列表已生成: ${OUTPUT_FILE}`);
+        fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2), 'utf8');
+        console.log(`\n✅ 成功生成文件列表: ${OUTPUT_FILE}`);
         console.log(`📊 统计信息:`);
         console.log(`   - 总文件数: ${files.length}`);
-        console.log(`   - 生成时间: ${fileListData.generated}`);
+        console.log(`   - 生成时间: ${output.generated}`);
+        console.log(`   - 输出大小: ${fs.statSync(OUTPUT_FILE).size} bytes`);
+        
+        if (files.length > 0) {
+            console.log(`\n📝 文件列表:`);
+            files.forEach((file, index) => {
+                const sizeKB = (file.size / 1024).toFixed(1);
+                console.log(`   ${index + 1}. ${file.filename} (${sizeKB} KB)`);
+            });
+        }
     } catch (error) {
-        console.error(`❌ 写入文件失败:`, error.message);
+        console.error(`写入文件失败:`, error.message);
         process.exit(1);
     }
 }
 
-/**
- * 主函数
- */
-function main() {
-    console.log('📋 Markdown 文件列表生成器');
-    console.log('================================');
-    
-    try {
-        generateFileList();
-        console.log('================================');
-        console.log('🎉 生成完成！');
-        console.log('');
-        console.log('💡 提示：');
-        console.log('   - 每次添加新的 .md 文件后都需要重新运行此脚本');
-        console.log('   - 可以将此脚本添加到 package.json 或 CI/CD 流程中');
-        console.log('   - 建议在部署前自动运行此脚本');
-    } catch (error) {
-        console.error('❌ 生成过程中出现错误:', error.message);
-        process.exit(1);
-    }
-}
-
-// 如果直接运行此脚本
+// 主程序
 if (require.main === module) {
-    main();
+    console.log('🔍 Markdown 文件列表生成器');
+    console.log('================================');
+    generateFileList();
+    console.log('\n🎉 完成！');
 }
 
 module.exports = {
