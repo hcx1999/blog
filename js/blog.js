@@ -37,7 +37,58 @@ class BlogApp {
         this.articles = [];
         this.currentView = 'home';
         this.currentArticle = null;
-        this.init();    }
+        this.checkProtocol(); // 检查协议
+        this.init();
+    }
+    
+    // 检查当前访问协议
+    checkProtocol() {
+        if (window.location.protocol === 'file:') {
+            console.warn('⚠️ 检测到file://协议访问，这可能导致功能异常');
+            this.showProtocolWarning();
+        }
+    }
+    
+    // 显示协议警告
+    showProtocolWarning() {
+        const warningDiv = document.createElement('div');
+        warningDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            z-index: 10000;
+            font-size: 14px;
+            border-bottom: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        `;
+        
+        warningDiv.innerHTML = `
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <strong>⚠️ 协议警告：</strong>
+                当前使用file://协议访问，博客功能可能无法正常工作。
+                <br>
+                <strong>建议解决方案：</strong>
+                启动HTTP服务器访问此页面，例如使用 
+                <code style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px; margin: 0 4px;">python -m http.server 8000</code>
+                或 
+                <code style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px; margin: 0 4px;">npx serve .</code>
+                <button onclick="this.parentElement.parentElement.style.display='none'" 
+                        style="margin-left: 15px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 4px 12px; border-radius: 4px; cursor: pointer;">
+                    知道了
+                </button>
+            </div>
+        `;
+        
+        document.body.insertBefore(warningDiv, document.body.firstChild);
+        
+        // 调整页面内容的顶部边距，避免被警告栏遮挡
+        document.body.style.paddingTop = '70px';
+    }
     
     async init() {
         await this.loadArticles();
@@ -108,7 +159,12 @@ class BlogApp {
                         return null;
                     }
                 } catch (error) {
-                    console.warn(`无法加载文件: ${filename}`, error);
+                    // 如果是file协议导致的网络错误，给出特殊提示
+                    if (window.location.protocol === 'file:' && error.name === 'TypeError') {
+                        console.warn(`无法加载文件 ${filename}: file:// 协议限制`);
+                    } else {
+                        console.warn(`无法加载文件: ${filename}`, error);
+                    }
                     return null;
                 }
             });
@@ -122,6 +178,29 @@ class BlogApp {
                 console.log('没有成功加载任何文章');
             }        } catch (error) {
             console.error('加载文章过程中出现错误:', error);
+            
+            // 如果是file协议访问导致的错误，给出特殊提示
+            if (window.location.protocol === 'file:' && error.name === 'TypeError') {
+                this.showError(`
+                    <div style="text-align: center; padding: 20px;">
+                        <h3 style="color: #e74c3c;">❌ 无法加载文章</h3>
+                        <p>检测到您正在使用 <strong>file://</strong> 协议访问此博客。</p>
+                        <p>由于浏览器安全限制，fetch API 无法在 file:// 协议下读取本地文件。</p>
+                        <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid #17a2b8; border-radius: 4px;">
+                            <strong>解决方案：</strong><br>
+                            1. 使用 HTTP 服务器访问此页面<br>
+                            2. 在项目目录下运行：<br>
+                            <code style="background: #e9ecef; padding: 4px 8px; border-radius: 3px; margin: 0 4px;">python -m http.server 8000</code><br>
+                            或<br>
+                            <code style="background: #e9ecef; padding: 4px 8px; border-radius: 3px; margin: 0 4px;">npx serve .</code><br>
+                            3. 然后访问 <code>http://localhost:8000</code>
+                        </div>
+                    </div>
+                `);
+            } else {
+                this.showError('加载文章失败，请检查网络连接或刷新页面重试');
+            }
+            
             this.articles = [];
         }
     }    // 获取 Markdown 文件列表的主要方法
@@ -129,58 +208,182 @@ class BlogApp {
         console.log('开始获取 Markdown 文件列表...');
         
         try {
-            // 尝试通过目录遍历获取文件列表（需要服务器支持）
-            try {
-                const response = await fetch(BlogConfig.getContentDirPath() + '/');
-                if (response.ok) {
-                    const htmlText = await response.text();
-                    const markdownFiles = this.parseDirectoryListing(htmlText);
-                    if (markdownFiles.length > 0) {
-                        console.log(`通过目录列表找到 ${markdownFiles.length} 个文件`);
-                        return markdownFiles;
-                    }
-                }
-            } catch (error) {
-                console.log('无法获取目录列表');
+            // 方法1: 尝试通过目录遍历获取文件列表（本地服务器支持）
+            const directoryFiles = await this.tryDirectoryListing();
+            if (directoryFiles.length > 0) {
+                console.log(`通过目录列表找到 ${directoryFiles.length} 个文件`);
+                return directoryFiles;
             }
             
-            // 尝试使用 fetch API 获取目录下的文件（需要服务器支持 CORS 和目录列表）
-            try {
-                const response = await fetch(BlogConfig.getContentDirPath() + '/', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    try {
-                        const dirContents = await response.json();
-                        if (Array.isArray(dirContents)) {
-                            const mdFiles = dirContents
-                                .filter(item => typeof item === 'string' && item.endsWith('.md'))
-                                .map(file => file.replace(/^\//, ''));
-                            
-                            if (mdFiles.length > 0) {
-                                console.log(`通过 JSON API 找到 ${mdFiles.length} 个文件`);
-                                return mdFiles;
-                            }
-                        }
-                    } catch (jsonError) {
-                        console.log('目录内容不是有效的 JSON 格式');
-                    }
-                }
-            } catch (error) {
-                console.log('无法使用 API 获取文件列表');
+            // 方法2: GitHub Pages兼容 - 通过探测已知文件扩展名模式
+            console.log('目录列表不可用，尝试GitHub Pages兼容模式...');
+            const discoveredFiles = await this.discoverFilesForGitHubPages();
+            if (discoveredFiles.length > 0) {
+                console.log(`通过文件探测找到 ${discoveredFiles.length} 个文件`);
+                return discoveredFiles;
             }
             
             // 如果都失败了，返回空数组
-            console.log('无法获取文件列表，请检查服务器配置或手动管理文件');
+            console.log('无法获取文件列表，请检查部署配置');
             return [];
         } catch (error) {
             console.error('获取文件列表失败:', error);
             return [];
         }
+    }
+
+    // 尝试传统目录列表方法
+    async tryDirectoryListing() {
+        try {
+            // 尝试HTML目录列表
+            const response = await fetch(BlogConfig.getContentDirPath() + '/');
+            if (response.ok) {
+                const htmlText = await response.text();
+                const markdownFiles = this.parseDirectoryListing(htmlText);
+                if (markdownFiles.length > 0) {
+                    return markdownFiles;
+                }
+            }
+        } catch (error) {
+            console.log('HTML目录列表不可用');
+        }
+
+        try {
+            // 尝试JSON API
+            const response = await fetch(BlogConfig.getContentDirPath() + '/', {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            if (response.ok) {
+                const dirContents = await response.json();
+                if (Array.isArray(dirContents)) {
+                    const mdFiles = dirContents
+                        .filter(item => typeof item === 'string' && item.endsWith('.md'))
+                        .map(file => file.replace(/^\//, ''));
+                    return mdFiles;
+                }
+            }
+        } catch (error) {
+            console.log('JSON API不可用');
+        }
+
+        return [];
+    }
+
+    // GitHub Pages兼容的文件发现机制
+    async discoverFilesForGitHubPages() {
+        console.log('启动GitHub Pages兼容的文件发现...');
+        
+        // 通过sitemap.xml或robots.txt尝试发现文件
+        const sitemapFiles = await this.tryDiscoverFromSitemap();
+        if (sitemapFiles.length > 0) {
+            return sitemapFiles;
+        }
+
+        // 尝试通过README.md中的链接发现其他文件
+        const readmeFiles = await this.tryDiscoverFromReadme();
+        if (readmeFiles.length > 0) {
+            return readmeFiles;
+        }
+
+        // 最后尝试通过常见的GitHub默认分支API
+        const githubFiles = await this.tryGitHubAPI();
+        if (githubFiles.length > 0) {
+            return githubFiles;
+        }
+
+        console.log('所有发现方法都失败了');
+        return [];
+    }
+
+    // 尝试从sitemap.xml发现文件
+    async tryDiscoverFromSitemap() {
+        try {
+            const response = await fetch('/sitemap.xml');
+            if (response.ok) {
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                const urls = xmlDoc.querySelectorAll('url loc');
+                
+                const mdFiles = [];
+                urls.forEach(url => {
+                    const urlText = url.textContent;
+                    const match = urlText.match(/\/Vault\/([^\/]+\.md)$/);
+                    if (match) {
+                        mdFiles.push(match[1]);
+                    }
+                });
+                
+                return mdFiles;
+            }
+        } catch (error) {
+            console.log('sitemap.xml不可用');
+        }
+        return [];
+    }
+
+    // 尝试从README.md发现其他文件
+    async tryDiscoverFromReadme() {
+        try {
+            const response = await fetch('README.md');
+            if (response.ok) {
+                const readmeContent = await response.text();
+                const mdFiles = [];
+                
+                // 查找Markdown链接模式
+                const linkRegex = /\[([^\]]+)\]\((?:\.\/)?Vault\/([^)]+\.md)\)/g;
+                let match;
+                while ((match = linkRegex.exec(readmeContent)) !== null) {
+                    mdFiles.push(match[2]);
+                }
+                
+                // 查找直接提到的.md文件
+                const fileRegex = /(?:^|\s)([\w\-\u4e00-\u9fa5]+\.md)(?:\s|$)/gm;
+                while ((match = fileRegex.exec(readmeContent)) !== null) {
+                    if (!mdFiles.includes(match[1])) {
+                        mdFiles.push(match[1]);
+                    }
+                }
+                
+                return mdFiles;
+            }
+        } catch (error) {
+            console.log('README.md不可用');
+        }
+        return [];
+    }
+
+    // 尝试使用GitHub API发现文件
+    async tryGitHubAPI() {
+        try {
+            // 检查是否在GitHub Pages环境
+            const hostname = window.location.hostname;
+            if (hostname.includes('github.io')) {
+                const pathParts = window.location.pathname.split('/');
+                const repoName = pathParts[1];
+                const username = hostname.split('.')[0];
+                
+                if (username && repoName) {
+                    const apiUrl = `https://api.github.com/repos/${username}/${repoName}/contents/Vault`;
+                    const response = await fetch(apiUrl);
+                    
+                    if (response.ok) {
+                        const contents = await response.json();
+                        const mdFiles = contents
+                            .filter(item => item.type === 'file' && item.name.endsWith('.md'))
+                            .map(item => item.name);
+                        
+                        console.log(`通过GitHub API找到 ${mdFiles.length} 个文件`);
+                        return mdFiles;
+                    }
+                }
+            }
+        } catch (error) {
+            console.log('GitHub API不可用:', error);
+        }
+        return [];
     }
 
     // 解析目录列表HTML
