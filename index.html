@@ -1,26 +1,24 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>hcx1999</title>
+    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>hcx1999</title>
     <link rel="stylesheet" href="css/style.css">
     <!-- 网站图标 -->
     <link rel="icon" href="src/avatar.svg" type="image/svg+xml">
     <!-- KaTeX CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
+    <!-- 导航辅助脚本 - 在博客脚本之前加载 -->
+    <script src="js/navigation.js"></script>
 </head>
-<body>    <header class="header">        <nav class="navbar">
-            <div class="nav-brand">
-                <a href="#" onclick="showHome()" class="brand-link">
+<body>    <header class="header">        <nav class="navbar">            <div class="nav-brand">                <a href="#" onclick="showHome(); return false;" data-action="home" class="brand-link">
                     <h1>
                         <img src="src/avatar.svg" alt="avatar" class="blog-icon" width="24" height="24">
                         HCX1999
                     </h1>
                 </a>
-            </div>            <div class="nav-menu">
-                <button id="sidebar-toggle" class="sidebar-toggle" title="切换侧边栏">☰</button>
-                <a href="#" class="nav-link" onclick="showHome()">首页</a>
-                <a href="#" class="nav-link" onclick="showAbout()">关于</a>
+            </div>            <div class="nav-menu">                <button id="sidebar-toggle" class="sidebar-toggle" title="切换侧边栏">☰</button>
+                <a href="#" onclick="showHome(); return false;" data-action="home" class="nav-link">首页</a>
+                <a href="#" onclick="showAbout(); return false;" data-action="about" class="nav-link">关于</a>
                 <div class="search-container">
                     <input type="text" id="search-input" class="search-input" placeholder="搜索文章..." />
                     <button id="search-btn" class="search-btn" onclick="performSearch()" title="搜索">🔍</button>
@@ -66,7 +64,7 @@
                         <div class="about-section">
                             <h3>个人简介</h3>
                             <p>你好，我说hcx1999，既不叫hcx也不是出生于1999。</p>
-                            <p>目前就读于北京大学信息科学技术学院2024级，今年大一。</p>
+                            <p>目前就读于北京大学信息科学技术学院本科一年级。</p>
                             <p>欢迎互换友链。</p>
                         </div>
                         
@@ -193,10 +191,183 @@
     <script src="js/image-fixer.js"></script>
     <script src="js/category.js"></script>
     <script src="js/search.js"></script>
-    <script src="js/blog.js"></script><script>
+    <script src="js/blog.js"></script>    <!-- 确保导航功能正常工作 -->
+    <script>
+        // 在DOM加载完成后绑定导航事件
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔄 正在注册导航事件...');
+
+            // 首页导航绑定
+            document.querySelectorAll('[data-action="home"]').forEach(function(el) {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('🏠 首页按钮被点击');
+                    if (window.blog) {
+                        window.blog.showHome();
+                    } else {
+                        console.error('❌ blog对象不可用，使用备用方案');
+                        // 第一种备用方案：直接显示home-view
+                        document.querySelectorAll('.view').forEach(view => {
+                            view.classList.remove('active');
+                        });
+                        document.getElementById('home-view').classList.add('active');
+                        // 第二种备用方案：重定向
+                        // window.location.hash = '#home';
+                    }
+                    return false;
+                });
+            });
+
+            // 关于页面导航绑定
+            document.querySelectorAll('[data-action="about"]').forEach(function(el) {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('ℹ️ 关于按钮被点击');
+                    if (window.blog) {
+                        window.blog.showAbout();
+                    } else {
+                        console.error('❌ blog对象不可用，使用备用方案');
+                        // 第一种备用方案：直接显示about-view
+                        document.querySelectorAll('.view').forEach(view => {
+                            view.classList.remove('active');
+                        });
+                        document.getElementById('about-view').classList.add('active');
+                        // 第二种备用方案：重定向
+                        // window.location.hash = '#about';
+                    }
+                    return false;
+                });
+            });            console.log('✅ 导航事件注册完成');
+        });
+        
+        // 为了向后兼容，保留全局函数 - 使用我们的超可靠函数
+        window.showHome = function() {
+            if (typeof blog !== 'undefined' && blog && typeof blog.showHome === 'function') {
+                return blog.showHome();
+            } else {
+                // 直接切换视图
+                document.querySelectorAll('.view').forEach(function(view) {
+                    view.classList.remove('active');
+                });
+                var homeView = document.getElementById('home-view');
+                if (homeView) homeView.classList.add('active');
+                document.body.className = document.body.className.replace(/view-\w+/g, '');
+                document.body.classList.add('view-home');
+                return false;
+            }
+        };
+        
+        window.showAbout = function() {
+            if (typeof blog !== 'undefined' && blog && typeof blog.showAbout === 'function') {
+                return blog.showAbout();
+            } else {
+                // 直接切换视图
+                document.querySelectorAll('.view').forEach(function(view) {
+                    view.classList.remove('active');
+                });
+                var aboutView = document.getElementById('about-view');
+                if (aboutView) aboutView.classList.add('active');
+                document.body.className = document.body.className.replace(/view-\w+/g, '');
+                document.body.classList.add('view-about');
+                return false;
+            }
+        };
+        
+        window.performSearch = performSearch;
+        window.clearSearch = clearSearch;
+        window.toggleTocSidebar = toggleTocSidebar;
+        window.filterByCategory = filterByCategory;
+    </script><style>
+        /* 加载提示样式 */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            z-index: 1000;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+            font-size: 14px;
+            max-width: 80%;
+            text-align: center;
+            opacity: 0;
+            animation: fadeInOut 2.5s ease-in-out infinite;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0.4; }
+        }
+    </style>    <script>        // 超级简单但可靠的视图切换函数
+        function switchToView(viewName) {
+            try {
+                // 如果有专用处理函数，直接调用
+                if (viewName === 'home') {
+                    showHome();
+                    return false;
+                } else if (viewName === 'about') {
+                    showAbout();
+                    return false;
+                }
+                
+                // 1. 尝试使用blog对象（如果存在且可用）
+                if (window.blog && typeof window.blog.switchView === 'function') {
+                    window.blog.switchView(viewName);
+                    if (viewName === 'home' && typeof window.blog.showHome === 'function') {
+                        window.blog.showHome();
+                    } else if (viewName === 'about' && typeof window.blog.showAbout === 'function') {
+                        window.blog.showAbout();
+                    }
+                    return false;
+                }
+                
+                // 2. 如果blog对象不可用，直接操作DOM
+                
+                // 隐藏所有视图
+                document.querySelectorAll('.view').forEach(function(view) {
+                    view.classList.remove('active');
+                });
+                
+                // 显示指定视图
+                var viewElement = document.getElementById(viewName + '-view');
+                if (viewElement) {
+                    viewElement.classList.add('active');
+                } else {
+                    console.error('❌ 未找到视图元素:', viewName + '-view');
+                }
+                
+                // 更新body类名
+                document.body.className = document.body.className.replace(/view-\w+/g, '');
+                document.body.classList.add('view-' + viewName);
+                
+                // 3. 尝试更新URL（可选，如果需要的话）
+                if (history && history.pushState) {
+                    history.pushState({view: viewName}, '', '#' + viewName);
+                }
+            } catch (error) {
+                console.error('❌ 切换视图时发生错误:', error);
+                // 最后的备用方案
+                try {
+                    document.querySelectorAll('.view').forEach(function(view) { view.style.display = 'none'; });
+                    document.getElementById(viewName + '-view').style.display = 'block';
+                } catch (e) {
+                    console.error('❌ 备用方案也失败了:', e);
+                }
+            }
+            
+            return false; // 阻止默认行为
+        }
+
         // 页面加载完成后初始化主题和搜索
         document.addEventListener('DOMContentLoaded', function() {
             try {
+                console.log('🔄 DOM加载完成，初始化页面组件...');
+                
+                // 初始化主题
                 if (typeof initTheme === 'function') {
                     initTheme();
                 } else {
@@ -209,9 +380,24 @@
                 } else {
                     console.error('initSearch function not found');
                 }
+                
+                // 确保至少有一个视图显示
+                setTimeout(function() {
+                    const activeView = document.querySelector('.view.active');
+                    if (!activeView) {
+                        console.warn('⚠️ 没有活动视图，显示首页');
+                        switchToView('home');
+                    }
+                }, 1000);
             } catch (error) {
                 console.error('Error during initialization:', error);
             }
+        });
+        
+        // 添加博客初始化完成事件监听
+        document.addEventListener('blogInitialized', function(event) {
+            console.log('🎉 收到博客初始化完成事件');
+            // 在这里可以添加依赖博客初始化的其他操作
         });
     </script>
 </body>

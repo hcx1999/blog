@@ -82,10 +82,8 @@ class SearchEngine {
             .replace(/[^\w\s\u4e00-\u9fa5]/g, ' ') // 保留中英文字符和数字
             .replace(/\s+/g, ' ')
             .trim();
-    }
-
-    // 执行搜索
-    performSearch(query) {
+    }    // 执行搜索
+    performSearch(query, updateHistory = true) {
         if (!query || query.length < 1) {
             return;
         }
@@ -95,14 +93,28 @@ class SearchEngine {
         
         console.log(`🔍 搜索查询: "${query}"`);
         
+        // 更新搜索输入框的内容
+        const searchInput = document.getElementById('search-input');
+        if (searchInput && searchInput.value !== query) {
+            searchInput.value = query;
+        }
+        
+        // 显示清除按钮
+        const searchClear = document.getElementById('search-clear');
+        if (searchClear) {
+            searchClear.style.display = 'inline-block';
+        }
+        
         const results = this.searchArticles(query);
         this.displaySearchResults(query, results);
         
         // 切换到搜索视图
         blog.switchView('search');
         
-        // 更新URL（可选）
-        // history.pushState({ view: 'search', query: query }, '', `#search?q=${encodeURIComponent(query)}`);
+        // 更新URL路由
+        if (updateHistory && blog) {
+            blog.updateRoute({ type: 'search', params: { q: query } });
+        }
     }
 
     // 搜索文章
@@ -237,9 +249,7 @@ class SearchEngine {
         }
         
         return highlightedText;
-    }
-
-    // 清除搜索
+    }    // 清除搜索
     clearSearch() {
         const searchInput = document.getElementById('search-input');
         const searchClear = document.getElementById('search-clear');
@@ -257,7 +267,7 @@ class SearchEngine {
         
         // 返回首页
         blog.switchView('home');
-        showHome();
+        blog.showHome(); // 这会自动更新路由
     }
 
     // HTML转义
@@ -287,29 +297,112 @@ let searchEngine = null;
 
 // 初始化搜索功能
 function initSearch() {
+    console.log('🔍 开始初始化搜索功能');
     if (typeof SearchEngine !== 'undefined') {
         searchEngine = new SearchEngine();
-        console.log('🔍 搜索功能已初始化');
+        console.log('✅ 搜索功能已初始化');
+        
+        // 如果博客对象已经存在且有文章数据，立即建立索引
+        if (blog && blog.articles && blog.articles.length > 0) {
+            console.log('🔍 检测到博客数据，立即建立搜索索引');
+            searchEngine.buildSearchIndex(blog.articles);
+        }
     } else {
         console.error('❌ SearchEngine 类未定义');
     }
 }
 
+// 延迟初始化搜索功能（等待博客数据加载）
+function initSearchWithBlog() {
+    console.log('🔍 尝试与博客数据同步初始化搜索');
+    if (!searchEngine) {
+        initSearch();
+    }
+    
+    if (searchEngine && blog && blog.articles && blog.articles.length > 0) {
+        console.log('🔍 建立搜索索引，包含', blog.articles.length, '篇文章');
+        searchEngine.buildSearchIndex(blog.articles);
+    } else {
+        console.warn('⚠️ 搜索索引建立失败：缺少必要数据');
+    }
+}
+
 // 执行搜索（全局函数，供HTML调用）
 function performSearch() {
+    console.log('🔍 performSearch() 被调用');
     const searchInput = document.getElementById('search-input');
-    if (searchInput && searchEngine) {
-        const query = searchInput.value.trim();
-        if (query) {
+    if (!searchInput) {
+        console.error('❌ 搜索输入框未找到');
+        return;
+    }
+
+    const query = searchInput.value.trim();
+    if (!query) {
+        console.warn('⚠️ 搜索查询为空');
+        return;
+    }
+
+    // 使用通用初始化等待函数处理搜索
+    if (typeof waitForBlogInitialization === 'function') {
+        waitForBlogInitialization('search', { query });
+    } else {
+        // 降级处理（如果waitForBlogInitialization不可用）
+        if (searchEngine) {
+            console.log('🔍 使用搜索引擎执行搜索:', query);
             searchEngine.performSearch(query);
+        } else if (typeof initSearch === 'function') {
+            console.warn('⚠️ 搜索引擎未初始化，尝试初始化后再搜索');
+            initSearch();
+            setTimeout(() => {
+                if (searchEngine) {
+                    searchEngine.performSearch(query);
+                } else if (blog) {
+                    blog.search(query);
+                }
+            }, 200);
+        } else if (blog) {
+            console.log('🔍 使用博客内置搜索功能:', query);
+            blog.search(query);
+        } else {
+            console.error('❌ 搜索功能不可用');
+            alert('搜索功能暂时不可用，请稍后再试');
         }
     }
 }
 
 // 清除搜索（全局函数，供HTML调用）
 function clearSearch() {
-    if (searchEngine) {
-        searchEngine.clearSearch();
+    console.log('🧹 clearSearch() 被调用');
+    
+    // 先清空搜索框
+    const searchInput = document.getElementById('search-input');
+    const searchClear = document.getElementById('search-clear');
+    
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    
+    if (searchClear) {
+        searchClear.style.display = 'none';
+    }
+    
+    // 使用通用初始化等待函数处理清除搜索
+    if (typeof waitForBlogInitialization === 'function') {
+        waitForBlogInitialization('clearSearch');
+    } else {
+        // 降级处理（如果waitForBlogInitialization不可用）
+        if (searchEngine) {
+            searchEngine.clearSearch();
+        } else if (blog) {
+            blog.showHome();
+        } else {
+            console.warn('⚠️ 博客对象和搜索引擎均未初始化，无法完全清除搜索');
+            setTimeout(() => {
+                if (blog) {
+                    blog.showHome();
+                }
+            }, 500);
+        }
     }
 }
 
@@ -324,6 +417,7 @@ function buildSearchIndex(articles) {
 if (typeof window !== 'undefined') {
     window.searchEngine = searchEngine;
     window.initSearch = initSearch;
+    window.initSearchWithBlog = initSearchWithBlog;
     window.performSearch = performSearch;
     window.clearSearch = clearSearch;
     window.buildSearchIndex = buildSearchIndex;

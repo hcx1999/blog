@@ -38,6 +38,7 @@ class BlogApp {    constructor() {
         this.currentArticle = null;
         this.sidebarHidden = localStorage.getItem('sidebar-hidden') === 'true'; // 侧边栏状态
         this.checkProtocol(); // 检查协议
+        this.setupRouter(); // 设置路由
         this.init();
     }
 
@@ -63,14 +64,19 @@ class BlogApp {    constructor() {
         await this.loadArticles();
         
         console.log('📋 步骤 3: 渲染侧边栏...');
-        this.renderSidebar();
-
-        console.log('📋 步骤 4: 渲染首页视图...');
-        this.renderHomeView();
+        this.renderSidebar();        console.log('📋 步骤 4: 根据URL路由恢复页面状态...');
+        // 检查当前URL并恢复相应的页面状态
+        if (window.location.hash) {
+            // 如果有哈希，根据哈希恢复状态
+            await this.handleRouteChange(false);
+        } else {
+            // 如果没有哈希，显示首页并设置URL
+            this.renderHomeView();
+            document.body.classList.add('view-home');
+            this.updateRoute({ type: 'home', params: {} }, true); // 使用 replaceState
+        }
         
-        // 设置初始的body class
-        document.body.classList.add('view-home');
-          console.log('📋 步骤 5: 初始化响应式侧边栏...');
+        console.log('📋 步骤 5: 初始化响应式侧边栏...');
         this.initResponsiveSidebar();
         
         console.log('📋 步骤 6: 初始化侧边栏状态...');
@@ -660,9 +666,7 @@ class BlogApp {    constructor() {
     renderSidebar() {
         this.renderArticleList();
         this.renderCategoryList();
-    }
-
-    // 渲染文章列表
+    }    // 渲染文章列表
     renderArticleList() {
         const articleList = document.getElementById('article-list');
         
@@ -673,16 +677,14 @@ class BlogApp {    constructor() {
 
         const html = this.articles.map(article => `
             <li>
-                <a href="#" class="article-link" onclick="blog.showArticle('${article.id}')">
+                <a href="#article/${encodeURIComponent(article.id)}" class="article-link" onclick="event.preventDefault(); blog.showArticle('${article.id.replace(/'/g, "\\'")}')">
                     ${article.title}
                 </a>
             </li>
         `).join('');
 
         articleList.innerHTML = html;
-    }
-
-    // 渲染分类列表
+    }// 渲染分类列表
     renderCategoryList() {
         const categories = [...new Set(this.articles.map(article => article.category))];
         const categoryList = document.getElementById('category-list');
@@ -696,7 +698,7 @@ class BlogApp {    constructor() {
             const count = this.articles.filter(article => article.category === category).length;
             return `
                 <li>
-                    <a href="#" class="category-link" onclick="blog.filterByCategory('${category}')">
+                    <a href="#category/${encodeURIComponent(category)}" class="category-link" onclick="event.preventDefault(); filterByCategory('${category.replace(/'/g, "\\'")}')">
                         ${category} (${count})
                     </a>
                 </li>
@@ -705,8 +707,7 @@ class BlogApp {    constructor() {
 
         categoryList.innerHTML = html;
     }
-    
-    // 渲染首页视图
+      // 渲染首页视图
     renderHomeView() {
         const recentList = document.getElementById('recent-list');
         // 显示全部文章而不只是前5篇
@@ -716,17 +717,15 @@ class BlogApp {    constructor() {
             recentList.innerHTML = '<div class="error">暂无文章</div>';
             return;
         }        const html = recentArticles.map(article => `
-            <div class="recent-item" onclick="blog.showArticle('${article.id}')">
+            <div class="recent-item" onclick="blog.showArticle('${article.id.replace(/'/g, "\\'")}')">
                 <h4>${article.title}</h4>
                 <p>${article.excerpt}</p>
             </div>
         `).join('');
 
         recentList.innerHTML = html;
-    }
-
-    // 显示文章
-    async showArticle(articleId) {
+    }// 显示文章
+    async showArticle(articleId, updateHistory = true) {
         const article = this.articles.find(a => a.id === articleId);
         if (!article) {
             this.showError('文章未找到');
@@ -741,6 +740,11 @@ class BlogApp {    constructor() {
             link.classList.remove('active');
         });
         document.querySelector(`[onclick="blog.showArticle('${articleId}')"]`)?.classList.add('active');
+
+        // 更新URL路由
+        if (updateHistory) {
+            this.updateRoute({ type: 'article', params: { id: articleId } });
+        }
 
         // 渲染Markdown内容
         try {
@@ -1240,14 +1244,20 @@ class BlogApp {    constructor() {
                 table.parentNode.insertBefore(tableContainer, table);
                 tableContainer.appendChild(table);            }
         });
-    }
-    
-    // 按分类过滤
-    filterByCategory(category) {
+    }    // 按分类过滤
+    filterByCategory(category, updateHistory = true) {
+        console.log('🏷️ 按分类过滤:', category);
         const filteredArticles = this.articles.filter(article => article.category === category);
         this.showCategoryView(filteredArticles, category);
+        
+        // 更新URL路由
+        if (updateHistory) {
+            this.updateRoute({ type: 'category', params: { name: category } });
+        }
     }    // 显示分类视图
-    showCategoryView(articles, category) {        this.switchView('category');
+    showCategoryView(articles, category) {
+        console.log('📄 显示分类视图:', category, '共', articles.length, '篇文章');
+        this.switchView('category');
         this.clearActiveLinks();
         this.clearTableOfContents();
         
@@ -1288,20 +1298,28 @@ class BlogApp {    constructor() {
         `;
         
         contentDiv.innerHTML = html;
-    }
-      // 显示首页
-    showHome() {
+    }    // 显示首页
+    showHome(updateHistory = true) {
         this.switchView('home');
         this.clearActiveLinks();
         this.clearTableOfContents();
-    }// 显示关于页面
-    showAbout() {
+        
+        // 更新URL路由
+        if (updateHistory) {
+            this.updateRoute({ type: 'home', params: {} });
+        }
+    }    // 显示关于页面
+    showAbout(updateHistory = true) {
         this.switchView('about');
         this.clearActiveLinks();
         this.clearTableOfContents();
+        
+        // 更新URL路由
+        if (updateHistory) {
+            this.updateRoute({ type: 'about', params: {} });
+        }
     }
-    
-    // 切换视图
+      // 切换视图
     switchView(viewName) {
         document.querySelectorAll('.view').forEach(view => {
             view.classList.remove('active');
@@ -1313,6 +1331,38 @@ class BlogApp {    constructor() {
         document.body.classList.add(`view-${viewName}`);
         
         this.currentView = viewName;
+        
+        // 更新页面标题
+        this.updatePageTitle(viewName);
+    }
+
+    // 更新页面标题
+    updatePageTitle(viewName) {
+        let title = 'hcx1999';
+        
+        switch (viewName) {
+            case 'home':
+                title = 'hcx1999 - 首页';
+                break;
+            case 'about':
+                title = 'hcx1999 - 关于';
+                break;
+            case 'article':
+                if (this.currentArticle) {
+                    title = `${this.currentArticle.title} - hcx1999`;
+                } else {
+                    title = 'hcx1999 - 文章';
+                }
+                break;
+            case 'category':
+                title = 'hcx1999 - 分类';
+                break;
+            case 'search':
+                title = 'hcx1999 - 搜索';
+                break;
+        }
+        
+        document.title = title;
     }
 
     // 清除活跃链接
@@ -1327,13 +1377,23 @@ class BlogApp {    constructor() {
         const contentDiv = document.getElementById('article-content');
         contentDiv.innerHTML = `<div class="error">${message}</div>`;
         this.switchView('article');
-    }
-    
-    // 搜索功能
-    search(query) {
+    }    // 搜索功能
+    search(query, updateHistory = true) {
         if (!query.trim()) {
-            this.showHome();
+            this.showHome(updateHistory);
             return;
+        }
+
+        // 更新搜索输入框的内容
+        const searchInput = document.getElementById('search-input');
+        if (searchInput && searchInput.value !== query) {
+            searchInput.value = query;
+        }
+        
+        // 显示清除按钮
+        const searchClear = document.getElementById('search-clear');
+        if (searchClear) {
+            searchClear.style.display = 'inline-block';
         }
 
         const results = this.articles.filter(article => 
@@ -1343,7 +1403,12 @@ class BlogApp {    constructor() {
         );
 
         this.showSearchView(results, query);
-    }    // 显示搜索视图
+        
+        // 更新URL路由
+        if (updateHistory) {
+            this.updateRoute({ type: 'search', params: { q: query } });
+        }
+    }// 显示搜索视图
     showSearchView(articles, query) {
         this.switchView('search');
         this.clearActiveLinks();
@@ -1685,9 +1750,7 @@ class BlogApp {    constructor() {
         if (overlay) {
             overlay.classList.remove('visible');
         }
-    }
-
-    // 更新目录切换按钮的显示状态
+    }    // 更新目录切换按钮的显示状态
     updateTocButtonVisibility(isArticlePage = false) {
         const tocToggleBtn = document.getElementById('toc-toggle');
         const width = window.innerWidth;
@@ -1703,40 +1766,390 @@ class BlogApp {    constructor() {
             this.closeTocSidebar();
         }
     }
+
+    // ===== 路由功能 =====
+    
+    // 设置路由系统
+    setupRouter() {
+        // 监听浏览器前进/后退按钮
+        window.addEventListener('popstate', (e) => {
+            console.log('浏览器前进/后退，恢复状态:', e.state);
+            this.handleRouteChange(false); // false 表示不需要更新历史记录
+        });
+        
+        // 监听哈希变化（备用方案）
+        window.addEventListener('hashchange', () => {
+            console.log('URL哈希变化:', window.location.hash);
+            this.handleRouteChange(false);
+        });
+    }    // 处理路由变化
+    async handleRouteChange(updateHistory = true) {
+        const hash = window.location.hash.slice(1); // 移除 # 号
+        const route = this.parseRoute(hash);
+        
+        console.log('路由解析结果:', route);
+        
+        // 根据路由类型执行相应操作
+        switch (route.type) {
+            case 'home':
+                this.showHome(updateHistory);
+                break;
+            case 'about':
+                this.showAbout(updateHistory);
+                break;
+            case 'article':
+                if (route.params.id) {
+                    await this.showArticle(route.params.id, updateHistory);
+                } else {
+                    this.showHome(updateHistory);
+                }
+                break;            case 'category':
+                if (route.params.name) {
+                    console.log('🏷️ 路由到分类页面:', route.params.name);
+                    this.filterByCategory(route.params.name, updateHistory);
+                } else {
+                    console.log('⚠️ 分类路由缺少参数，回到首页');
+                    this.showHome(updateHistory);
+                }
+                break;
+            case 'search':
+                if (route.params.q) {
+                    // 如果有搜索引擎，使用搜索引擎，否则使用内置搜索
+                    if (typeof searchEngine !== 'undefined' && searchEngine) {
+                        searchEngine.performSearch(route.params.q, updateHistory);
+                    } else {
+                        this.search(route.params.q, updateHistory);
+                    }
+                } else {
+                    this.showHome(updateHistory);
+                }
+                break;
+            default:
+                this.showHome(updateHistory);
+        }
+    }
+
+    // 解析路由
+    parseRoute(hash) {
+        if (!hash || hash === '' || hash === 'home') {
+            return { type: 'home', params: {} };
+        }
+
+        if (hash === 'about') {
+            return { type: 'about', params: {} };
+        }
+
+        // 文章路由: article/文章ID
+        if (hash.startsWith('article/')) {
+            const id = hash.substring(8);
+            return { type: 'article', params: { id: id } };
+        }        // 分类路由: category/分类名
+        if (hash.startsWith('category/')) {
+            const name = decodeURIComponent(hash.substring(9));
+            console.log('🔗 解析分类路由:', name);
+            return { type: 'category', params: { name: name } };
+        }
+
+        // 搜索路由: search?q=关键词
+        if (hash.startsWith('search')) {
+            const urlParams = new URLSearchParams(hash.substring(6)); // 移除 'search'
+            const query = urlParams.get('q') || '';
+            return { type: 'search', params: { q: query } };
+        }
+
+        // 默认返回首页
+        return { type: 'home', params: {} };
+    }    // 更新URL和历史记录
+    updateRoute(route, replaceState = false) {
+        let hash = '';
+        
+        switch (route.type) {
+            case 'home':
+                hash = '#home';
+                break;
+            case 'about':
+                hash = '#about';
+                break;
+            case 'article':
+                hash = `#article/${route.params.id}`;
+                break;
+            case 'category':
+                hash = `#category/${encodeURIComponent(route.params.name)}`;
+                break;
+            case 'search':
+                hash = `#search?q=${encodeURIComponent(route.params.q)}`;
+                break;
+        }
+
+        if (replaceState) {
+            window.history.replaceState(route, '', hash);
+            console.log('🔄 URL已替换:', hash);
+        } else {
+            window.history.pushState(route, '', hash);
+            console.log('📌 URL已更新:', hash);
+        }
+    }
+
+    // 获取当前路由状态
+    getCurrentRoute() {
+        const hash = window.location.hash.slice(1);
+        return this.parseRoute(hash);
+    }
 }
 
 // 全局函数，供HTML调用
 function showHome() {
-    blog.showHome();
+    // 使用基于Promise的初始化机制
+    if (window.blogInitPromise) {
+        window.blogInitPromise.then(function(blog) {
+            if (blog && typeof blog.showHome === 'function') {
+                blog.showHome();
+            } else {
+                // 降级到直接DOM操作
+                showHomeDirect();
+            }
+        }).catch(function(error) {
+            console.error('❌ 博客初始化失败，使用备用方案显示首页', error);
+            showHomeDirect();
+        });
+    } else {
+        // 降级处理：直接尝试访问blog对象
+        const blog = window.getBlog();
+        if (blog && typeof blog.showHome === 'function') {
+            blog.showHome();
+        } else {
+            // 如果没有导入navigation.js，这里提供一个备用方案
+            if (typeof showHomeDirect === 'function') {
+                showHomeDirect();
+            } else {
+                document.querySelectorAll('.view').forEach(view => {
+                    view.classList.remove('active');
+                });
+                const homeView = document.getElementById('home-view');
+                if (homeView) {
+                    homeView.classList.add('active');
+                    document.body.className = document.body.className.replace(/view-\w+/g, '');
+                    document.body.classList.add('view-home');
+                }
+            }
+        }
+    }
 }
 
 function showAbout() {
-    blog.showAbout();
+    console.log('ℹ️ showAbout() 被调用');
+    
+    // 使用基于Promise的初始化机制
+    if (window.blogInitPromise) {
+        window.blogInitPromise.then(function(blog) {
+            console.log('✅ 博客初始化成功，显示关于页面');
+            blog.showAbout();
+        }).catch(function(error) {
+            console.error('❌ 博客初始化失败，使用备用方案显示关于页面', error);
+            // 备用方案：直接切换视图
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById('about-view').classList.add('active');
+        });
+    } else {
+        // 降级处理：直接尝试访问blog对象
+        const blog = window.getBlog();
+        if (blog) {
+            blog.showAbout();
+        } else {
+            console.error('❌ 博客对象不可用，直接切换视图');
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById('about-view').classList.add('active');
+        }
+    }
+}
+
+function filterByCategory(category) {
+    console.log('🏷️ filterByCategory() 被调用:', category);
+    waitForBlogInitialization('filterByCategory', { category });
 }
 
 function toggleTocSidebar() {
-    if (blog) {
-        blog.toggleTocSidebar();
+    console.log('📋 toggleTocSidebar() 被调用');
+    waitForBlogInitialization('toggleTocSidebar');
+}
+
+// 等待博客系统初始化的通用函数
+function waitForBlogInitialization(action, params, maxRetries = 20) {
+    console.log(`⏳ 等待博客初始化完成以执行: ${action}`);
+    
+    // 已有blog对象，直接执行
+    if (typeof window.blog !== 'undefined' && window.blog) {
+        console.log(`✅ 博客已初始化，执行: ${action}`);
+        executeBlogAction(action, params);
+        return;
+    }
+    
+    let retryCount = 0;
+    
+    // 显示加载提示
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = '<span>系统初始化中，请稍候...</span>';
+    document.body.appendChild(toast);
+    
+    // 检测blog初始化状态并执行操作
+    const checkInitialization = function() {
+        if (typeof window.blog !== 'undefined' && window.blog) {
+            // 移除提示
+            if (document.body.contains(toast)) {
+                document.body.removeChild(toast);
+            }
+            
+            console.log(`✅ 博客初始化完成，执行: ${action}`);
+            executeBlogAction(action, params);
+            return;
+        }
+        
+        retryCount++;
+        if (retryCount >= maxRetries) {
+            // 移除提示
+            if (document.body.contains(toast)) {
+                document.body.removeChild(toast);
+            }
+            
+            console.error(`❌ 超过最大重试次数(${maxRetries})，博客初始化失败`);
+            alert('系统初始化失败，请刷新页面重试');
+            return;
+        }
+        
+        // 递增等待时间，从100ms到1000ms
+        const waitTime = Math.min(100 * Math.pow(1.5, retryCount), 1000);
+        console.log(`⏳ 等待博客初始化，重试 ${retryCount}/${maxRetries}，等待 ${waitTime}ms`);
+        setTimeout(checkInitialization, waitTime);
+    };
+    
+    // 开始检查
+    setTimeout(checkInitialization, 100);
+}
+
+// 执行博客操作
+function executeBlogAction(action, params) {
+    // 确保使用window.blog而不是blog局部变量，增加可靠性
+    if (typeof window.blog === 'undefined' || !window.blog) {
+        console.error(`❌ 执行${action}失败：博客对象未初始化`);
+        alert('博客系统尚未就绪，请刷新页面重试');
+        return;
+    }
+    
+    switch(action) {
+        case 'showHome':
+            window.blog.showHome();
+            break;
+        case 'showAbout':
+            window.blog.showAbout();
+            break;        case 'search':
+            if (params && params.query) {
+                if (typeof searchEngine !== 'undefined' && searchEngine) {
+                    searchEngine.performSearch(params.query);
+                } else {
+                    window.blog.search(params.query);
+                }
+            }
+            break;
+        case 'clearSearch':
+            if (typeof searchEngine !== 'undefined' && searchEngine) {
+                searchEngine.clearSearch();
+            } else if (window.blog) {
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+                window.blog.showHome();
+            }
+            break;
+        case 'filterByCategory':
+            if (params && params.category) {
+                window.blog.filterByCategory(params.category);
+            }
+            break;
+        case 'toggleTocSidebar':
+            window.blog.toggleTocSidebar();
+            break;
+        default:
+            console.error(`❌ 未知操作: ${action}`);
     }
 }
 
 // 初始化博客应用
 let blog;
+
+// 创建一个Promise，用于确保博客初始化
+window.blogInitPromise = new Promise((resolve, reject) => {
+    window.resolveBlogInit = resolve;
+    window.rejectBlogInit = reject;
+});
+
+// 提供一个方法，用于获取blog对象
+window.getBlog = function() {
+    return window.blog || blog || null;
+};
+
+// 主初始化函数
+function initBlog() {
+    try {
+        console.log('📢 开始初始化博客应用...');
+        blog = new BlogApp();
+        
+        // 确保blog全局可访问
+        window.blog = blog;
+        
+        // 触发初始化完成事件
+        const event = new CustomEvent('blogInitialized', { detail: { blog: window.blog } });
+        document.dispatchEvent(event);
+        
+        // 解析初始化Promise
+        if (window.resolveBlogInit) {
+            window.resolveBlogInit(window.blog);
+        }
+        
+        console.log('✅ 博客应用已初始化并设置为全局变量');
+        return window.blog;
+    } catch (error) {
+        console.error('❌ 博客初始化失败:', error);
+        
+        // 拒绝初始化Promise
+        if (window.rejectBlogInit) {
+            window.rejectBlogInit(error);
+        }
+        
+        return null;
+    }
+}
+
+// 在DOM加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {
-    blog = new BlogApp();
-    initTheme(); // 初始化主题
-    
-    // 初始化图片修复工具
-    if (typeof ImageFixUtil !== 'undefined') {
-        ImageFixUtil.init({
-            debug: BlogConfig.debug.enabled,
-            imageBaseDir: BlogConfig.getAttachmentsDirPath() + '/',
-            autoFix: true,
-            checkInterval: 3000 // 3秒检查一次
-        });
-        console.log('✅ ImageFixUtil 已集成到博客系统');
-    } else {
-        console.warn('⚠️ ImageFixUtil 未加载，图片处理功能受限');
+    try {
+        // 初始化博客
+        const blogInstance = initBlog();
+        
+        // 初始化主题
+        if (typeof initTheme === 'function') {
+            initTheme();
+        }
+        
+        // 初始化图片修复工具
+        if (typeof ImageFixUtil !== 'undefined' && blogInstance) {
+            ImageFixUtil.init({
+                debug: BlogConfig.debug.enabled,
+                imageBaseDir: BlogConfig.getAttachmentsDirPath() + '/',
+                autoFix: true,
+                checkInterval: 3000 // 3秒检查一次
+            });
+            console.log('✅ ImageFixUtil 已集成到博客系统');
+        } else {
+            console.warn('⚠️ ImageFixUtil 未加载或blog未初始化，图片处理功能受限');
+        }
+    } catch (error) {
+        console.error('❌ 博客初始化过程中出现错误:', error);
     }
 });
 
@@ -1778,3 +2191,35 @@ function clearBlogCache() {
         alert('清除缓存失败: ' + error.message);
     }
 }
+
+// 确保blog对象初始化的备份机制
+(function() {
+    // 检查博客是否在一定时间内初始化
+    setTimeout(function() {
+        if (typeof window.blog === 'undefined' || !window.blog) {
+            console.warn('⚠️ 博客对象在5秒内未初始化，尝试强制初始化');
+            try {
+                // 尝试再次初始化
+                const blogInstance = initBlog();
+                
+                if (blogInstance) {
+                    console.log('✅ 博客对象已强制初始化');
+                    
+                    // 如果当前没有激活的视图，显示首页
+                    const activeView = document.querySelector('.view.active');
+                    if (!activeView) {
+                        blogInstance.showHome();
+                    }
+                }
+            } catch (error) {
+                console.error('❌ 博客强制初始化失败:', error);
+                
+                // 极端情况下的备用方案：至少显示首页
+                document.querySelectorAll('.view').forEach(view => {
+                    view.classList.remove('active');
+                });
+                document.getElementById('home-view').classList.add('active');
+            }
+        }
+    }, 5000);
+})();

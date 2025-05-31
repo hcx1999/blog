@@ -270,3 +270,12 @@ improvement: 改进
 build: 打包
 ci: 持续集成
 ```
+### git配置用户名和邮箱
+```bash
+# 设置用户名和邮箱
+git config --global user.name "username"
+git config --global user.email  useremail@qq.com
+# 检查是否设置成功
+git config user.name
+git config user.email
+```
