@@ -95,7 +95,7 @@ body {
     grid-template-areas:
         "header header header"
         "sidebar content toc"
-        "footer footer footer";
+        "sidebar footer toc";
     min-height: 100vh;
     gap: 0;
 }
@@ -154,7 +154,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 64px;
+    height: 56px; /* 从64px减小到56px */
     position: relative;
 }
 
@@ -193,12 +193,12 @@ body {
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    font-size: 1.6rem;
+    font-size: 1.4rem; /* 从1.6rem减小到1.4rem */
     font-weight: 800;
     letter-spacing: -0.025em;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem; /* 从0.5rem减小到0.4rem */
     position: relative;
 }
 
@@ -225,9 +225,9 @@ body {
     text-decoration: none;
     color: var(--text-secondary);
     font-weight: 600;
-    font-size: 0.95rem;
-    padding: 10px 20px;
-    border-radius: 25px;
+    font-size: 0.9rem; /* 从0.95rem减小到0.9rem */
+    padding: 8px 16px; /* 从10px 20px减小到8px 16px */
+    border-radius: 22px; /* 从25px减小到22px */
     transition: var(--transition);
     position: relative;
     overflow: hidden;
@@ -273,15 +273,15 @@ body {
     border: 1px solid var(--border-light);
     color: var(--text-secondary);
     cursor: pointer;
-    font-size: 1.1rem;
-    padding: 12px;
+    font-size: 1rem; /* 从1.1rem减小到1rem */
+    padding: 10px; /* 从12px减小到10px */
     border-radius: 50%;
     transition: var(--transition);
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 38px; /* 从44px减小到38px */
+    min-height: 38px; /* 从44px减小到38px */
     line-height: 1;
     position: relative;
     overflow: hidden;
@@ -332,9 +332,9 @@ body {
     z-index: 100;
     box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.1);
     /* 固定高度，使其有自己的滚动条 */
-    height: calc(100vh - 64px); /* 减去header高度 */
+    height: calc(100vh - 56px); /* 减去header高度，从64px减小到56px */
     position: sticky;
-    top: 64px; /* 与header高度保持一致，确保在header下方 */
+    top: 56px; /* 与header高度保持一致，从64px减小到56px */
 }
 
 [data-theme="dark"] .sidebar {
@@ -535,13 +535,13 @@ body {
 }
 
 .search-input {
-    padding: 12px 20px 12px 44px;
+    padding: 10px 16px 10px 38px; /* 从12px 20px 12px 44px减小到10px 16px 10px 38px */
     border: 2px solid var(--border-light);
-    border-radius: 25px;
+    border-radius: 22px; /* 从25px减小到22px */
     background: var(--bg-secondary);
     color: var(--text-primary);
-    font-size: 0.9rem;
-    width: 240px;
+    font-size: 0.85rem; /* 从0.9rem减小到0.85rem */
+    width: 220px; /* 从240px减小到220px */
     transition: var(--transition);
     position: relative;
     backdrop-filter: blur(10px);
@@ -570,15 +570,15 @@ body {
     border: none;
     color: white;
     cursor: pointer;
-    padding: 10px;
+    padding: 8px; /* 从10px减小到8px */
     border-radius: 50%;
     transition: var(--transition);
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* 从0.9rem减小到0.85rem */
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 36px;
-    min-height: 36px;
+    min-width: 32px; /* 从36px减小到32px */
+    min-height: 32px; /* 从36px减小到32px */
     position: absolute;
     left: 4px;
     top: 50%;
@@ -713,9 +713,9 @@ body {
     z-index: 100;
     box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.1);
     /* 固定高度，使其有自己的滚动条 */
-    height: calc(100vh - 64px); /* 减去header高度 */
+    height: calc(100vh - 56px); /* 减去header高度，从64px减小到56px */
     position: sticky;
-    top: 64px; /* 与header高度保持一致，确保在header下方 */
+    top: 56px; /* 与header高度保持一致，从64px减小到56px */
 }
 
 [data-theme="dark"] .toc-sidebar {
@@ -744,7 +744,7 @@ body.view-search .layout-grid {
     grid-template-areas:
         "header header"
         "sidebar content"
-        "footer footer";
+        "sidebar footer";
 }
 
 /* 确保这些页面的侧边栏仍然固定 */
@@ -752,9 +752,9 @@ body.view-home .sidebar,
 body.view-about .sidebar,
 body.view-category .sidebar,
 body.view-search .sidebar {
-    height: calc(100vh - 64px);
+    height: calc(100vh - 56px); /* 从64px减小到56px */
     position: sticky;
-    top: 64px;
+    top: 56px; /* 从64px减小到56px */
 }
 
 /* 响应式设计 - CSS Grid布局 */
@@ -767,23 +767,21 @@ body.view-search .sidebar {
         grid-template-areas:
             "header header"
             "sidebar content"
-            "footer footer";
+            "sidebar footer";
     }
-    
-    .sidebar {
+      .sidebar {
         /* 中等屏幕上保持固定 */
-        height: calc(100vh - 64px);
+        height: calc(100vh - 56px); /* 从64px减小到56px */
         position: sticky;
-        top: 64px;
+        top: 56px; /* 从64px减小到56px */
     }
     
     .toc-sidebar {
         display: none !important; /* 中等屏幕隐藏目录 */
     }
-    
-    .navbar {
+      .navbar {
         padding: 0 clamp(12px, 2vw, 24px);
-        height: clamp(56px, 8vh, 64px);
+        height: clamp(50px, 8vh, 56px); /* 减小高度 */
     }
     
     .nav-brand h1 {
@@ -891,15 +889,14 @@ body.view-search .sidebar {
     .nav-brand h1 {
         font-size: clamp(1rem, 4vw, 1.3rem);
     }
-    
-    .nav-menu {
+      .nav-menu {
         order: 3;
         width: 100%;
         justify-content: center;
-        padding: clamp(8px, 2vw, 16px) 0;
+        padding: clamp(6px, 2vw, 12px) 0; /* 减小内边距 */
         border-top: 1px solid var(--border-light);
-        margin-top: clamp(8px, 2vw, 12px);
-        gap: clamp(6px, 2vw, 12px);
+        margin-top: clamp(6px, 2vw, 10px); /* 减小上边距 */
+        gap: clamp(4px, 2vw, 10px); /* 减小间距 */
     }
     
     .search-container {
@@ -1093,7 +1090,7 @@ body.view-search .sidebar {
 .recent-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
+    gap: 32px; /* 增加卡片间距从24px到32px */
     padding: 20px 0;
 }
 
@@ -1103,7 +1100,7 @@ body.view-search .sidebar {
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 16px;
-    padding: 24px;
+    padding: 14px 24px; /* 进一步减小垂直内边距从18px到14px */
     cursor: pointer;
     transition: var(--transition);
     position: relative;
@@ -1164,9 +1161,9 @@ body.view-search .sidebar {
 
 .recent-item h4 {
     color: var(--text-primary);
-    font-size: 1.2rem;
+    font-size: 1.1rem; /* 减小标题字体大小从1.2rem到1.1rem */
     font-weight: 700;
-    margin-bottom: 12px;
+    margin-bottom: 10px; /* 减小底部边距从12px到10px */
     line-height: 1.3;
     display: flex;
     align-items: center;
@@ -1181,12 +1178,12 @@ body.view-search .sidebar {
 
 .recent-item p {
     color: var(--text-secondary);
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin-bottom: 16px;
+    font-size: 0.85rem; /* 进一步减小字体大小从0.9rem到0.85rem */
+    line-height: 1.45; /* 进一步减小行高从1.5到1.45 */
+    margin-bottom: 10px; /* 进一步减小底部间距从12px到10px */
     display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 2; /* 保持2行显示 */
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -1196,10 +1193,10 @@ body.view-search .sidebar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 16px;
-    padding-top: 16px;
+    margin-top: 12px; /* 减小顶部边距从16px到12px */
+    padding-top: 12px; /* 减小顶部内边距从16px到12px */
     border-top: 1px solid var(--border-light);
-    font-size: 0.8rem;
+    font-size: 0.75rem; /* 减小字体大小从0.8rem到0.75rem */
     color: var(--text-muted);
 }
 
@@ -1623,14 +1620,13 @@ body.view-search .sidebar {
 }
 
 /* 移动端目录显示时的处理 */
-@media (max-width: 768px) {
-    /* 在阅读文章时，可以通过JavaScript显示移动端目录 */
+@media (max-width: 768px) {    /* 在阅读文章时，可以通过JavaScript显示移动端目录 */
     .toc-sidebar.mobile-show {
         position: fixed;
-        top: 64px; /* 确保在固定导航栏下方 */
+        top: 56px; /* 确保在固定导航栏下方，从64px减小到56px */
         right: 0;
         width: 280px;
-        height: calc(100vh - 64px);
+        height: calc(100vh - 56px); /* 从64px减小到56px */
         z-index: 9999;
         transform: translateX(100%);
         transition: transform 0.3s ease;
@@ -1656,10 +1652,15 @@ body.view-search .sidebar {
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-top: 1px solid var(--border-light);
-    padding: 32px 40px;
+    padding: 20px 16px; /* 进一步减小内边距 */
     text-align: center;
     position: relative;
     z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 [data-theme="dark"] .footer {
@@ -1671,23 +1672,9 @@ body.view-search .sidebar {
     margin: 0;
     color: var(--text-secondary);
     font-size: 0.9rem;
-    line-height: 1.6;
-}
-
-.footer p:first-child {
-    margin-bottom: 8px;
-    font-weight: 500;
-}
-
-.footer a {
-    color: var(--text-muted);
-    text-decoration: underline;
-    transition: var(--transition);
-}
-
-.footer a:hover {
-    color: var(--accent-primary);
-    text-decoration: none;
+    letter-spacing: 0.02em; /* 进一步增加字间距 */
+    font-weight: 600; /* 增加字重以提高可读性 */
+    line-height: 1.4;
 }
 
 /* 为footer添加一些装饰效果 */
@@ -1697,33 +1684,64 @@ body.view-search .sidebar {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 60px;
-    height: 2px;
+    width: 90px; /* 增加宽度 */
+    height: 3px; /* 增加高度 */
     background: var(--accent-gradient);
     border-radius: 2px;
-    opacity: 0.6;
+    opacity: 0.7; /* 增加不透明度 */
+}
+
+.footer-decoration {
+    position: relative;
+    width: 40px;
+    height: 2px;
+    margin-top: 6px;
+    background: var(--accent-gradient);
+    border-radius: 2px;
+    opacity: 0.4;
 }
 
 /* 响应式footer样式 */
 @media (max-width: 768px) {
     .footer {
-        padding: 24px 16px;
-        margin-top: 40px;
+        padding: 18px 14px;
+        margin-top: 30px;
     }
     
     .footer p {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
+    }
+    
+    .footer::before {
+        width: 60px;
+    }
+    
+    .footer-decoration {
+        margin-top: 4px;
+        width: 35px;
     }
 }
 
 @media (max-width: 480px) {
     .footer {
-        padding: 20px 12px;
-        margin-top: 30px;
+        padding: 16px 12px;
+        margin-top: 24px;
     }
     
     .footer p {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.015em;
+    }
+    
+    .footer::before {
+        width: 50px;
+        height: 2px;
+    }
+    
+    .footer-decoration {
+        width: 30px;
+        height: 2px;
+        margin-top: 3px;
     }
 }
 
@@ -1803,4 +1821,18 @@ body.view-search .sidebar {
         height: 44px;
         font-size: 16px;
     }
+}
+
+/* 首页内容样式，与分类页面保持一致 */
+#home-content h1 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+#home-content .category-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
 }

@@ -38,50 +38,9 @@
                 <ul id="article-list" class="article-list">
                     <li class="loading">加载中...</li>
                 </ul>
-            </div>
-        </aside>        <main class="content"><div id="home-view" class="view active">
-                    <!-- 欢迎区域 -->
-                    <div class="welcome-section">
-                        <div class="welcome-header">
-                            <div class="welcome-avatar">
-                                <img src="src/avatar.svg" alt="HCX1999" class="avatar-img">
-                                <div class="avatar-glow"></div>
-                            </div>
-                            <div class="welcome-text">
-                                <h1 class="welcome-title">
-                                    欢迎来到我的技术博客
-                                    <span class="wave">👋</span>
-                                </h1>
-                                <p class="welcome-subtitle">
-                                    分享技术、探索未知、记录成长
-                                </p>
-                                <div class="welcome-stats">
-                                    <div class="stat-item">
-                                        <span class="stat-number" id="article-count">--</span>
-                                        <span class="stat-label">篇文章</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-number" id="category-count">--</span>
-                                        <span class="stat-label">个分类</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-number">2024</span>
-                                        <span class="stat-label">建站年份</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 最新文章区域 -->
-                    <div id="recent-articles">
-                        <div class="section-header">
-                            <h2>最新文章</h2>
-                            <div class="section-line"></div>
-                        </div>
-                        <div id="recent-list" class="recent-list">
-                            <div class="loading">加载中...</div>
-                        </div>
+            </div>        </aside>        <main class="content"><div id="home-view" class="view active">
+                    <div id="home-content">
+                        <!-- 标题和描述将由JavaScript动态生成 -->
                     </div>
                 </div>
 
@@ -211,9 +170,10 @@
                     </nav>
                 </div>
             </aside>            <footer class="footer">
-                <p>&copy; 2025 hcx1999. 保留所有权利.</p>
-                <p><a href="#" onclick="clearBlogCache()" style="color: var(--text-muted); text-decoration: underline; font-size: 0.8rem;">清除网站缓存</a></p>
-            </footer>        </div>    <!-- 移动端目录遮罩层 -->
+                <p>&copy; 2025 hcx1999</p>
+                <p>保留所有权利</p>
+                <div class="footer-decoration"></div>
+            </footer></div>    <!-- 移动端目录遮罩层 -->
     <div id="toc-overlay" class="toc-overlay"></div>    <!-- 返回顶部按钮 -->
     <button id="back-to-top" class="back-to-top" onclick="blog.scrollToTop()" title="返回顶部">
         🚀

@@ -760,24 +760,31 @@ class BlogApp {
 
         categoryList.innerHTML = html;
     }
-    
-    // 渲染首页视图
+      // 渲染首页视图
     renderHomeView() {
-        const recentList = document.getElementById('recent-list');
+        const homeContent = document.getElementById('home-content');
         // 显示全部文章而不只是前5篇
         const recentArticles = this.articles;
 
         if (recentArticles.length === 0) {
-            recentList.innerHTML = '<div class="error">暂无文章</div>';
+            homeContent.innerHTML = '<div class="error">暂无文章</div>';
             return;
-        }        const html = recentArticles.map(article => `
-            <div class="recent-item" onclick="blog.showArticle('${article.id}')">
-                <h4>${article.title}</h4>
-                <p>${article.excerpt}</p>
+        }
+        
+        const html = `
+            <h1>所有文章</h1>
+            <p class="category-description">共 ${recentArticles.length} 篇文章</p>
+            <div class="article-grid">
+                ${recentArticles.map(article => `
+                    <div class="recent-item" onclick="blog.showArticle('${article.id}')">
+                        <h4>${article.title}</h4>
+                        <p>${article.excerpt}</p>
+                    </div>
+                `).join('')}
             </div>
-        `).join('');
+        `;
 
-        recentList.innerHTML = html;
+        homeContent.innerHTML = html;
     }
 
     // 显示文章
