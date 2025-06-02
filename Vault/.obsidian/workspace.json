@@ -11,10 +11,14 @@
             "id": "580370762f101a56",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "AI 05-对抗神经网络.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "新标签页"
+              "title": "AI 05-对抗神经网络"
             }
           }
         ]
@@ -165,13 +169,14 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "580370762f101a56",
+  "active": "7afd8a3fa1280e4f",
   "lastOpenFiles": [
+    "AI 05-对抗神经网络.md",
+    "未命名.md",
     "Linux Linux环境配置笔记.md",
     "AI ai基础作业笔记.md",
     "AI 07-Transformer.md",
     "AI 06-循环神经网络.md",
-    "AI 05-对抗神经网络.md",
     "AI 04-卷积神经网络.md",
     "AI 03-神经网络.md",
     "AI 02-机器学习.md",

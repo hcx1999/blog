@@ -248,7 +248,7 @@ body {
 }
 
 .nav-link:hover {
-    color: white;
+    color: var(--accent-primary);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
@@ -566,9 +566,7 @@ body {
 
 .search-btn,
 .search-clear {
-    background: var(--accent-gradient);
     border: none;
-    color: white;
     cursor: pointer;
     padding: 8px; /* 从10px减小到8px */
     border-radius: 50%;
@@ -583,16 +581,27 @@ body {
     left: 4px;
     top: 50%;
     transform: translateY(-50%);
-    box-shadow: var(--shadow-sm);
+}
+
+.search-btn {
+    background: transparent;
+    color: var(--text-secondary);
+    box-shadow: none;
 }
 
 .search-clear {
+    background: var(--error-color);
+    color: white;
+    box-shadow: var(--shadow-sm);
     left: auto;
     right: 4px;
-    background: var(--error-color);
 }
 
-.search-btn:hover,
+.search-btn:hover {
+    transform: translateY(-50%) scale(1.05);
+    color: var(--accent-primary);
+}
+
 .search-clear:hover {
     transform: translateY(-50%) scale(1.05);
     box-shadow: var(--shadow-md);
