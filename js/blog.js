@@ -73,6 +73,9 @@ class BlogApp {
         // 设置初始的body class
         document.body.classList.add('view-home');
         
+        // 设置全局滚动监听（确保返回顶部按钮在所有页面都能工作）
+        this.setupGlobalScrollListener();
+        
         console.log('✅ 博客系统初始化完成');
     }
 
@@ -587,12 +590,67 @@ class BlogApp {
         
         console.log(`✅ 成功加载了 ${this.articles.length} 篇文章`);
         
+        // 更新统计信息
+        this.updateStatistics();
+        
         // 构建搜索索引
         if (typeof buildSearchIndex === 'function') {
             buildSearchIndex(this.articles);
         }
 
-    }// 解析Markdown文件
+    }    // 更新统计信息
+    updateStatistics() {
+        // 更新文章数量
+        const articleCountElement = document.getElementById('article-count');
+        if (articleCountElement) {
+            this.animateCounter(articleCountElement, this.articles.length);
+        }
+
+        // 更新分类数量
+        const categories = [...new Set(this.articles.map(article => article.category))];
+        const categoryCountElement = document.getElementById('category-count');
+        if (categoryCountElement) {
+            this.animateCounter(categoryCountElement, categories.length);
+        }
+
+        console.log(`📊 统计信息已更新: ${this.articles.length} 篇文章, ${categories.length} 个分类`);
+    }
+
+    // 数字递增动画
+    animateCounter(element, targetValue) {
+        const startValue = parseInt(element.textContent) || 0;
+        const increment = targetValue > startValue ? 1 : -1;
+        const duration = 800; // 动画持续时间
+        const steps = Math.abs(targetValue - startValue);
+        const stepDuration = steps > 0 ? duration / steps : 0;
+
+        if (steps === 0) {
+            element.textContent = targetValue;
+            return;
+        }
+
+        // 添加动画类
+        element.classList.add('updating');
+        
+        let currentValue = startValue;
+        const timer = setInterval(() => {
+            currentValue += increment;
+            element.textContent = currentValue;
+            
+            if (currentValue === targetValue) {
+                clearInterval(timer);
+                element.classList.remove('updating');
+                element.classList.add('count-animation');
+                
+                // 移除动画类
+                setTimeout(() => {
+                    element.classList.remove('count-animation');
+                }, 600);
+            }
+        }, stepDuration);
+    }
+
+    // 解析Markdown文件
     parseMarkdownFile(filename, content) {
         const title = this.extractTitle(content, filename);
         const category = CategoryUtil.extractCategory(filename);
@@ -651,12 +709,12 @@ class BlogApp {
             .trim();
         
         return text.length > 150 ? text.substring(0, 150) + '...' : text;
-    }
-
-    // 渲染侧边栏
+    }    // 渲染侧边栏
     renderSidebar() {
         this.renderArticleList();
         this.renderCategoryList();
+        // 确保统计信息保持更新
+        this.updateStatistics();
     }
 
     // 渲染文章列表
@@ -1120,6 +1178,26 @@ class BlogApp {
                 backToTopBtn.classList.remove('visible');
             }
         }
+    }
+    
+    // 设置全局滚动监听（确保返回顶部按钮在所有页面都能工作）
+    setupGlobalScrollListener() {
+        // 移除现有的全局滚动监听（如果存在）
+        if (this.globalScrollHandler) {
+            window.removeEventListener('scroll', this.globalScrollHandler);
+        }
+        
+        // 创建全局滚动处理函数
+        this.globalScrollHandler = () => {
+            // 始终更新返回顶部按钮状态
+            this.updateBackToTopButton();
+        };
+        
+        // 添加全局滚动监听
+        window.addEventListener('scroll', this.globalScrollHandler, { passive: true });
+        
+        // 初始化时也检查一次按钮状态
+        this.updateBackToTopButton();
     }
     
     // 处理图片路径（增强版，集成 ImageFixUtil）
