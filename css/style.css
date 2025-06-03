@@ -85,9 +85,9 @@ body {
 .layout-grid {
     display: grid;
     grid-template-columns: 
-        clamp(240px, 30vw, 560px)  /* 侧边栏，宽度加倍 */
+        clamp(200px, 26vw, 480px)  /* 侧边栏：从30vw减小到26vw，从560px减小到480px */
         1fr                        /* 主内容 */
-        clamp(160px, 15vw, 260px); /* 目录栏，更灵活的响应式宽度 */
+        clamp(180px, 18vw, 320px); /* 目录栏：从15vw增大到18vw，从260px增大到320px */
     grid-template-rows: 
         auto                       /* header - 导航栏固定，此高度只是占位 */
         1fr                        /* 主要内容区域 */
@@ -790,9 +790,9 @@ body.view-search .sidebar {
 @media (max-width: 1440px) {
     .layout-grid {
         grid-template-columns: 
-            clamp(200px, 24vw, 480px)  /* 侧边栏宽度加倍 */
+            clamp(170px, 20vw, 400px)  /* 侧边栏：从24vw减小到20vw，从480px减小到400px */
             1fr                         /* 主内容 */
-            clamp(140px, 12vw, 220px);  /* 进一步缩小目录栏 */
+            clamp(160px, 16vw, 280px);  /* 目录栏：从12vw增大到16vw，从220px增大到280px */
     }
     
     /* 特殊页面也要响应式 */
@@ -801,7 +801,7 @@ body.view-search .sidebar {
     body.view-category .layout-grid,
     body.view-search .layout-grid {
         grid-template-columns: 
-            clamp(200px, 24vw, 480px)  /* 侧边栏宽度加倍 */
+            clamp(170px, 20vw, 400px)  /* 侧边栏：从24vw减小到20vw，从480px减小到400px */
             1fr;                       /* 主内容（扩展） */
     }
 }
@@ -809,9 +809,9 @@ body.view-search .sidebar {
 @media (max-width: 1200px) {
     .layout-grid {
         grid-template-columns: 
-            clamp(160px, 20vw, 400px)  /* 侧边栏宽度加倍 */
+            clamp(140px, 18vw, 320px)  /* 侧边栏：从20vw减小到18vw，从400px减小到320px */
             1fr                         /* 主内容 */
-            clamp(120px, 10vw, 180px);  /* 更小的目录栏 */
+            clamp(140px, 14vw, 240px);  /* 目录栏：从10vw增大到14vw，从180px增大到240px */
     }
     
     /* 特殊页面也要响应式 */
@@ -820,7 +820,7 @@ body.view-search .sidebar {
     body.view-category .layout-grid,
     body.view-search .layout-grid {
         grid-template-columns: 
-            clamp(160px, 20vw, 400px)  /* 侧边栏宽度加倍 */
+            clamp(140px, 18vw, 320px)  /* 侧边栏：从20vw减小到18vw，从400px减小到320px */
             1fr;                       /* 主内容（扩展） */
     }
 }
@@ -829,7 +829,7 @@ body.view-search .sidebar {
     /* 中等屏幕：隐藏目录栏，调整为2列布局 */
     .layout-grid {
         grid-template-columns: 
-            clamp(160px, 30vw, 440px)  /* 侧边栏宽度加倍 */
+            clamp(140px, 28vw, 380px)  /* 侧边栏：从30vw减小到28vw，从440px减小到380px */
             1fr;                       /* 主内容扩展 */
         grid-template-areas:
             "header header"
@@ -843,7 +843,7 @@ body.view-search .sidebar {
     body.view-category .layout-grid,
     body.view-search .layout-grid {
         grid-template-columns: 
-            clamp(160px, 30vw, 440px)  /* 侧边栏宽度加倍 */
+            clamp(140px, 28vw, 380px)  /* 侧边栏：从30vw减小到28vw，从440px减小到380px */
             1fr;                       /* 主内容（扩展） */
     }
       .sidebar {
@@ -877,7 +877,7 @@ body.view-search .sidebar {
 /* 第二个1024px媒体查询已合并到上面的媒体查询中 */
 
 @media (max-width: 768px) {
-    /* 平板：改为垂直堆叠布局，侧边栏和目录栏在主内容上方 */
+    /* 手机和平板：改为垂直堆叠布局，左侧栏→目录栏→主内容的顺序 */
     .layout-grid {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto 1fr auto;
@@ -889,57 +889,66 @@ body.view-search .sidebar {
             "footer";
         padding-top: 0;
     }
-    
-    /* 显示目录栏在文章页面 */
-    body.view-article .toc-sidebar {
-        display: block;
-        margin-bottom: 16px;
-    }    .sidebar {
-        /* 在移动设备上，侧边栏恢复正常高度，不固定 */
+      .sidebar {
+        /* 侧边栏在手机端占满整个页面宽度 */
         height: auto;
         position: static;
         top: auto;
-        width: 100%; /* 在移动端占满宽度 */
-        padding: 12px;
+        width: 100%;
+        padding: clamp(12px, 3vw, 20px);
         border-right: none;
         border-bottom: 1px solid var(--border-light);
         overflow-y: auto;
-        overflow-x: auto; /* 保持横向滚动能力 */
-        max-height: 60vh; /* 使用视口高度来确保适应不同尺寸的设备 */
+        overflow-x: hidden; /* 保持一致，隐藏横向滚动 */
+        max-height: 45vh; /* 从60vh调小到45vh */
     }
     
     [data-theme="dark"] .sidebar {
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
     
+    .toc-sidebar {
+        /* 目录栏在手机端占满整个页面宽度 */
+        position: static;
+        top: auto;
+        width: 100%;
+        padding: clamp(12px, 3vw, 20px);
+        border-left: none;
+        border-bottom: 1px solid var(--border-light);
+        max-height: 55vh; /* 从50vh调大到55vh */
+        overflow-y: auto;
+        overflow-x: hidden;
+        margin-bottom: 0;
+        display: block; /* 在手机端始终显示，但内容为空时不占空间 */
+    }
+    
+    /* 非文章页面的目录栏隐藏内容但保持结构 */
+    body:not(.view-article) .toc-sidebar {
+        display: none;
+    }
+    
+    /* 文章页面显示目录内容 */
+    body.view-article .toc-sidebar {
+        display: block;
+    }
+    
+    [data-theme="dark"] .toc-sidebar {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
     .content {
-        /* 调整内边距 */
+        /* 主内容在手机端占满整个页面宽度 */
         padding: clamp(20px, 5vw, 32px);
         border-left: none;
         border-right: none;
+        width: 100%;
         height: auto;
-        min-height: calc(100vh - 400px); /* 确保有足够的内容高度 */
+        min-height: calc(100vh - 400px);
     }
     
     [data-theme="dark"] .content {
         border-left: none;
         border-right: none;
-    }
-      .toc-sidebar {
-        display: none !important;
-    }
-    
-    /* 但在文章页面时显示目录 */
-    body.view-article .toc-sidebar {
-        display: block !important;
-        max-height: 250px;
-        overflow-y: auto;
-        margin-bottom: 12px;
-        border-bottom: 1px solid var(--border-light);
-    }
-    
-    [data-theme="dark"] body.view-article .toc-sidebar {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
     
     .nav-menu {
@@ -974,7 +983,7 @@ body.view-search .sidebar {
 }
 
 @media (max-width: 480px) {
-    /* 手机：导航栏重新布局 */
+    /* 最小手机屏幕：保持垂直堆叠布局，进一步优化间距 */
     .navbar {
         padding: 0 clamp(8px, 3vw, 16px);
         flex-wrap: wrap;
@@ -986,29 +995,36 @@ body.view-search .sidebar {
     .nav-brand h1 {
         font-size: clamp(1rem, 4vw, 1.3rem);
     }
-      .nav-menu {
+    
+    .nav-menu {
         order: 3;
         width: 100%;
         justify-content: center;
-        padding: clamp(6px, 2vw, 12px) 0; /* 减小内边距 */
+        padding: clamp(6px, 2vw, 12px) 0;
         border-top: 1px solid var(--border-light);
-        margin-top: clamp(6px, 2vw, 10px); /* 减小上边距 */
-        gap: clamp(4px, 2vw, 10px); /* 减小间距 */
+        margin-top: clamp(6px, 2vw, 10px);
+        gap: clamp(4px, 2vw, 10px);
     }
     
     .search-container {
         order: 2;
     }
-    
-    .content {
-        /* 手机上进一步减少内边距 */
-        padding: clamp(16px, 4vw, 24px);
-        min-height: calc(100vh - 300px);
-    }
-    
+      /* 侧边栏在最小屏幕上的优化 */
     .sidebar {
         padding: clamp(14px, 4vw, 20px);
-        max-height: 250px; /* 手机上进一步限制侧边栏高度 */
+        max-height: 35vh; /* 从40vh调小到35vh */
+    }
+    
+    /* 目录栏在最小屏幕上的优化 */
+    .toc-sidebar {
+        padding: clamp(14px, 4vw, 20px);
+        max-height: 40vh; /* 从35vh调大到40vh */
+    }
+    
+    /* 主内容在最小屏幕上的优化 */
+    .content {
+        padding: clamp(16px, 4vw, 24px);
+        min-height: calc(100vh - 300px);
     }
     
     .recent-item {
