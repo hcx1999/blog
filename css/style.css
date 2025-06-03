@@ -85,9 +85,9 @@ body {
 .layout-grid {
     display: grid;
     grid-template-columns: 
-        clamp(240px, 18vw, 280px)  /* 侧边栏 */
+        clamp(240px, 30vw, 560px)  /* 侧边栏，宽度加倍 */
         1fr                        /* 主内容 */
-        clamp(240px, 18vw, 280px); /* 目录栏 */
+        clamp(160px, 15vw, 260px); /* 目录栏，更灵活的响应式宽度 */
     grid-template-rows: 
         auto                       /* header - 导航栏固定，此高度只是占位 */
         1fr                        /* 主要内容区域 */
@@ -98,6 +98,7 @@ body {
         "sidebar footer toc";
     min-height: 100vh;
     gap: 0;
+    transition: all 0.3s ease;    /* 添加平滑过渡效果 */
 }
 
 /* Grid区域分配 */
@@ -325,17 +326,21 @@ body {
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-right: 1px solid var(--border-light);
-    padding: 20px;
+    padding: clamp(6px, 1.5vw, 20px); /* 更响应式的padding，最小值更小 */
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: hidden; /* 隐藏横向滚动 */
     transition: var(--transition);
     z-index: 100;
     box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.1);
-    /* 固定高度，使其有自己的滚动条 */
-    height: calc(100vh - 56px); /* 减去header高度，从64px减小到56px */
+    /* 移除固定高度限制，但保持侧边栏跟随滚动 */
     position: sticky;
-    top: 56px; /* 与header高度保持一致，从64px减小到56px */
+    top: 56px; /* 与header高度保持一致 */
+    width: 100%; /* 确保侧边栏占满分配的网格宽度 */
+    display: flex;
+    flex-direction: column;
 }
+
+/* 侧边栏内容的响应式样式 - 已合并到下面的样式中 */
 
 [data-theme="dark"] .sidebar {
     background: var(--bg-card);
@@ -348,8 +353,9 @@ body {
 }
 
 .sidebar-section {
-    margin-bottom: 20px;
+    margin-bottom: clamp(12px, 2vw, 20px);
     position: relative;
+    min-width: 0; /* 防止内容溢出 */
 }
 
 .sidebar-section:last-child {
@@ -358,10 +364,13 @@ body {
 
 .sidebar-section h3 {
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: clamp(0.75rem, 1.8vw, 1.1rem); /* 更响应式的字体大小 */
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: clamp(6px, 1vw, 12px); /* 响应式边距 */
     position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     padding-bottom: 6px;
     padding-left: 14px;
 }
@@ -395,11 +404,17 @@ body {
     list-style: none;
     margin: 0;
     padding: 0;
+    width: 100%; /* 确保内容占满容器宽度 */
+    display: flex;
+    flex-direction: column;
 }
 
 .category-list li,
 .article-list li {
     margin-bottom: 3px;
+    width: 100%; /* 让列表项占满容器宽度 */
+    min-width: 0; /* 允许内容收缩以适应容器 */
+    overflow: hidden; /* 隐藏溢出内容 */
 }
 
 .category-list a,
@@ -408,15 +423,18 @@ body {
     align-items: center;
     text-decoration: none;
     color: var(--text-secondary);
-    padding: 8px 12px;
+    padding: clamp(6px, 1vw, 8px) clamp(8px, 1.5vw, 12px); /* 响应式内边距 */
     border-radius: 8px;
     transition: var(--transition);
-    font-size: 0.8rem;
+    font-size: clamp(0.7rem, 1.5vw, 0.8rem); /* 响应式字体 */
     line-height: 1.3;
     position: relative;
     overflow: hidden;
     border: 1px solid transparent;
     background: rgba(255, 255, 255, 0.3);
+    white-space: normal; /* 允许文本换行以适应容器宽度 */
+    word-wrap: break-word; /* 长单词可以断行 */
+    hyphens: auto; /* 自动连字符 */
 }
 
 [data-theme="dark"] .category-list a,
@@ -483,6 +501,7 @@ body {
 /* 侧边栏滚动条样式 */
 .sidebar::-webkit-scrollbar {
     width: 6px;
+    height: 6px; /* 水平滚动条高度 */
 }
 
 .sidebar::-webkit-scrollbar-track {
@@ -721,10 +740,9 @@ body {
     transition: var(--transition);
     z-index: 100;
     box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.1);
-    /* 固定高度，使其有自己的滚动条 */
-    height: calc(100vh - 56px); /* 减去header高度，从64px减小到56px */
+    /* 应用sticky定位以便在桌面版时跟随滚动 */
     position: sticky;
-    top: 56px; /* 与header高度保持一致，从64px减小到56px */
+    top: 56px; /* 与header高度保持一致 */
 }
 
 [data-theme="dark"] .toc-sidebar {
@@ -748,7 +766,7 @@ body.view-about .layout-grid,
 body.view-category .layout-grid,
 body.view-search .layout-grid {
     grid-template-columns: 
-        clamp(240px, 18vw, 280px)  /* 侧边栏 */
+        clamp(240px, 30vw, 560px)  /* 侧边栏 - 宽度加倍 */
         1fr;                       /* 主内容（扩展） */
     grid-template-areas:
         "header header"
@@ -767,16 +785,66 @@ body.view-search .sidebar {
 }
 
 /* 响应式设计 - CSS Grid布局 */
+
+/* 大屏幕到中等屏幕的过渡 */
+@media (max-width: 1440px) {
+    .layout-grid {
+        grid-template-columns: 
+            clamp(200px, 24vw, 480px)  /* 侧边栏宽度加倍 */
+            1fr                         /* 主内容 */
+            clamp(140px, 12vw, 220px);  /* 进一步缩小目录栏 */
+    }
+    
+    /* 特殊页面也要响应式 */
+    body.view-home .layout-grid,
+    body.view-about .layout-grid,
+    body.view-category .layout-grid,
+    body.view-search .layout-grid {
+        grid-template-columns: 
+            clamp(200px, 24vw, 480px)  /* 侧边栏宽度加倍 */
+            1fr;                       /* 主内容（扩展） */
+    }
+}
+
+@media (max-width: 1200px) {
+    .layout-grid {
+        grid-template-columns: 
+            clamp(160px, 20vw, 400px)  /* 侧边栏宽度加倍 */
+            1fr                         /* 主内容 */
+            clamp(120px, 10vw, 180px);  /* 更小的目录栏 */
+    }
+    
+    /* 特殊页面也要响应式 */
+    body.view-home .layout-grid,
+    body.view-about .layout-grid,
+    body.view-category .layout-grid,
+    body.view-search .layout-grid {
+        grid-template-columns: 
+            clamp(160px, 20vw, 400px)  /* 侧边栏宽度加倍 */
+            1fr;                       /* 主内容（扩展） */
+    }
+}
+
 @media (max-width: 1024px) {
     /* 中等屏幕：隐藏目录栏，调整为2列布局 */
     .layout-grid {
         grid-template-columns: 
-            clamp(200px, 16vw, 240px)  /* 侧边栏缩窄 */
+            clamp(160px, 30vw, 440px)  /* 侧边栏宽度加倍 */
             1fr;                       /* 主内容扩展 */
         grid-template-areas:
             "header header"
             "sidebar content"
             "sidebar footer";
+    }
+    
+    /* 特殊页面也要响应式 */
+    body.view-home .layout-grid,
+    body.view-about .layout-grid,
+    body.view-category .layout-grid,
+    body.view-search .layout-grid {
+        grid-template-columns: 
+            clamp(160px, 30vw, 440px)  /* 侧边栏宽度加倍 */
+            1fr;                       /* 主内容（扩展） */
     }
       .sidebar {
         /* 中等屏幕上保持固定 */
@@ -806,30 +874,38 @@ body.view-search .sidebar {
     }
 }
 
+/* 第二个1024px媒体查询已合并到上面的媒体查询中 */
+
 @media (max-width: 768px) {
-    /* 平板：改为垂直堆叠布局 */
+    /* 平板：改为垂直堆叠布局，侧边栏和目录栏在主内容上方 */
     .layout-grid {
         grid-template-columns: 1fr;
-        grid-template-rows: auto auto 1fr auto;
+        grid-template-rows: auto auto auto 1fr auto;
         grid-template-areas:
             "header"
             "sidebar"
+            "toc"
             "content"
             "footer";
-        /* 添加顶部外边距以适应固定导航栏 */
-        padding-top: 0; /* header已经固定，不需要额外空间 */
+        padding-top: 0;
     }
     
-    .sidebar {
+    /* 显示目录栏在文章页面 */
+    body.view-article .toc-sidebar {
+        display: block;
+        margin-bottom: 16px;
+    }    .sidebar {
         /* 在移动设备上，侧边栏恢复正常高度，不固定 */
         height: auto;
         position: static;
         top: auto;
-        max-height: 300px; /* 限制最大高度避免占用太多空间 */
-        padding: clamp(12px, 3vw, 20px);
+        width: 100%; /* 在移动端占满宽度 */
+        padding: 12px;
         border-right: none;
         border-bottom: 1px solid var(--border-light);
         overflow-y: auto;
+        overflow-x: auto; /* 保持横向滚动能力 */
+        max-height: 60vh; /* 使用视口高度来确保适应不同尺寸的设备 */
     }
     
     [data-theme="dark"] .sidebar {
@@ -849,9 +925,21 @@ body.view-search .sidebar {
         border-left: none;
         border-right: none;
     }
-    
-    .toc-sidebar {
+      .toc-sidebar {
         display: none !important;
+    }
+    
+    /* 但在文章页面时显示目录 */
+    body.view-article .toc-sidebar {
+        display: block !important;
+        max-height: 250px;
+        overflow-y: auto;
+        margin-bottom: 12px;
+        border-bottom: 1px solid var(--border-light);
+    }
+    
+    [data-theme="dark"] body.view-article .toc-sidebar {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
     
     .nav-menu {
@@ -1630,9 +1718,41 @@ body.view-search .sidebar {
 
 /* 移动端目录显示时的处理 */
 @media (max-width: 768px) {    /* 在阅读文章时，可以通过JavaScript显示移动端目录 */
+    /* 目录开关按钮 - 仅在移动端文章页面显示 */
+    .toc-toggle-btn {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--accent-gradient);
+        color: white;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-md);
+        border: none;
+        z-index: 999;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        opacity: 0.9;
+    }
+    
+    /* 文章页面显示TOC按钮 */
+    body.view-article .toc-toggle-btn {
+        display: flex;
+    }
+    
+    .toc-toggle-btn:hover, .toc-toggle-btn:active {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+    
     .toc-sidebar.mobile-show {
         position: fixed;
-        top: 56px; /* 确保在固定导航栏下方，从64px减小到56px */
+        top: 56px; /* 确保在固定导航栏下方 */
         right: 0;
         width: 280px;
         height: calc(100vh - 56px); /* 从64px减小到56px */
@@ -1641,6 +1761,8 @@ body.view-search .sidebar {
         transition: transform 0.3s ease;
         display: block !important;
         box-shadow: var(--shadow-xl);
+        background: var(--bg-primary);
+        padding: 16px;
     }
     
     .toc-sidebar.mobile-show.active {
