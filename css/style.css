@@ -741,9 +741,12 @@ body {
     transition: var(--transition);
     z-index: 100;
     box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.1);
-    /* 应用sticky定位以便在桌面版时跟随滚动 */
+    /* 桌面端固定目录栏不滚动，与侧边栏行为一致 */
     position: sticky;
     top: 56px; /* 与header高度保持一致 */
+    height: calc(100vh - 56px); /* 与侧边栏相同的固定高度 */
+    display: flex;
+    flex-direction: column;
 }
 
 [data-theme="dark"] .toc-sidebar {
