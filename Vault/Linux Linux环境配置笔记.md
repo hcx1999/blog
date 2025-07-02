@@ -1,4 +1,4 @@
-Linux配置笔记
+# Linux配置笔记
 ## 磁盘操作
 #### ls 命令
 列出当前工作目录下的所有文件/文件夹的名称
@@ -214,6 +214,26 @@ Linux ps （英文全拼：process status）命令用于显示当前进程的状
 - `ps -o args=`：显示完整的命令行参数。
 - `ps aux --sort=-%cpu`：按CPU使用率降序显示进程。
 - `ps aux --sort=-%mem`：按内存使用率降序显示进程。
+#### 脱离终端
+```
+nohup python cifar10_cnn_torch.py > output.log 2>&1 &
+```
+1. **`nohup`**:
+    - 表示 "no hang up"。
+    - 这个命令可以让程序在终端关闭后继续运行，避免因终端断开连接而导致程序中断。
+2. **`> output.log`**:
+    - 将程序的标准输出（`stdout`）重定向到文件 `output.log` 中。
+    - 这样可以保存程序运行时的日志信息，方便后续查看。
+3. **`2>&1`**:
+    - 将标准错误输出（`stderr`）重定向到标准输出（`stdout`）。
+    - 这样，所有的错误信息也会被写入 `output.log` 文件中。
+4. **`&`**:
+    - 将命令放到后台运行。
+    - 这样，终端会立即返回控制权，而程序会在后台继续运行。
+
+可以通过`jobs`查看进程（仅限原终端）， `ps`来查看后台进程，通过`cat output.log`查看输出内容
+
+*output.log中提示`nohup: ignoring input` 是正常行为，表示 `nohup` 忽略了标准输入。如果程序不需要输入，可以放心忽略这个提示。*
 
 ## 终端配置
 此处以debian11为例
@@ -255,6 +275,18 @@ source $ZSH/oh-my-zsh.sh
 ```
 完成。
 ## git和github
+### git本地信任
+```bash
+//查看用户名
+git config user.name
+//查看邮箱地址
+git config user.email
+
+//修改用户名，xxx 处填写你的用户名
+git config --global user.name "xxx"
+//修改邮箱地址，xxx 处填写你的邮箱地址
+git config --global user.email "xxx"
+```
 ### git commit提交规范
 ```
 feat: 新功能（feature）

@@ -87,7 +87,7 @@ body {
     grid-template-columns: 
         clamp(200px, 26vw, 480px)  /* 侧边栏：从30vw减小到26vw，从560px减小到480px */
         1fr                        /* 主内容 */
-        clamp(180px, 18vw, 320px); /* 目录栏：从15vw增大到18vw，从260px增大到320px */
+        clamp(220px, 22vw, 400px); /* 目录栏：加宽从18vw到22vw，从320px到400px */
     grid-template-rows: 
         auto                       /* header - 导航栏固定，此高度只是占位 */
         1fr                        /* 主要内容区域 */
@@ -789,7 +789,7 @@ body.view-search .layout-grid {
         grid-template-columns: 
             clamp(170px, 20vw, 400px)  /* 侧边栏：从24vw减小到20vw，从480px减小到400px */
             1fr                         /* 主内容 */
-            clamp(160px, 16vw, 280px);  /* 目录栏：从12vw增大到16vw，从220px增大到280px */
+            clamp(200px, 20vw, 360px);  /* 目录栏：加宽从16vw到20vw，从280px到360px */
     }
     
     /* 特殊页面也要响应式 */
@@ -808,7 +808,7 @@ body.view-search .layout-grid {
         grid-template-columns: 
             clamp(140px, 18vw, 320px)  /* 侧边栏：从20vw减小到18vw，从400px减小到320px */
             1fr                         /* 主内容 */
-            clamp(140px, 14vw, 240px);  /* 目录栏：从10vw增大到14vw，从180px增大到240px */
+            clamp(160px, 18vw, 300px);  /* 目录栏：加宽从14vw到18vw，从240px到300px */
     }
     
     /* 特殊页面也要响应式 */
@@ -1159,6 +1159,53 @@ body.view-search .layout-grid {
     font-size: 0.7rem;
 }
 
+/* 目录中的Markdown渲染元素样式 */
+.toc-nav a strong {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.toc-nav a em {
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+.toc-nav a code {
+    background: var(--bg-tertiary);
+    color: var(--accent-primary);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Fira Code', 'Monaco', 'Menlo', monospace;
+    font-size: 0.75em;
+    border: 1px solid var(--border-light);
+}
+
+.toc-nav a del {
+    text-decoration: line-through;
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+.toc-nav a mark {
+    background: linear-gradient(120deg, var(--warning-color) 0%, var(--warning-color) 100%);
+    background-size: 100% 0.2em;
+    background-repeat: no-repeat;
+    background-position: 0 85%;
+    color: inherit;
+    padding: 0;
+}
+
+/* 目录中Markdown元素的悬停效果 */
+.toc-nav a:hover strong {
+    color: var(--accent-primary);
+}
+
+.toc-nav a:hover code {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    border-color: var(--accent-primary);
+}
+
 .toc-placeholder {
     color: var(--text-muted);
     font-style: italic;
@@ -1491,501 +1538,209 @@ body.view-search .layout-grid {
     white-space: pre;
 }
 
-.article-content blockquote {
-    margin: 24px 0;
-    padding: 20px 24px;
-    background: var(--bg-secondary);
-    border-left: 4px solid var(--accent-primary);
-    border-radius: 0 12px 12px 0;
-    color: var(--text-secondary);
-    font-style: italic;
+/* 代码高亮增强样式 */
+.article-content pre {
     position: relative;
 }
 
-.article-content blockquote::before {
-    content: '"';
+/* 语言标签样式 */
+.code-language-label {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 2rem;
-    color: var(--accent-primary);
-    opacity: 0.3;
+    top: 8px;
+    right: 12px;
+    background: var(--accent-primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    z-index: 2;
+    opacity: 0.8;
+    transition: var(--transition);
 }
 
-/* 表格样式 */
-.article-content table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 24px 0;
+/* 复制按钮样式 */
+.code-copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 80px; /* 位置在语言标签左侧 */
     background: var(--bg-secondary);
-    border-radius: 12px;
-    overflow: hidden;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-light);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    cursor: pointer;
+    z-index: 2;
+    opacity: 0;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    backdrop-filter: blur(10px);
+}
+
+.code-copy-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
 }
 
-.article-content th,
-.article-content td {
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.article-content th {
-    background: var(--accent-gradient);
+.code-copy-btn.copied {
+    background: var(--success-color);
     color: white;
-    font-weight: 600;
+    border-color: var(--success-color);
 }
 
-.article-content tr:last-child td {
-    border-bottom: none;
-}
-
-.article-content tr:hover {
-    background: var(--bg-tertiary);
-}
-
-/* 链接样式改进 */
-.article-content a {
-    color: var(--accent-primary);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: var(--transition);
-    position: relative;
-}
-
-.article-content a:hover {
-    border-bottom-color: var(--accent-primary);
-    color: var(--accent-secondary);
-}
-
-.article-content a::after {
-    content: '↗';
-    font-size: 0.8rem;
-    opacity: 0;
-    margin-left: 4px;
-    transition: var(--transition);
-}
-
-.article-content a:hover::after {
+/* 代码块悬停时显示复制按钮 */
+.article-content pre:hover .code-copy-btn {
     opacity: 1;
 }
 
-/* 分隔线样式 */
-.article-content hr {
-    border: none;
+/* 仅有复制按钮时的位置调整 */
+.article-content pre:not(.has-language-label) .code-copy-btn {
+    right: 12px;
+}
+
+[data-theme="dark"] .code-language-label {
+    background: var(--accent-secondary);
+}
+
+[data-theme="dark"] .code-copy-btn {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border-color: var(--border-medium);
+}
+
+[data-theme="dark"] .code-copy-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+}
+/* =========================== 表格样式 =========================== */
+
+/* 基础表格样式 */
+.article-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    table-layout: fixed;
+}
+
+/* 表格容器 */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* 表格头部样式 */
+.article-content table th {
+    background: var(--bg-secondary);
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border: 1px solid var(--border-light);
+}
+
+/* 表格单元格样式 */
+.article-content table td {
+    padding: 12px;
+    border: 1px solid var(--border-light);
+    vertical-align: top;
+    word-wrap: break-word;
+}
+
+/* 第一列宽度控制 - 解决第一列过宽问题 */
+.article-content table th:first-child,
+.article-content table td:first-child {
+    width: 20%;
+    min-width: 120px;
+    max-width: 200px;
+}
+
+/* =========================== Footer样式 =========================== */
+
+.footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+    padding: 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 1;
+}
+
+.footer p {
+    margin: 4px 0;
+}
+
+.footer-decoration {
+    width: 60px;
     height: 2px;
     background: var(--accent-gradient);
-    margin: 40px 0;
+    margin: 12px auto 0;
     border-radius: 2px;
     opacity: 0.6;
 }
 
-/* 改进的列表样式 */
-.article-content ul li::marker {
-    color: var(--accent-primary);
-}
-
-.article-content ol li::marker {
-    color: var(--accent-primary);
-    font-weight: 600;
-}
-
-/* 导航栏增强效果 */
-.nav-link {
-    position: relative;
-    overflow: hidden;
-}
-
-/* 为导航链接添加下划线动画 */
-.nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--accent-gradient);
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 1px;
-}
-
-.nav-link:hover::after {
-    width: 100%;
-}
-
-/* 品牌logo增强效果 */
-.blog-icon {
-    transition: var(--transition);
-    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
-}
-
-.brand-link:hover .blog-icon {
-    transform: rotate(360deg) scale(1.1);
-    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.5));
-}
-
-/* 搜索框增强效果 */
-.search-container {
-    position: relative;
-}
-
-.search-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--accent-gradient);
-    border-radius: 24px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    z-index: -1;
-}
-
-.search-container:focus-within::before {
-    opacity: 0.1;
-}
-
-/* 主题切换按钮增强 */
-.theme-toggle {
-    position: relative;
-    overflow: hidden;
-}
-
-.theme-toggle::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: var(--accent-gradient);
-    border-radius: 50%;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translate(-50%, -50%);
-    z-index: -1;
-}
-
-.theme-toggle:hover::before {
-    width: 120%;
-    height: 120%;
-}
-
-/* 欢迎区域增强动画 */
-.welcome-stats {
-    position: relative;
-}
-
-.welcome-stats::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--accent-gradient);
-    opacity: 0;
-    border-radius: 20px;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
-.welcome-stats:hover::before {
-    opacity: 0.05;
-}
-
-.stat-item {
-    transition: var(--transition);
-}
-
-.stat-item:hover {
-    transform: translateY(-2px) scale(1.05);
-}
-
-/* 欢迎标题的挥手动画 */
-.wave {
-    display: inline-block;
-    animation: wave 2s ease-in-out infinite;
-    transform-origin: 70% 70%;
-}
-
-@keyframes wave {
-    0%, 100% { transform: rotate(0deg); }
-    10%, 30%, 50%, 70%, 90% { transform: rotate(14deg); }
-    20%, 40%, 60%, 80% { transform: rotate(-14deg); }
-}
-
-/* 移动端目录遮罩层 */
-.toc-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 9998;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.toc-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* 移动端目录显示时的处理 */
-@media (max-width: 768px) {    /* 在阅读文章时，可以通过JavaScript显示移动端目录 */
-    /* 目录开关按钮 - 仅在移动端文章页面显示 */
-    .toc-toggle-btn {
-        position: fixed;
-        bottom: 80px;
-        right: 20px;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        background: var(--accent-gradient);
-        color: white;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        box-shadow: var(--shadow-md);
-        border: none;
-        z-index: 999;
-        font-size: 1.2rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        opacity: 0.9;
-    }
-    
-    /* 文章页面显示TOC按钮 */
-    body.view-article .toc-toggle-btn {
-        display: flex;
-    }
-    
-    .toc-toggle-btn:hover, .toc-toggle-btn:active {
-        transform: scale(1.05);
-        opacity: 1;
-    }
-    
-    .toc-sidebar.mobile-show {
-        position: fixed;
-        top: 56px; /* 确保在固定导航栏下方 */
-        right: 0;
-        width: 280px;
-        height: calc(100vh - 56px); /* 从64px减小到56px */
-        z-index: 9999;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-        display: block !important;
-        box-shadow: var(--shadow-xl);
-        background: var(--bg-primary);
-        padding: 16px;
-    }
-    
-    .toc-sidebar.mobile-show.active {
-        transform: translateX(0);
-    }
-    
-    /* 确保导航栏在移动端也固定在顶部 */
-    .header {
-        position: sticky;
-        top: 0;
-        z-index: 1001; /* 确保高于其他元素 */
-    }
-}
-
-/* Footer 样式 - 使用Grid布局 */
-.footer {
-    background: var(--bg-card);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-top: 1px solid var(--border-light);
-    padding: 20px 16px; /* 进一步减小内边距 */
-    text-align: center;
-    position: relative;
-    z-index: 200;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
 [data-theme="dark"] .footer {
-    background: var(--bg-card);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-tertiary);
+    border-top-color: var(--border-medium);
 }
 
-.footer p {
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    letter-spacing: 0.02em; /* 进一步增加字间距 */
-    font-weight: 600; /* 增加字重以提高可读性 */
-    line-height: 1.4;
-}
+/* =========================== 返回顶部按钮样式 =========================== */
 
-/* 为footer添加一些装饰效果 */
-.footer::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90px; /* 增加宽度 */
-    height: 3px; /* 增加高度 */
-    background: var(--accent-gradient);
-    border-radius: 2px;
-    opacity: 0.7; /* 增加不透明度 */
-}
-
-.footer-decoration {
-    position: relative;
-    width: 40px;
-    height: 2px;
-    margin-top: 6px;
-    background: var(--accent-gradient);
-    border-radius: 2px;
-    opacity: 0.4;
-}
-
-/* 响应式footer样式 */
-@media (max-width: 768px) {
-    .footer {
-        padding: 18px 14px;
-        margin-top: 30px;
-    }
-    
-    .footer p {
-        font-size: 0.85rem;
-    }
-    
-    .footer::before {
-        width: 60px;
-    }
-    
-    .footer-decoration {
-        margin-top: 4px;
-        width: 35px;
-    }
-}
-
-@media (max-width: 480px) {
-    .footer {
-        padding: 16px 12px;
-        margin-top: 24px;
-    }
-    
-    .footer p {
-        font-size: 0.8rem;
-        letter-spacing: 0.015em;
-    }
-    
-    .footer::before {
-        width: 50px;
-        height: 2px;
-    }
-    
-    .footer-decoration {
-        width: 30px;
-        height: 2px;
-        margin-top: 3px;
-    }
-}
-
-/* 返回顶部按钮样式 */
 .back-to-top {
     position: fixed;
-    bottom: 32px;
-    right: 32px;
-    width: 56px;
-    height: 56px;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
     background: var(--accent-gradient);
+    color: white;
     border: none;
     border-radius: 50%;
-    color: white;
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 1.2rem;
     cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+    z-index: 1000;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(20px) scale(0.8);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--shadow-lg);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    transform: translateY(20px);
 }
 
-/* 按钮可见状态 */
-.back-to-top.visible {
+.back-to-top.show {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
 }
 
-/* 悬停效果 */
 .back-to-top:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: var(--shadow-xl), var(--glow-primary);
-    background: var(--accent-gradient-hover);
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: var(--shadow-xl);
 }
 
-/* 点击效果 */
 .back-to-top:active {
-    transform: translateY(0) scale(0.95);
+    transform: translateY(-1px) scale(1.05);
 }
 
-/* 深色主题适配 */
 [data-theme="dark"] .back-to-top {
     background: var(--accent-gradient);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: var(--shadow-lg), 0 0 20px rgba(59, 130, 246, 0.2);
 }
 
-[data-theme="dark"] .back-to-top:hover {
-    box-shadow: var(--shadow-xl), var(--glow-primary);
-}
-
-/* 响应式设计 */
+/* 移动端适配 */
 @media (max-width: 768px) {
     .back-to-top {
-        bottom: 20px;
-        right: 20px;
-        width: 48px;
-        height: 48px;
-        font-size: 18px;
+        bottom: 15px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
     }
-}
-
-@media (max-width: 480px) {
-    .back-to-top {
-        bottom: 16px;
-        right: 16px;
-        width: 44px;
-        height: 44px;
-        font-size: 16px;
-    }
-}
-
-/* 首页内容样式，与分类页面保持一致 */
-#home-content h1 {
-    color: var(--text-primary);
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-}
-
-#home-content .category-description {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-bottom: 1.5rem;
 }

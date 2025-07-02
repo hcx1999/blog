@@ -2,16 +2,31 @@
 function toggleTheme() {
     const body = document.body;
     const themeToggle = document.getElementById('theme-toggle');
+    const lightTheme = document.getElementById('prism-light-theme');
+    const darkTheme = document.getElementById('prism-dark-theme');
     
     if (body.getAttribute('data-theme') === 'dark') {
         body.removeAttribute('data-theme');
         themeToggle.textContent = '🌙';
         localStorage.setItem('theme', 'light');
+        // 切换到浅色代码主题
+        if (lightTheme) lightTheme.disabled = false;
+        if (darkTheme) darkTheme.disabled = true;
     } else {
         body.setAttribute('data-theme', 'dark');
         themeToggle.textContent = '☀️';
         localStorage.setItem('theme', 'dark');
+        // 切换到深色代码主题
+        if (lightTheme) lightTheme.disabled = true;
+        if (darkTheme) darkTheme.disabled = false;
     }
+    
+    // 重新高亮所有代码块以适应新主题
+    setTimeout(() => {
+        if (typeof Prism !== 'undefined') {
+            Prism.highlightAll();
+        }
+    }, 100);
 }
 
 // 初始化主题
@@ -19,15 +34,23 @@ function initTheme() {
     const savedTheme = localStorage.getItem('theme');
     const body = document.body;
     const themeToggle = document.getElementById('theme-toggle');
+    const lightTheme = document.getElementById('prism-light-theme');
+    const darkTheme = document.getElementById('prism-dark-theme');
     
     if (!themeToggle) return; // 防止在页面未完全加载时出错
     
     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         body.setAttribute('data-theme', 'dark');
         themeToggle.textContent = '☀️';
+        // 设置深色代码主题
+        if (lightTheme) lightTheme.disabled = true;
+        if (darkTheme) darkTheme.disabled = false;
     } else {
         body.removeAttribute('data-theme');
         themeToggle.textContent = '🌙';
+        // 设置浅色代码主题
+        if (lightTheme) lightTheme.disabled = false;
+        if (darkTheme) darkTheme.disabled = true;
     }
 }
 
@@ -833,9 +856,11 @@ class BlogApp {
             
             // 处理表格 - 添加横向滚动容器
             this.processTables(contentDiv);
-            
-            // 渲染KaTeX数学公式
+              // 渲染KaTeX数学公式
             this.renderMath(contentDiv);
+            
+            // 高亮代码块
+            this.highlightCodeBlocks(contentDiv);
             
             // 生成目录
             this.generateTableOfContents(contentDiv);
@@ -990,6 +1015,196 @@ class BlogApp {
                 });        } catch (error) {
                 console.warn('auto-render数学公式渲染失败:', error);
             }
+        }    }
+
+    // 高亮代码块
+    highlightCodeBlocks(container) {
+        // 检查 Prism 是否加载
+        if (typeof Prism === 'undefined') {
+            console.warn('Prism.js未加载，跳过代码高亮');
+            return;
+        }
+
+        // 查找所有代码块
+        const codeBlocks = container.querySelectorAll('pre code');
+        
+        codeBlocks.forEach(codeBlock => {
+            // 获取父级 pre 元素
+            const preElement = codeBlock.parentElement;
+            
+            // 尝试从类名中提取语言信息
+            let language = 'text';
+            const classNames = codeBlock.className.split(' ');
+            
+            for (const className of classNames) {
+                if (className.startsWith('language-')) {
+                    language = className.replace('language-', '');
+                    break;
+                }
+            }
+            
+            // 如果没有找到语言，尝试从内容中推断
+            if (language === 'text') {
+                language = this.detectLanguage(codeBlock.textContent);
+            }
+            
+            // 设置语言类
+            codeBlock.className = `language-${language}`;
+            preElement.className = `language-${language}`;
+            
+            // 添加语言标签
+            this.addLanguageLabel(preElement, language);
+            
+            // 高亮代码
+            try {
+                Prism.highlightElement(codeBlock);
+            } catch (error) {
+                console.warn('代码高亮失败:', error);
+            }
+        });
+    }
+
+    // 检测代码语言
+    detectLanguage(code) {
+        const trimmedCode = code.trim();
+        
+        // JavaScript/TypeScript
+        if (trimmedCode.includes('function') || trimmedCode.includes('=>') || 
+            trimmedCode.includes('const ') || trimmedCode.includes('let ') ||
+            trimmedCode.includes('var ') || trimmedCode.includes('console.log')) {
+            if (trimmedCode.includes('interface ') || trimmedCode.includes(': string') ||
+                trimmedCode.includes(': number') || trimmedCode.includes('type ')) {
+                return 'typescript';
+            }
+            return 'javascript';
+        }
+        
+        // Python
+        if (trimmedCode.includes('def ') || trimmedCode.includes('import ') ||
+            trimmedCode.includes('print(') || trimmedCode.includes('if __name__')) {
+            return 'python';
+        }
+        
+        // HTML
+        if (trimmedCode.includes('<html') || trimmedCode.includes('<!DOCTYPE') ||
+            (trimmedCode.includes('<') && trimmedCode.includes('>'))) {
+            return 'html';
+        }
+        
+        // CSS
+        if (trimmedCode.includes('{') && trimmedCode.includes('}') &&
+            (trimmedCode.includes(':') || trimmedCode.includes('.'))) {
+            return 'css';
+        }
+        
+        // JSON
+        if ((trimmedCode.startsWith('{') && trimmedCode.endsWith('}')) ||
+            (trimmedCode.startsWith('[') && trimmedCode.endsWith(']'))) {
+            try {
+                JSON.parse(trimmedCode);
+                return 'json';
+            } catch (e) {
+                // 不是有效的JSON
+            }
+        }
+        
+        // Shell/Bash
+        if (trimmedCode.includes('#!/bin/bash') || trimmedCode.includes('$ ') ||
+            trimmedCode.includes('cd ') || trimmedCode.includes('ls ') ||
+            trimmedCode.includes('npm ') || trimmedCode.includes('git ')) {
+            return 'bash';
+        }
+        
+        // SQL
+        if (trimmedCode.toUpperCase().includes('SELECT ') || 
+            trimmedCode.toUpperCase().includes('INSERT ') ||
+            trimmedCode.toUpperCase().includes('UPDATE ') ||
+            trimmedCode.toUpperCase().includes('DELETE ')) {
+            return 'sql';
+        }
+        
+        return 'text';
+    }    // 添加语言标签和复制按钮
+    addLanguageLabel(preElement, language) {
+        // 检查是否已经有标签
+        if (preElement.querySelector('.code-language-label')) {
+            return;
+        }
+        
+        // 创建语言标签
+        const label = document.createElement('span');
+        label.className = 'code-language-label';
+        label.textContent = language.toUpperCase();
+        
+        // 创建复制按钮
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'code-copy-btn';
+        copyBtn.innerHTML = '<span>📋</span><span>复制</span>';
+        copyBtn.title = '复制代码';
+        
+        // 添加复制功能
+        copyBtn.addEventListener('click', () => {
+            this.copyCodeToClipboard(preElement, copyBtn);
+        });
+        
+        // 将元素添加到 pre 元素中
+        preElement.style.position = 'relative';
+        preElement.appendChild(label);
+        preElement.appendChild(copyBtn);
+        
+        // 标记该代码块有语言标签
+        if (language !== 'text') {
+            preElement.classList.add('has-language-label');
+        }
+    }
+
+    // 复制代码到剪贴板
+    async copyCodeToClipboard(preElement, copyBtn) {
+        try {
+            const codeElement = preElement.querySelector('code');
+            if (!codeElement) return;
+            
+            // 获取代码文本（去除高亮标记）
+            let codeText = codeElement.textContent || codeElement.innerText;
+            
+            // 使用现代 Clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(codeText);
+            } else {
+                // 降级方案：使用传统方法
+                const textArea = document.createElement('textarea');
+                textArea.value = codeText;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                document.execCommand('copy');
+                textArea.remove();
+            }
+            
+            // 显示复制成功状态
+            const originalHTML = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<span>✅</span><span>已复制</span>';
+            copyBtn.classList.add('copied');
+            
+            // 2秒后恢复原状
+            setTimeout(() => {
+                copyBtn.innerHTML = originalHTML;
+                copyBtn.classList.remove('copied');
+            }, 2000);
+            
+        } catch (error) {
+            console.error('复制失败:', error);
+            
+            // 显示复制失败状态
+            const originalHTML = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<span>❌</span><span>复制失败</span>';
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = originalHTML;
+            }, 2000);
         }
     }
 
@@ -1019,7 +1234,9 @@ class BlogApp {
 
         headings.forEach(heading => {
             const level = parseInt(heading.tagName.charAt(1));
-            const text = heading.textContent.trim();
+            const rawText = heading.textContent.trim();
+            // 应用Markdown渲染到目录文本
+            const renderedText = this.renderMarkdownForToc(rawText);
             const id = heading.id;
 
             // 处理层级变化
@@ -1041,8 +1258,8 @@ class BlogApp {
                 tocHTML += '</li>';
             }
 
-            // 添加当前标题
-            tocHTML += `<li><a href="#${id}" class="toc-h${level}" onclick="return blog.scrollToHeading('${id}')">${text}</a>`;
+            // 添加当前标题（使用渲染后的文本）
+            tocHTML += `<li><a href="#${id}" class="toc-h${level}" onclick="return blog.scrollToHeading('${id}')">${renderedText}</a>`;
             currentLevel = level;
         });
 
@@ -1065,6 +1282,31 @@ class BlogApp {
 
         // 监听滚动事件，高亮当前标题
         this.setupTocScrollSpy(headings);
+    }
+
+    // 为目录渲染基本的Markdown语法
+    renderMarkdownForToc(text) {
+        if (!text) return '';
+        
+        // 处理基本的Markdown语法
+        return text
+            // 处理粗体 **text** 或 __text__
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/__(.*?)__/g, '<strong>$1</strong>')
+            // 处理斜体 *text* 或 _text_ (但要避免与粗体冲突)
+            .replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, '<em>$1</em>')
+            .replace(/(?<!_)_([^_]+?)_(?!_)/g, '<em>$1</em>')
+            // 处理行内代码 `code`
+            .replace(/`([^`]+?)`/g, '<code>$1</code>')
+            // 处理删除线 ~~text~~
+            .replace(/~~(.*?)~~/g, '<del>$1</del>')
+            // 处理高亮 ==text== (非标准但Obsidian支持)
+            .replace(/==(.*?)==/g, '<mark>$1</mark>')
+            // 转义剩余的HTML标签（安全考虑）
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            // 恢复我们处理过的标签
+            .replace(/&lt;(\/?(strong|em|code|del|mark))&gt;/g, '<$1>');
     }
 
     // 滚动到指定标题

@@ -1,0 +1,281 @@
+/* =========================== 表格样式 =========================== */
+
+/* 基础表格样式 */
+.article-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    /* 设置表格布局为固定，使列宽更均匀 */
+    table-layout: fixed;
+}
+
+/* 表格容器 - 响应式横向滚动 */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 24px 0;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    /* 自定义滚动条样式 */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-medium) var(--bg-secondary);
+}
+
+/* 表头样式 */
+.article-content table th {
+    background: var(--accent-gradient);
+    color: white;
+    padding: 16px 20px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-bottom: 2px solid var(--accent-primary);
+    position: relative;
+    /* 限制第一列宽度 */
+    width: auto;
+}
+
+/* 第一列宽度控制 - 解决第一列过宽问题 */
+.article-content table th:first-child,
+.article-content table td:first-child {
+    width: 20%; /* 限制第一列最大宽度为20% */
+    min-width: 120px; /* 设置最小宽度避免过窄 */
+    max-width: 200px; /* 设置最大宽度避免过宽 */
+}
+
+/* 第二列和第三列宽度 */
+.article-content table th:nth-child(2),
+.article-content table td:nth-child(2) {
+    width: 35%; /* 示例列 */
+}
+
+.article-content table th:nth-child(3),
+.article-content table td:nth-child(3) {
+    width: 45%; /* 特点列 */
+}
+
+/* 表格单元格样式 */
+.article-content table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    vertical-align: top;
+    /* 文本换行处理 */
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* 斑马纹效果 */
+.article-content table tr:nth-child(even) {
+    background: var(--bg-secondary);
+}
+
+.article-content table tr:nth-child(odd) {
+    background: var(--bg-primary);
+}
+
+/* 悬停效果 */
+.article-content table tr:hover {
+    background: rgba(59, 130, 246, 0.05);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.article-content table tr:hover td {
+    color: var(--text-primary);
+}
+
+/* Webkit浏览器滚动条样式 */
+.table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* 表格内的代码样式 */
+.article-content table code {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent-primary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    word-break: keep-all; /* 代码不要断行 */
+    white-space: nowrap;
+}
+
+/* 表格内的强调文本 */
+.article-content table strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* 表格内的链接 */
+.article-content table a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: var(--transition);
+}
+
+.article-content table a:hover {
+    color: var(--accent-secondary);
+    border-bottom-color: var(--accent-secondary);
+}
+
+/* 深色主题表格样式 */
+[data-theme="dark"] .article-content table {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .article-content table th {
+    background: var(--accent-gradient);
+    color: white;
+}
+
+[data-theme="dark"] .article-content table td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .article-content table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="dark"] .article-content table tr:nth-child(odd) {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .article-content table tr:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="dark"] .article-content table tr:hover td {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .article-content table code {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* 移动端表格优化 */
+@media (max-width: 768px) {
+    .article-content table {
+        font-size: 0.8rem;
+        margin: 20px 0;
+    }
+    
+    .article-content table th,
+    .article-content table td {
+        padding: 12px 16px;
+    }
+    
+    .article-content table th {
+        font-size: 0.75rem;
+    }
+    
+    /* 移动端第一列宽度调整 */
+    .article-content table th:first-child,
+    .article-content table td:first-child {
+        width: 25%; /* 移动端稍微增加第一列宽度 */
+        min-width: 100px;
+        max-width: 150px;
+    }
+    
+    /* 在移动端为表格添加指示器 */
+    .table-container::before {
+        content: "← 左右滑动查看完整表格 →";
+        display: block;
+        text-align: center;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        padding: 8px;
+        background: var(--bg-tertiary);
+        border-radius: 6px 6px 0 0;
+        margin-bottom: -1px;
+        border: 1px solid var(--border-light);
+        border-bottom: none;
+    }
+}
+
+/* 小屏幕进一步优化 */
+@media (max-width: 480px) {
+    .article-content table {
+        font-size: 0.75rem;
+    }
+    
+    .article-content table th,
+    .article-content table td {
+        padding: 10px 12px;
+    }
+    
+    .article-content table th {
+        font-size: 0.7rem;
+    }
+    
+    /* 超小屏幕第一列宽度 */
+    .article-content table th:first-child,
+    .article-content table td:first-child {
+        width: 30%;
+        min-width: 80px;
+        max-width: 120px;
+    }
+}
+
+/* 特定类型表格的优化 - 针对CSS选择器表格 */
+.table-selector-comparison th:first-child,
+.table-selector-comparison td:first-child {
+    width: 18%;
+    min-width: 110px;
+    max-width: 160px;
+}
+
+.table-selector-comparison th:nth-child(2),
+.table-selector-comparison td:nth-child(2) {
+    width: 32%;
+}
+
+.table-selector-comparison th:nth-child(3),
+.table-selector-comparison td:nth-child(3) {
+    width: 50%;
+}
+
+/* 紧凑型表格样式 */
+.table-compact {
+    font-size: 0.8rem;
+}
+
+.table-compact th,
+.table-compact td {
+    padding: 10px 14px;
+}
+
+.table-compact th:first-child,
+.table-compact td:first-child {
+    width: 15%;
+    min-width: 90px;
+    max-width: 140px;
+}

@@ -1,4 +1,4 @@
-Javascript-zw
+JavaScript 语言与前端学习笔记
 # 00 课程简介
 浏览器、服务器、本地、嵌入式
 忒修斯之船：既非A也非B
@@ -58,6 +58,8 @@ typeof也有一个很奇怪的操作，就是直接`typeof a`（a未定义）不
 2. **隐式参数arguments**：用法是`arguments[i]`，但是他不是数组，不能直接使用foreach等方法，可以用`Array.from()`方法把他变成数组之后使用（ES6之后）。arguments只记录用户传入的，不记录默认值。
 3. **spread操作符**：与rest操作相反，再调用函数时在数组前面加三个点，将数组中的所有元素作为多个参数传入函数。
 > **箭头函数**是一种轻量级的函数，里面没有arguments数组，在箭头函数内部使用的arguments数组实际上是外层函数的arguments。
+
+> arguments不是原生数组而是一个object，将其转化为数组可以使用`Array.from()`，或者用`[].slice.call(arguments)`
 ### 函数的四种调用方式：
 主要为函数上下文（function context）的不同。
 #### 1. invoke as a function
@@ -155,10 +157,12 @@ for-in循环语句：对一个object**及其原型链**中满足两个条件的k
 ### iterable object
 **for-of循环语句**：具有一个key为Symbol.iterator的property（Symbol.iterator是ES定义的一个well-known symbol），其value是一个function，调用这个funciton会返回一个iterator。一个iterator是一个object，有一个next方法，返回一个object。返回的object里面有两个属性：done和value，分别表示是否已经遍历了所有值和当前遍历到的值。其中done默认为false，value只在done为false时有意义。for-of循环语句也是一种语法糖。
 **spread操作符**：通过在数组前面加`...`将数组转化为一组元素，可以用在任何iterable object上。
+![[attachments/Pasted image 20250620014621.png]]
 ### class
 使用原型链模拟面向对象语言中的类与类之间的扩展/继承关系。
 具体的，使用对象构造函数模拟其他语言中的类，对象属性中有一个const同名函数属性模拟constructor构造函数，有一个Object.defineProperties()函数模拟class中的其他函数。
 class中还有accessor property和静态方法。
+可以用computed member names定义成员。
 还有class expression可以定义匿名类，还是太开放了。
 class的重要优点是更方便的使用extends了，子类构造函数必须先调用super。
 ### Object上的方法
@@ -188,11 +192,13 @@ class的重要优点是更方便的使用extends了，子类构造函数必须�
 并集：`const u = new Set{ [...s1, ...s2] };`
 交集：`const v = new Set{ [...s1].filter(v => s2.has(v)) };`
 ### Destructing
-TODO
+赋初值、赋值都可以使用析构操作更方便的赋值。缺省√，变量重命名√，
+析构赋值表达式得到的是等号右边的式子的值。
+数组析构
 ### `?.`操作符
 通常与`.`有相同的行为，区别在于对象为null或undefined时使用`.`会抛出异常，而使用`?.`会返回undefined。
 # 04 Type Conversion
-感觉没啥意思，有些细节等回放的时候记一下
+
 # 05 JS中的模块化机制
 四个关键词：分解（Decomposition）、封装（Encapusulation）、接口（Interface）、复用（Reuse）
 两个模块化机制：CJS和ESM，分别用扩展名.cjs和.mjs来表示
@@ -219,3 +225,4 @@ TODO
 `window.setTimeOut(func, delay) window.setInterval(func, delay)`
 更多：TODO
 # 07 JS异步程序设计
+to be done...

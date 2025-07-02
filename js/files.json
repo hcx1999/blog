@@ -1,44 +1,104 @@
 {
-  "generated": "2025-05-30T05:20:21.316Z",
+  "generated": "2025-06-04T08:09:40.570Z",
   "generator": "generate-file-list.js",
   "version": "1.0",
-  "totalFiles": 6,
+  "totalFiles": 16,
   "files": [
     {
-      "filename": "AI基础笔记.md",
-      "size": 20843,
-      "modified": "2025-05-29T18:50:25.981Z",
-      "created": "2025-04-19T06:23:10.402Z"
+      "filename": "AI 01-数学基础.md",
+      "size": 2335,
+      "modified": "2025-06-02T16:46:44.598Z",
+      "created": "2025-06-02T16:46:44.598Z"
     },
     {
-      "filename": "AI基础作业笔记.md",
-      "size": 1157,
-      "modified": "2025-05-29T10:47:52.882Z",
-      "created": "2025-04-17T05:11:28.038Z"
+      "filename": "AI 02-机器学习.md",
+      "size": 3363,
+      "modified": "2025-06-02T16:46:44.604Z",
+      "created": "2025-06-02T16:46:44.603Z"
     },
     {
-      "filename": "CAMEL.md",
-      "size": 5,
-      "modified": "2025-05-29T10:47:57.223Z",
-      "created": "2025-05-12T06:46:37.330Z"
+      "filename": "AI 03-神经网络.md",
+      "size": 4911,
+      "modified": "2025-06-02T16:46:44.605Z",
+      "created": "2025-06-02T16:46:44.605Z"
     },
     {
-      "filename": "JavaScript-tds.md",
+      "filename": "AI 04-卷积神经网络.md",
+      "size": 1679,
+      "modified": "2025-06-02T16:46:44.605Z",
+      "created": "2025-06-02T16:46:44.605Z"
+    },
+    {
+      "filename": "AI 05-对抗神经网络.md",
+      "size": 5711,
+      "modified": "2025-06-04T03:33:24.025Z",
+      "created": "2025-06-02T16:46:44.605Z"
+    },
+    {
+      "filename": "AI 06-循环神经网络.md",
+      "size": 1993,
+      "modified": "2025-06-02T16:46:44.605Z",
+      "created": "2025-06-02T16:46:44.605Z"
+    },
+    {
+      "filename": "AI 07-Transformer.md",
+      "size": 1112,
+      "modified": "2025-06-02T16:46:44.605Z",
+      "created": "2025-06-02T16:46:44.605Z"
+    },
+    {
+      "filename": "AI ai基础作业笔记.md",
+      "size": 1182,
+      "modified": "2025-06-02T16:46:44.605Z",
+      "created": "2025-06-02T16:46:44.605Z"
+    },
+    {
+      "filename": "js 前端框架.md",
+      "size": 35006,
+      "modified": "2025-06-04T06:02:41.852Z",
+      "created": "2025-06-04T05:19:24.193Z"
+    },
+    {
+      "filename": "js css和css3.md",
+      "size": 20354,
+      "modified": "2025-06-04T06:01:10.827Z",
+      "created": "2025-06-04T05:06:22.008Z"
+    },
+    {
+      "filename": "js HTML和HTML5.md",
+      "size": 13633,
+      "modified": "2025-06-04T07:11:37.014Z",
+      "created": "2025-06-04T05:15:41.428Z"
+    },
+    {
+      "filename": "js JavaScript-tds.md",
       "size": 4826,
-      "modified": "2025-05-29T10:48:16.098Z",
-      "created": "2025-04-23T03:05:19.328Z"
+      "modified": "2025-06-04T05:06:32.842Z",
+      "created": "2025-06-02T16:46:44.638Z"
     },
     {
-      "filename": "JavaScript-zw.md",
-      "size": 13718,
-      "modified": "2025-05-30T03:44:41.272Z",
-      "created": "2025-04-20T02:26:55.920Z"
+      "filename": "js JavaScript-zw.md",
+      "size": 13939,
+      "modified": "2025-06-02T16:46:44.638Z",
+      "created": "2025-06-02T16:46:44.638Z"
     },
     {
-      "filename": "Linux配置笔记.md",
-      "size": 8040,
-      "modified": "2025-05-29T10:48:31.927Z",
-      "created": "2025-04-07T11:45:17.290Z"
+      "filename": "js JavaScript和ECMAscript.md",
+      "size": 18375,
+      "modified": "2025-06-04T06:02:28.743Z",
+      "created": "2025-06-04T06:01:59.740Z"
+    },
+    {
+      "filename": "js Notes-tds.md",
+      "size": 66624,
+      "modified": "2025-06-04T07:00:23.389Z",
+      "created": "2025-06-04T03:33:41.986Z"
+    },
+    {
+      "filename": "Linux Linux环境配置笔记.md",
+      "size": 8313,
+      "modified": "2025-06-02T16:46:44.610Z",
+      "created": "2025-06-02T16:46:44.605Z"
     }
   ]
 }

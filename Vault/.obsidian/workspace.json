@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "32d0e3cf57f6e9b6",
+        "id": "f3a7b0b6387df6c7",
         "type": "tabs",
         "children": [
           {
-            "id": "580370762f101a56",
+            "id": "3cd5b598d6540755",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "AI 05-对抗神经网络.md",
+                "file": "js JavaScript.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "AI 05-对抗神经网络"
+              "title": "js JavaScript"
             }
           }
         ]
@@ -169,20 +169,38 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "7afd8a3fa1280e4f",
+  "active": "3cd5b598d6540755",
   "lastOpenFiles": [
-    "AI 05-对抗神经网络.md",
-    "未命名.md",
+    "AI 09-强化学习.md",
+    "AI 10-LLM.md",
+    "AI 08-搜索.md",
+    "AI 11-具身智能.md",
     "Linux Linux环境配置笔记.md",
-    "AI ai基础作业笔记.md",
     "AI 07-Transformer.md",
+    "js JavaScript.md",
+    "attachments/Pasted image 20250620014621.png",
+    "attachments/Pasted image 20250608103923.png",
+    "attachments/Pasted image 20250608103854.png",
+    "AI ai基础作业笔记.md",
+    "js css和css3.md",
+    "js Notes-tds.md",
+    "js HTML和HTML5.md",
+    "js 前端框架.md",
+    "attachments/Pasted image 20250604214903.png",
+    "attachments/Pasted image 20250604212221.png",
+    "attachments/Pasted image 20250604212143.png",
+    "attachments/Pasted image 20250604212133.png",
+    "attachments/Pasted image 20250604212017.png",
+    "attachments/Pasted image 20250604212006.png",
+    "attachments/Pasted image 20250604211956.png",
+    "js JavaScript-tds.md",
+    "js JavaScript和ECMAscript.md",
+    "AI 05-对抗神经网络.md",
     "AI 06-循环神经网络.md",
     "AI 04-卷积神经网络.md",
     "AI 03-神经网络.md",
     "AI 02-机器学习.md",
     "AI 01-数学基础.md",
-    "js JavaScript-zw.md",
-    "js JavaScript-tds.md",
     "未命名",
     "测试自动更新.md",
     "目录功能测试.md",
@@ -191,21 +209,7 @@
     "index.json",
     "file-index.json",
     "CAMEL.md",
-    "2025-05-30.md",
-    "attachments/Pasted image 20250419170637.png",
-    "attachments/Pasted image 20250528181903.png",
     "attachments",
-    "attachments/Pasted image 20250525102449.png",
-    "imgs",
-    "attachments/Pasted image 20250513142149.png",
-    "attachments/Pasted image 20250513142047.png",
-    "attachments/Pasted image 20250513142019.png",
-    "attachments/Pasted image 20250513141236.png",
-    "attachments/Pasted image 20250513141232.png",
-    "attachments/Pasted image 20250513141209.png",
-    "attachments/Pasted image 20250513141153.png",
-    "2025-04-19.md",
-    "Welcome.md",
-    "create a link.md"
+    "imgs"
   ]
 }
