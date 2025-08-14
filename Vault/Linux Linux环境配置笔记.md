@@ -265,6 +265,10 @@ chsh -s /usr/bin/zsh
 cd ~/.oh-my-zsh/custom/plugins
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 git clone --depth=1 https://gitee.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k # gitee版本
+
+# 安装zsh-syntax-highlighting插件
+cd ~/.oh-my-zsh/custom/plugins/
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git
 ```
 然后捣鼓一下`~/.zshrc`文件就可以了，我的是：
 ```bash
