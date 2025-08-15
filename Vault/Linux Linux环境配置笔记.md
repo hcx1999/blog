@@ -234,7 +234,21 @@ nohup python cifar10_cnn_torch.py > output.log 2>&1 &
 可以通过`jobs`查看进程（仅限原终端）， `ps`来查看后台进程，通过`cat output.log`查看输出内容
 
 *output.log中提示`nohup: ignoring input` 是正常行为，表示 `nohup` 忽略了标准输入。如果程序不需要输入，可以放心忽略这个提示。*
-
+#### grep
+Linux grep (global regular expression) 命令用于查找文件里符合条件的字符串或正则表达式。
+grep 指令用于查找内容包含指定的范本样式的文件，如果发现某文件的内容符合所指定的范本样式，预设 grep 指令会把含有范本样式的那一列显示出来。若不指定任何文件名称，或是所给予的文件名为 -，则 grep 指令会从标准输入设备读取数据。
+##### 语法
+grep \[options] pattern \[files]
+- pattern - 表示要查找的字符串或正则表达式。
+- files - 表示要查找的文件名，可以同时查找多个文件，如果省略 files 参数，则默认从标准输入中读取数据。
+**常用选项：**
+- `-i`：忽略大小写进行匹配。
+- `-v`：反向查找，只打印不匹配的行。
+- `-n`：显示匹配行的行号。
+- `-r`：递归查找子目录中的文件。
+- `-l`：只打印匹配的文件名。
+- `-c`：只打印匹配的行数。
+**[更多][Linux grep 命令 | 菜鸟教程](https://www.runoob.com/linux/linux-comm-grep.html)()**
 ## 终端配置
 此处以debian11为例
 ```bash
@@ -306,3 +320,4 @@ improvement: 改进
 build: 打包
 ci: 持续集成
 ```
+# 进程
