@@ -1,4 +1,4 @@
-# Linux配置笔记
+# 环境配置笔记
 ## 磁盘操作
 #### ls 命令
 列出当前工作目录下的所有文件/文件夹的名称
@@ -95,10 +95,8 @@ conda info -e
    # <<< conda init <<<
 ```
 #### 与win11中zsh的兼容性问题：
-[原文（主要是3个issue）](https://hlsvillager.icu/2024/09/10/a-problem-in-windows-conda-zsh/)
-问题的本质是`\n`与`\r\n`的编码区别问题。
-解决办法：在用户目录`~`下新建一个`conda-shell-zsh-hook.zsh`文件：
-```sh
+[一个有效的解决方案](https://hlsvillager.icu/2024/09/10/a-problem-in-windows-conda-zsh/))
+```bash
 export PYTHONIOENCODING=UTF-8
 export CONDA_EXE="$(cygpath 'C:\Users\16534\miniconda3\Scripts\conda.exe')"
 export _CE_M=''
@@ -171,17 +169,16 @@ fi
 conda activate base
 ```
 在`.zshrc`中添加：
-```sh
-# >>> conda initialize >>>  
-# !! Contents within this block are managed by 'conda init' !!  
-if [ -f '/cygdrive/d/Anaconda/anaconda3/Scripts/conda.exe' ]; then  
-    export PYTHONIOENCODING=UTF-8  
-    source ~/conda-shell-zsh-hook.zsh  
-fi  
-  
-if [ -f "/cygdrive/d/Anaconda/anaconda3/etc/profile.d/mamba.sh" ]; then  
-    . "/cygdrive/d/Anaconda/anaconda3/etc/profile.d/mamba.sh"  
-fi  
+```bash
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+if [ -f '/c/Users/16534/miniconda3/Scripts/conda.exe' ]; then
+    export PYTHONIOENCODING=UTF-8
+    source ~/conda-shell-zsh-hook.zsh
+fi
+if [ -f "~/miniconda3/etc/profile.d/mamba.sh" ]; then
+    . "~/miniconda3/etc/profile.d/mamba.sh
+fi
 # <<< conda initialize <<<
 ```
 ### Python venv
@@ -320,4 +317,3 @@ improvement: 改进
 build: 打包
 ci: 持续集成
 ```
-# 进程
