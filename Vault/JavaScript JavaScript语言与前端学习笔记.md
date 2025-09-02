@@ -180,6 +180,23 @@ class的重要优点是更方便的使用extends了，子类构造函数必须�
 - `sort()`注意返回值不是true和false而是大于0的值和小于0的值
 - `every() some()`参数为回调函数
 - `find() indexOf() lastIndexOf()`不存在返回-1，还有`findIndex()`参数为函数
+需要使用定长数组（如桶）的情况下使用`let arr: number[] = new Array(MAXN)`会导致arr中充满undefined，进行运算则得到NaN。为了方便可以使用TypedArray：
+#### TypedArray
+一、有哪些类型
+- 整数（8/16/32 位）
+    - Int8Array, Uint8Array, Uint8ClampedArray
+    - Int16Array, Uint16Array
+    - Int32Array, Uint32Array
+- 浮点
+    - Float32Array, Float64Array
+- 大整数（元素为 bigint）
+    - BigInt64Array, BigUint64Array
+二、核心特性
+- 固定长度、连续内存、默认值全为 0（Float 型是 +0）。
+- 不能 push/pop/shift/unshift/splice；长度不可变。
+- 下标越界不会增长，写入被忽略；读取得到 undefined。
+- 值会被类型强制：例如 Uint8Array 只保留 0..255（Clamped 会夹紧，普通 Uint 溢出取模）。
+- 适合做计数/直方图/数值计算/二进制数据处理。
 #### Map
 同样的`(v, k, o) => {...}`，这个设计还挺好玩的
 #### Set
@@ -193,6 +210,7 @@ class的重要优点是更方便的使用extends了，子类构造函数必须�
 数组析构
 ### `?.`操作符
 通常与`.`有相同的行为，区别在于对象为null或undefined时使用`.`会抛出异常，而使用`?.`会返回undefined。
+> 此外，此处应当说明js和ts语言钟in和of的区别。简单讲in去的是键of取的是值。对于数组来说应该使用of，使用in并不是1..n，而是奇怪的字符串索引，容易发生意想不到的隐式转化。
 # 04 Type Conversion
 
 # 05 JS中的模块化机制
