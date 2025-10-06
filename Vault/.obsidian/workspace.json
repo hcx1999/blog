@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "e285e9dbb8b60503",
+        "id": "54c745304b03a705",
         "type": "tabs",
         "children": [
           {
-            "id": "f0279f6d0f6be9e7",
+            "id": "f4197cba0a0ad8cb",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Note 幻觉抑制课题组实习笔记.md",
+                "file": "AI AI基础.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Note 幻觉抑制课题组实习笔记"
+              "title": "AI AI基础"
             }
           }
         ]
@@ -44,7 +44,7 @@
                 "autoReveal": false
               },
               "icon": "lucide-folder-closed",
-              "title": "文件列表"
+              "title": "Files"
             }
           },
           {
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 308.5
   },
   "right": {
     "id": "a653e5076f42554b",
@@ -161,53 +161,53 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "bases:创建新数据库": false,
-      "switcher:打开快速切换": false,
-      "graph:查看关系图谱": false,
-      "canvas:新建白板": false,
-      "daily-notes:打开/创建今天的日记": false,
-      "templates:插入模板": false,
-      "command-palette:打开命令面板": false
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
     }
   },
-  "active": "f0279f6d0f6be9e7",
+  "active": "f4197cba0a0ad8cb",
   "lastOpenFiles": [
-    "Rust Rust学习笔记.md",
-    "attachments/Pasted image 20250831154315.png",
-    "Note 幻觉抑制课题组实习笔记.md",
+    "AI 01-数学基础.md",
+    "AI 09-强化学习.md",
+    "AI AI基础.md",
+    "AI AI基础.md",
+    "AI 08-搜索.md",
+    "AI 07-Transformer.md",
+    "AI 06-循环神经网络.md",
+    "AI 05-对抗神经网络.md",
+    "AI 04-卷积神经网络.md",
+    "AI 03-神经网络.md",
+    "AI 02-机器学习.md",
+    "attachments/Pasted image 20250928123605.png",
+    "attachments/Pasted image 20250928123120.png",
+    "attachments/Pasted image 20250911205248.png",
+    "attachments/Pasted image 20250907204335.png",
+    "attachments/Pasted image 20250907203029.png",
+    "System ICS lab 踩坑笔记.md",
+    "Python Python 学习笔记.md",
+    "AI 强化学习.md",
+    "attachments/Pasted image 20250419170637.png",
     "Linux 环境配置笔记.md",
+    "未命名",
+    "Rust Rust学习笔记.md",
+    "Note 幻觉抑制课题组实习笔记.md",
+    "attachments/Pasted image 20250831154315.png",
     "[在.md",
     "attachments/Pasted image 20250829125701.png",
     "attachments/Pasted image 20250829032240.png",
     "attachments/Pasted image 20250829024723.png",
-    "attachments/Pasted image 20250829024509.png",
-    "attachments/Pasted image 20250828174559.png",
-    "attachments/Pasted image 20250828174507.png",
-    "attachments/Pasted image 20250826164900.png",
     "JavaScript JavaScript语言与前端学习笔记.md",
-    "attachments/Pasted image 20250815110132.png",
-    "attachments/Pasted image 20250814112022.png",
-    "AI 01-数学基础.md",
-    "AI 09-强化学习.md",
     "AI 10-LLM.md",
-    "AI 08-搜索.md",
     "AI 11-具身智能.md",
-    "AI 07-Transformer.md",
     "AI ai基础作业笔记.md",
     "js css和css3.md",
     "js Notes-tds.md",
     "js HTML和HTML5.md",
-    "js 前端框架.md",
-    "js JavaScript-tds.md",
-    "js JavaScript和ECMAscript.md",
-    "AI 05-对抗神经网络.md",
-    "AI 06-循环神经网络.md",
-    "AI 04-卷积神经网络.md",
-    "AI 03-神经网络.md",
-    "AI 02-机器学习.md",
-    "未命名",
-    "测试自动更新.md",
-    "目录功能测试.md",
     "index.json",
     "file-index.json",
     "attachments",
