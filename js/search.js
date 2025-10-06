@@ -8,6 +8,20 @@ class SearchEngine {
         this.initSearchEvents();
     }
 
+    getSearchPageUrl() {
+        if (typeof blog !== 'undefined' && blog && typeof blog.resolvePagePath === 'function') {
+            return blog.resolvePagePath('search.html');
+        }
+        return window.location.pathname.includes('/pages/') ? 'search.html' : 'pages/search.html';
+    }
+
+    getHomePageUrl() {
+        if (typeof blog !== 'undefined' && blog && typeof blog.resolvePagePath === 'function') {
+            return blog.resolvePagePath('index.html');
+        }
+        return window.location.pathname.includes('/pages/') ? 'index.html' : 'pages/index.html';
+    }
+
     // 初始化搜索事件监听
     initSearchEvents() {
         const searchInput = document.getElementById('search-input');
@@ -86,8 +100,17 @@ class SearchEngine {
     }
 
     // 执行搜索
-    performSearch(query) {
+    performSearch(query, options = {}) {
         if (!query || query.length < 1) {
+            return;
+        }
+
+        const isSearchPage = document.body.getAttribute('data-page') === 'search';
+        const stayOnPage = options.stayOnPage || isSearchPage;
+
+        if (!stayOnPage) {
+            const params = new URLSearchParams({ q: query.trim() });
+            window.location.href = `${this.getSearchPageUrl()}?${params.toString()}`;
             return;
         }
 
@@ -98,9 +121,22 @@ class SearchEngine {
         
         const results = this.searchArticles(query);
         this.displaySearchResults(query, results);
+        const searchClear = document.getElementById('search-clear');
+        if (searchClear) {
+            searchClear.style.display = 'block';
+        }
         
-        // 切换到搜索视图
-        blog.switchView('search');
+        if (typeof blog !== 'undefined' && blog) {
+            if (typeof blog.switchView === 'function') {
+                blog.switchView('search');
+            }
+            if (typeof blog.clearActiveLinks === 'function') {
+                blog.clearActiveLinks();
+            }
+            if (typeof blog.clearTableOfContents === 'function') {
+                blog.clearTableOfContents();
+            }
+        }
         
         // 更新URL（可选）
         // history.pushState({ view: 'search', query: query }, '', `#search?q=${encodeURIComponent(query)}`);
@@ -346,10 +382,17 @@ class SearchEngine {
         
         this.currentQuery = '';
         this.isSearchMode = false;
-        
-        // 返回首页
-        blog.switchView('home');
-        showHome();
+
+        const searchContent = document.getElementById('search-content');
+        if (searchContent && document.body.getAttribute('data-page') === 'search') {
+            searchContent.innerHTML = '<div class="search-placeholder">输入关键词开始搜索。</div>';
+        }
+
+        if (typeof blog !== 'undefined' && blog) {
+            blog.showHome();
+        } else {
+            window.location.href = this.getHomePageUrl();
+        }
     }
 
     // HTML转义
@@ -380,6 +423,7 @@ let searchEngine = null;
 function initSearch() {
     if (typeof SearchEngine !== 'undefined') {
         searchEngine = new SearchEngine();
+        window.searchEngine = searchEngine;
         console.log('🔍 搜索功能已初始化');
     } else {
         console.error('❌ SearchEngine 类未定义');

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>hcx1999</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/about.css">
+    <!-- 网站图标 -->
+    <link rel="icon" href="../src/avatar.svg" type="image/svg+xml">    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">    <!-- Prism.js CSS for code highlighting - High contrast themes -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-solarizedlight.min.css" id="prism-light-theme">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" id="prism-dark-theme" disabled>
+</head>
+<body data-page="home">
+    <div class="layout-grid">
+        <header class="header">        <nav class="navbar">
+                <div class="nav-brand">
+                    <a href="index.html" class="brand-link">
+                        <h1>
+                            <img src="../src/avatar.svg" alt="avatar" class="blog-icon" width="24" height="24">
+                            HCX1999
+                        </h1>
+                    </a>
+                </div>                <div class="nav-menu">
+                    <div class="search-container">
+                        <input type="text" id="search-input" class="search-input" placeholder="搜索文章..." />
+                        <button id="search-btn" class="search-btn" onclick="performSearch()" title="搜索">🔍</button>
+                        <button id="search-clear" class="search-clear" onclick="clearSearch()" title="清除搜索" style="display: none;">✖</button>
+                    </div>                    <a href="index.html" class="nav-link">首页</a>
+                    <a href="category.html" class="nav-link">分类</a>
+                    <a href="about.html" class="nav-link">关于</a>
+                    <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()">🌙</button>
+                </div>
+            </nav>
+        </header>        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>分类</h3>
+                <ul id="category-list" class="category-list">
+                </ul>
+            </div>            <div class="sidebar-section">
+                <h3>文章列表</h3>
+                <ul id="article-list" class="article-list">
+                    <li class="loading">加载中...</li>
+                </ul>
+            </div>        </aside>        <main class="content">
+            <div id="home-view" class="view active">
+                <div id="home-content">
+                    <!-- 标题和描述将由JavaScript动态生成 -->
+                </div>
+            </div>
+        </main>            <aside class="toc-sidebar">                <div class="toc-wrapper">
+                    <div style="margin-bottom: 16px;">
+                        <h3>📋 目录</h3>
+                    </div>
+                    <div class="reading-progress" id="reading-progress" style="display: none;">
+                        <div class="progress-label">
+                            <span>阅读进度</span>
+                            <span id="progress-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                    </div>
+                    <nav id="table-of-contents" class="toc-nav">
+                        <div class="toc-placeholder">阅读文章时将显示目录</div>
+                    </nav>
+                </div>
+            </aside>            <footer class="footer">
+                <p>&copy; 2025 hcx1999</p>
+                <p>保留所有权利</p>
+                <div class="footer-decoration"></div>
+            </footer></div>    <!-- 移动端目录遮罩层 -->
+    <div id="toc-overlay" class="toc-overlay"></div>    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" class="back-to-top" onclick="blog.scrollToTop()" title="返回顶部">
+        🚀
+    </button><script src="../js/markdown.min.js"></script>
+    <!-- Prism.js for code highlighting -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <!-- KaTeX JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>    <!-- 配置文件必须在 blog.js 和 image-fixer.js 之前加载 -->
+    <script src="../js/config.js"></script>
+    <script src="../js/image-fixer.js"></script>    <script src="../js/category.js"></script>
+    <script src="../js/search.js"></script>
+    <script src="../js/mobile-ui.js"></script>
+    <script src="../js/blog.js"></script><script>
+        // 页面加载完成后初始化主题和搜索
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                if (typeof initTheme === 'function') {
+                    initTheme();
+                } else {
+                    console.error('initTheme function not found');
+                }
+                
+                // 初始化搜索功能
+                if (typeof initSearch === 'function') {
+                    initSearch();
+                } else {
+                    console.error('initSearch function not found');
+                }
+            } catch (error) {
+                console.error('Error during initialization:', error);
+            }
+        });
+    </script>
+</body>
+</html>

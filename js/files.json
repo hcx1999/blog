@@ -1,104 +1,50 @@
 {
-  "generated": "2025-06-04T08:09:40.570Z",
+  "generated": "2025-10-06T11:00:57.595Z",
   "generator": "generate-file-list.js",
   "version": "1.0",
-  "totalFiles": 16,
+  "totalFiles": 7,
   "files": [
     {
-      "filename": "AI 01-数学基础.md",
-      "size": 2335,
-      "modified": "2025-06-02T16:46:44.598Z",
-      "created": "2025-06-02T16:46:44.598Z"
+      "filename": "AI 强化学习.md",
+      "size": 1376,
+      "modified": "2025-10-06T08:55:23.953Z",
+      "created": "2025-10-06T06:08:01.169Z"
     },
     {
-      "filename": "AI 02-机器学习.md",
-      "size": 3363,
-      "modified": "2025-06-02T16:46:44.604Z",
-      "created": "2025-06-02T16:46:44.603Z"
+      "filename": "AI AI基础.md",
+      "size": 7191,
+      "modified": "2025-10-06T07:59:23.327Z",
+      "created": "2025-10-06T05:59:35.904Z"
     },
     {
-      "filename": "AI 03-神经网络.md",
-      "size": 4911,
-      "modified": "2025-06-02T16:46:44.605Z",
-      "created": "2025-06-02T16:46:44.605Z"
+      "filename": "Linux 环境配置.md",
+      "size": 10377,
+      "modified": "2025-10-06T06:29:41.117Z",
+      "created": "2025-10-03T05:49:34.553Z"
     },
     {
-      "filename": "AI 04-卷积神经网络.md",
-      "size": 1679,
-      "modified": "2025-06-02T16:46:44.605Z",
-      "created": "2025-06-02T16:46:44.605Z"
+      "filename": "Note 幻觉抑制课题组实习.md",
+      "size": 13283,
+      "modified": "2025-10-06T07:11:01.312Z",
+      "created": "2025-10-03T05:49:34.565Z"
     },
     {
-      "filename": "AI 05-对抗神经网络.md",
-      "size": 5711,
-      "modified": "2025-06-04T03:33:24.025Z",
-      "created": "2025-06-02T16:46:44.605Z"
+      "filename": "Others 杂记.md",
+      "size": 9,
+      "modified": "2025-10-06T06:50:51.546Z",
+      "created": "2025-10-06T06:50:42.429Z"
     },
     {
-      "filename": "AI 06-循环神经网络.md",
-      "size": 1993,
-      "modified": "2025-06-02T16:46:44.605Z",
-      "created": "2025-06-02T16:46:44.605Z"
+      "filename": "Rust Rust语言.md",
+      "size": 2376,
+      "modified": "2025-10-06T06:29:30.208Z",
+      "created": "2025-10-03T05:49:34.577Z"
     },
     {
-      "filename": "AI 07-Transformer.md",
-      "size": 1112,
-      "modified": "2025-06-02T16:46:44.605Z",
-      "created": "2025-06-02T16:46:44.605Z"
-    },
-    {
-      "filename": "AI ai基础作业笔记.md",
-      "size": 1182,
-      "modified": "2025-06-02T16:46:44.605Z",
-      "created": "2025-06-02T16:46:44.605Z"
-    },
-    {
-      "filename": "js 前端框架.md",
-      "size": 35006,
-      "modified": "2025-06-04T06:02:41.852Z",
-      "created": "2025-06-04T05:19:24.193Z"
-    },
-    {
-      "filename": "js css和css3.md",
-      "size": 20354,
-      "modified": "2025-06-04T06:01:10.827Z",
-      "created": "2025-06-04T05:06:22.008Z"
-    },
-    {
-      "filename": "js HTML和HTML5.md",
-      "size": 13633,
-      "modified": "2025-06-04T07:11:37.014Z",
-      "created": "2025-06-04T05:15:41.428Z"
-    },
-    {
-      "filename": "js JavaScript-tds.md",
-      "size": 4826,
-      "modified": "2025-06-04T05:06:32.842Z",
-      "created": "2025-06-02T16:46:44.638Z"
-    },
-    {
-      "filename": "js JavaScript-zw.md",
-      "size": 13939,
-      "modified": "2025-06-02T16:46:44.638Z",
-      "created": "2025-06-02T16:46:44.638Z"
-    },
-    {
-      "filename": "js JavaScript和ECMAscript.md",
-      "size": 18375,
-      "modified": "2025-06-04T06:02:28.743Z",
-      "created": "2025-06-04T06:01:59.740Z"
-    },
-    {
-      "filename": "js Notes-tds.md",
-      "size": 66624,
-      "modified": "2025-06-04T07:00:23.389Z",
-      "created": "2025-06-04T03:33:41.986Z"
-    },
-    {
-      "filename": "Linux Linux环境配置笔记.md",
-      "size": 8313,
-      "modified": "2025-06-02T16:46:44.610Z",
-      "created": "2025-06-02T16:46:44.605Z"
+      "filename": "Web JavaScript语言.md",
+      "size": 14848,
+      "modified": "2025-10-06T06:51:44.386Z",
+      "created": "2025-10-03T05:49:34.540Z"
     }
   ]
 }

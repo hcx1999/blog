@@ -8,10 +8,11 @@
  * 3. 或者调用特定函数手动修复特定问题
  */
 var ImageFixUtil = (function() {
+            var basePath = window.location.pathname.includes('/pages/') ? '../' : '';
       // 配置选项
     var config = {
         debug: true,
-        imageBaseDir: (typeof BlogConfig !== 'undefined' ? BlogConfig.getAttachmentsDirPath() + '/' : 'Vault/attachments/'),
+                imageBaseDir: (typeof BlogConfig !== 'undefined' ? BlogConfig.getAttachmentsDirPath() + '/' : basePath + 'Vault/attachments/'),
         autoFix: true,
         checkInterval: 2000 // 毫秒
     };
@@ -95,7 +96,7 @@ var ImageFixUtil = (function() {
         if (!path) return false;
         if (path.indexOf('http') === 0) return false;
         if (path.indexOf('data:') === 0) return false;
-          var baseDir = (typeof BlogConfig !== 'undefined' ? BlogConfig.getAttachmentsDirPath() : 'Vault/attachments');
+          var baseDir = (typeof BlogConfig !== 'undefined' ? BlogConfig.getAttachmentsDirPath() : basePath + 'Vault/attachments');
         var attachmentsDir = (typeof BlogConfig !== 'undefined' ? BlogConfig.attachmentsDir : 'attachments');
         
         // 检查是否已经正确指向attachments目录
@@ -128,7 +129,7 @@ var ImageFixUtil = (function() {
      */    function fixImagePath(path) {
         if (!path) return path;
           var fixedPath = path;
-        var contentDir = (typeof BlogConfig !== 'undefined' ? BlogConfig.contentDir : 'Vault');
+    var contentDir = (typeof BlogConfig !== 'undefined' ? BlogConfig.contentDir : basePath + 'Vault');
         var attachmentsDir = (typeof BlogConfig !== 'undefined' ? BlogConfig.attachmentsDir : 'attachments');
         
         // 处理各种路径格式
@@ -239,7 +240,7 @@ var ImageFixUtil = (function() {
         var paths = [];
           if (!originalPath) return paths;
         
-        var attachmentPath = (typeof BlogConfig !== 'undefined' ? BlogConfig.getAttachmentPath : function(filename) { return 'Vault/attachments/' + filename; });
+    var attachmentPath = (typeof BlogConfig !== 'undefined' ? BlogConfig.getAttachmentPath : function(filename) { return basePath + 'Vault/attachments/' + filename; });
         
         // 提取文件名
         var pathParts = originalPath.split('/');

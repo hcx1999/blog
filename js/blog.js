@@ -56,12 +56,38 @@ function initTheme() {
 
 // 博客应用主类
 class BlogApp {
-    constructor() {
+    constructor(pageType) {
+        this.pageType = pageType || document.body.getAttribute('data-page') || 'home';
         this.articles = [];
-        this.currentView = 'home';
+        this.currentView = this.pageType;
         this.currentArticle = null;
+        this.assetBasePath = this.computeAssetBasePath();
+        this.pageBasePath = this.computePageBasePath();
         this.checkProtocol(); // 检查协议
-        this.init();
+    }
+
+    computeAssetBasePath() {
+        const path = window.location.pathname;
+        return path.includes('/pages/') ? '../' : '';
+    }
+
+    computePageBasePath() {
+        const path = window.location.pathname;
+        return path.includes('/pages/') ? '' : 'pages/';
+    }
+
+    resolveAssetPath(relativePath) {
+        if (/^(?:[a-z]+:)?\/\//i.test(relativePath) || relativePath.startsWith('../') || relativePath.startsWith('/')) {
+            return relativePath;
+        }
+        return `${this.assetBasePath}${relativePath}`;
+    }
+
+    resolvePagePath(page) {
+        if (/^(?:[a-z]+:)?\/\//i.test(page) || page.startsWith('../') || page.startsWith('/')) {
+            return page;
+        }
+        return `${this.pageBasePath}${page}`;
     }
 
     // 检查协议（确保在合适的环境中运行）
@@ -77,7 +103,13 @@ class BlogApp {
         console.log(`🌐 当前域名: ${location.hostname || 'localhost'}`);
     }
 
-    async init() {
+    async init(pageType) {
+        if (pageType) {
+            this.pageType = pageType;
+        } else if (!this.pageType) {
+            this.pageType = document.body.getAttribute('data-page') || 'home';
+        }
+
         console.log('🚀 博客系统初始化开始...');
         console.log('📋 步骤 1: 强制更新文件列表...');
         
@@ -90,11 +122,8 @@ class BlogApp {
         console.log('📋 步骤 3: 渲染侧边栏...');
         this.renderSidebar();
 
-        console.log('📋 步骤 4: 渲染首页视图...');
-        this.renderHomeView();
-        
-        // 设置初始的body class
-        document.body.classList.add('view-home');
+    console.log('📋 步骤 4: 渲染页面内容...');
+    this.renderPageContent();
         
         // 设置全局滚动监听（确保返回顶部按钮在所有页面都能工作）
         this.setupGlobalScrollListener();
@@ -158,7 +187,7 @@ class BlogApp {
     async handleStaticHostingEnvironment() {
         try {
             // 优先从 files.json 获取文件列表
-            const response = await fetch('js/files.json');
+            const response = await fetch(this.resolveAssetPath('js/files.json'));
             if (response.ok) {
                 const fileData = await response.json();
                 if (fileData.files && Array.isArray(fileData.files)) {
@@ -214,7 +243,7 @@ class BlogApp {
     async fallbackToExistingFilesList() {
         try {
             // 尝试从 files.json 获取
-            const response = await fetch('js/files.json');
+            const response = await fetch(this.resolveAssetPath('js/files.json'));
             if (response.ok) {
                 const fileData = await response.json();
                 if (fileData.files && Array.isArray(fileData.files)) {
@@ -242,7 +271,7 @@ class BlogApp {
         const validFiles = [];
         for (const filename of filenames) {
             try {
-                const response = await fetch(`Vault/${filename}`, { method: 'HEAD' });
+                const response = await fetch(this.resolveAssetPath(`Vault/${filename}`), { method: 'HEAD' });
                 if (response.ok) {
                     validFiles.push(filename);
                 }
@@ -256,7 +285,7 @@ class BlogApp {
     // 直接扫描Vault目录
     async scanVaultDirectory() {
         try {
-            const response = await fetch('Vault/');
+            const response = await fetch(this.resolveAssetPath('Vault/'));
             if (response.ok) {
                 const htmlText = await response.text();
                 const markdownFiles = this.parseDirectoryListing(htmlText);
@@ -271,7 +300,7 @@ class BlogApp {
     // 检查文件列表是否需要更新
     async checkIfFileListNeedsUpdate(currentFiles) {
         try {
-            const response = await fetch('js/files.json');
+            const response = await fetch(this.resolveAssetPath('js/files.json'));
             if (!response.ok) {
                 console.log('files.json不存在，需要创建');
                 return true;
@@ -316,7 +345,7 @@ class BlogApp {
             
             // 首先尝试实时扫描目录（确保获取最新文件列表）
             try {
-                const response = await fetch('Vault/');
+                const response = await fetch(this.resolveAssetPath('Vault/'));
                 if (response.ok) {
                     const htmlText = await response.text();
                     const markdownFiles = this.parseDirectoryListing(htmlText);                    if (markdownFiles.length > 0) {
@@ -336,7 +365,7 @@ class BlogApp {
             
             // 如果目录扫描失败，尝试从 files.json 获取
             try {
-                const response = await fetch('js/files.json');
+                const response = await fetch(this.resolveAssetPath('js/files.json'));
                 if (response.ok) {
                     const fileData = await response.json();
                     if (fileData.files && Array.isArray(fileData.files)) {
@@ -436,7 +465,7 @@ class BlogApp {
         // 尝试获取每个文件的详细信息
         for (const filename of files) {
             try {
-                const response = await fetch(`Vault/${filename}`, { method: 'HEAD' });
+                const response = await fetch(this.resolveAssetPath(`Vault/${filename}`), { method: 'HEAD' });
                 if (response.ok) {
                     const lastModified = response.headers.get('Last-Modified');
                     const contentLength = response.headers.get('Content-Length');
@@ -532,7 +561,7 @@ class BlogApp {
     async checkAndUpdateFileList(currentFiles) {
         try {
             // 尝试获取现有的 files.json
-            const response = await fetch('js/files.json');
+            const response = await fetch(this.resolveAssetPath('js/files.json'));
             if (response.ok) {
                 const existingData = await response.json();
                 const existingFiles = existingData.files ? existingData.files.map(f => f.filename) : [];
@@ -595,7 +624,7 @@ class BlogApp {
         
         const loadPromises = markdownFiles.map(async (filename) => {
             try {
-                const response = await fetch(`Vault/${filename}`);
+                const response = await fetch(this.resolveAssetPath(`Vault/${filename}`));
                 if (response.ok) {
                     const content = await response.text();
                     return this.parseMarkdownFile(filename, content);
@@ -740,9 +769,132 @@ class BlogApp {
         this.updateStatistics();
     }
 
+    // 根据页面类型渲染内容
+    renderPageContent() {
+        const viewName = this.pageType || 'home';
+
+        switch (viewName) {
+            case 'home':
+                this.renderHomeView();
+                this.switchView('home');
+                break;
+            case 'article':
+                this.prepareArticlePage();
+                break;
+            case 'category':
+                this.prepareCategoryPage();
+                break;
+            case 'search':
+                this.prepareSearchPage();
+                break;
+            case 'about':
+                this.switchView('about');
+                this.clearTableOfContents();
+                break;
+            default:
+                this.switchView(viewName);
+                break;
+        }
+    }
+
+    // 准备文章页面
+    prepareArticlePage() {
+        this.switchView('article');
+        const articleId = this.getQueryParam('id');
+        const articleFilename = this.getQueryParam('file');
+
+        if (articleId || articleFilename) {
+            this.showArticle(articleId || articleFilename, {
+                stayOnPage: true,
+                filename: articleFilename || undefined
+            });
+        } else {
+            const contentDiv = document.getElementById('article-content');
+            if (contentDiv) {
+                contentDiv.innerHTML = '<div class="article-placeholder">请选择一篇文章阅读。</div>';
+            }
+            this.clearTableOfContents();
+        }
+    }
+
+    // 准备分类页面
+    prepareCategoryPage() {
+        this.switchView('category');
+        const category = this.getQueryParam('name');
+
+        if (category) {
+            const filteredArticles = this.articles.filter(article => article.category === category);
+            this.showCategoryView(filteredArticles, category, { stayOnPage: true });
+        } else {
+            this.renderCategoryOverview();
+            this.clearTableOfContents();
+        }
+    }
+
+    // 分类总览
+    renderCategoryOverview() {
+        const contentDiv = document.getElementById('category-content');
+        if (!contentDiv) return;
+
+        const categories = [...new Set(this.articles.map(article => article.category))];
+
+        const html = `
+            <h1>所有分类</h1>
+            <div class="article-grid">
+                ${categories.map(category => {
+                    const count = this.articles.filter(article => article.category === category).length;
+                    return `
+                        <div class="recent-item" onclick="blog.filterByCategory('${category}')">
+                            <h4>${category}</h4>
+                            <p>${count} 篇文章</p>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+
+        contentDiv.innerHTML = html;
+    }
+
+    // 准备搜索页面
+    prepareSearchPage() {
+        this.switchView('search');
+        this.clearTableOfContents();
+
+        const query = this.getQueryParam('q');
+        const searchInput = document.getElementById('search-input');
+        if (searchInput && query) {
+            searchInput.value = query;
+        }
+
+        if (query && typeof searchEngine !== 'undefined' && searchEngine) {
+            searchEngine.performSearch(query, { stayOnPage: true });
+        } else {
+            const contentDiv = document.getElementById('search-content');
+            if (contentDiv) {
+                contentDiv.innerHTML = '<div class="search-placeholder">输入关键词开始搜索。</div>';
+            }
+        }
+    }
+
+    // 获取URL参数
+    getQueryParam(name) {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const value = params.get(name);
+            return value ? decodeURIComponent(value) : null;
+        } catch (error) {
+            console.warn('解析URL参数失败:', error);
+            return null;
+        }
+    }
+
     // 渲染文章列表
     renderArticleList() {
         const articleList = document.getElementById('article-list');
+        if (!articleList) {
+            return;
+        }
         
         if (this.articles.length === 0) {
             articleList.innerHTML = '<li class="error">暂无文章</li>';
@@ -764,6 +916,9 @@ class BlogApp {
     renderCategoryList() {
         const categories = [...new Set(this.articles.map(article => article.category))];
         const categoryList = document.getElementById('category-list');
+        if (!categoryList) {
+            return;
+        }
 
         if (categories.length === 0) {
             categoryList.innerHTML = '<li class="error">暂无分类</li>';
@@ -786,6 +941,12 @@ class BlogApp {
       // 渲染首页视图
     renderHomeView() {
         const homeContent = document.getElementById('home-content');
+        if (!homeContent) {
+            console.warn('首页容器不存在，跳过渲染');
+            return;
+        }
+
+        this.clearTableOfContents();
         // 显示全部文章而不只是前5篇
         const recentArticles = this.articles;
 
@@ -810,34 +971,137 @@ class BlogApp {
         homeContent.innerHTML = html;
     }
 
+    findArticleByIdentifiers(id, filename) {
+        if (!Array.isArray(this.articles) || this.articles.length === 0) {
+            return null;
+        }
+
+        const candidates = new Set();
+
+        if (typeof id === 'string' && id.trim()) {
+            const trimmedId = id.trim();
+            candidates.add(trimmedId);
+            candidates.add(trimmedId.replace(/\.md$/i, ''));
+        }
+
+        if (typeof filename === 'string' && filename.trim()) {
+            const trimmedFilename = filename.trim();
+            candidates.add(trimmedFilename);
+            candidates.add(trimmedFilename.replace(/\.md$/i, ''));
+        }
+
+        for (const key of candidates) {
+            if (!key) continue;
+            const found = this.articles.find(article => {
+                const filename = typeof article.filename === 'string' ? article.filename : '';
+                const filenameWithoutExt = filename.replace(/\.md$/i, '');
+                return article.id === key || filename === key || filenameWithoutExt === key;
+            });
+            if (found) {
+                return found;
+            }
+        }
+
+        return null;
+    }
+
+    async loadSingleArticle(filename) {
+        if (!filename || typeof filename !== 'string') {
+            return null;
+        }
+
+        const normalizedFilename = filename.trim();
+        if (!normalizedFilename) {
+            return null;
+        }
+
+        // 如果文章已经存在则直接返回
+        const existing = this.findArticleByIdentifiers(normalizedFilename, normalizedFilename);
+        if (existing) {
+            return existing;
+        }
+
+        try {
+            const response = await fetch(this.resolveAssetPath(`Vault/${encodeURIComponent(normalizedFilename)}`));
+            if (!response.ok) {
+                console.warn(`无法按需加载文章文件: ${normalizedFilename}`);
+                return null;
+            }
+
+            const content = await response.text();
+            const article = this.parseMarkdownFile(normalizedFilename, content);
+
+            this.articles.push(article);
+            this.articles.sort((a, b) => new Date(b.date) - new Date(a.date));
+            this.renderSidebar();
+
+            if (typeof buildSearchIndex === 'function') {
+                buildSearchIndex(this.articles);
+            }
+
+            return article;
+        } catch (error) {
+            console.error('按需加载文章失败:', error);
+            return null;
+        }
+    }
+
     // 显示文章
-    async showArticle(articleId) {
-        const article = this.articles.find(a => a.id === articleId);
+    async showArticle(articleIdentifier, options = {}) {
+        let article = this.findArticleByIdentifiers(articleIdentifier, options.filename);
+        if (!article && options.filename) {
+            article = await this.loadSingleArticle(options.filename);
+        }
         if (!article) {
             this.showError('文章未找到');
             return;
         }
 
+        const stayOnPage = options.stayOnPage || this.pageType === 'article';
+
+        if (!stayOnPage) {
+            const params = new URLSearchParams({ id: article.id });
+            if (article.filename) {
+                params.set('file', article.filename);
+            }
+            window.location.href = `${this.resolvePagePath('article.html')}?${params.toString()}`;
+            return;
+        }
+
         this.currentArticle = article;
         this.switchView('article');
-        
-        // 更新侧边栏活跃状态
-        document.querySelectorAll('.article-link').forEach(link => {
-            link.classList.remove('active');
-        });
-        document.querySelector(`[onclick="blog.showArticle('${articleId}')"]`)?.classList.add('active');
+        this.highlightActiveArticleLink(article.id);
 
-        // 渲染Markdown内容
+        await this.renderArticleContent(article);
+    }
+
+    highlightActiveArticleLink(articleId) {
+        const links = document.querySelectorAll('.article-link');
+        if (links.length === 0) return;
+
+        links.forEach(link => link.classList.remove('active'));
+        const activeLink = document.querySelector(`[onclick="blog.showArticle('${articleId}')"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    }
+
+    async renderArticleContent(article) {
+        const contentDiv = document.getElementById('article-content');
+        if (!contentDiv) {
+            console.error('文章容器未找到');
+            return;
+        }
+
         try {
-            const contentDiv = document.getElementById('article-content');
             contentDiv.innerHTML = '<div class="loading">正在渲染文章...</div>';
-            
+
             // 预处理Markdown内容（修复标题格式）
             let processedContent = this.preprocessMarkdown(article.content);
-            
+
             // 预处理KaTeX数学公式
             processedContent = this.preprocessMath(processedContent);
-            
+
             // 配置marked.js选项
             marked.setOptions({
                 gfm: true,
@@ -845,28 +1109,30 @@ class BlogApp {
                 pedantic: false,
                 sanitize: false,
                 smartLists: true,
-                smartypants: false            });
-            
+                smartypants: false
+            });
+
             // 使用marked.js渲染Markdown
             const htmlContent = marked.parse(processedContent);
             contentDiv.innerHTML = htmlContent;
-            
+
             // 处理图片路径
             this.processImages(contentDiv);
-            
+
             // 处理表格 - 添加横向滚动容器
             this.processTables(contentDiv);
-              // 渲染KaTeX数学公式
+
+            // 渲染KaTeX数学公式
             this.renderMath(contentDiv);
-            
+
             // 高亮代码块
             this.highlightCodeBlocks(contentDiv);
-            
+
             // 生成目录
             this.generateTableOfContents(contentDiv);
-            
         } catch (error) {
-            console.error('渲染文章失败:', error);            this.showError('文章渲染失败');
+            console.error('渲染文章失败:', error);
+            this.showError('文章渲染失败');
         }
     }
     
@@ -1591,26 +1857,49 @@ class BlogApp {
     
     // 按分类过滤
     filterByCategory(category) {
+        if (!category) return;
+
+        if (this.pageType !== 'category') {
+            const params = new URLSearchParams({ name: category });
+            window.location.href = `${this.resolvePagePath('category.html')}?${params.toString()}`;
+            return;
+        }
+
         const filteredArticles = this.articles.filter(article => article.category === category);
-        this.showCategoryView(filteredArticles, category);
-    }    // 显示分类视图
-    showCategoryView(articles, category) {        this.switchView('category');
+        this.showCategoryView(filteredArticles, category, { stayOnPage: true });
+    }
+
+    // 显示分类视图
+    showCategoryView(articles, category, options = {}) {
+        const stayOnPage = options.stayOnPage || this.pageType === 'category';
+        if (!stayOnPage) {
+            const params = new URLSearchParams({ name: category });
+            window.location.href = `${this.resolvePagePath('category.html')}?${params.toString()}`;
+            return;
+        }
+
+        this.switchView('category');
         this.clearActiveLinks();
         this.clearTableOfContents();
         
         const contentDiv = document.getElementById('category-content');
+        if (!contentDiv) {
+            return;
+        }
         
         const html = `
             <h1>分类: ${category}</h1>
             <p class="category-description">共 ${articles.length} 篇文章</p>
-            <div class="article-grid">
-                ${articles.map(article => `
-                    <div class="recent-item" onclick="blog.showArticle('${article.id}')">
-                        <h4>${article.title}</h4>
-                        <p>${article.excerpt}</p>
-                    </div>
-                `).join('')}
-            </div>
+            ${articles.length > 0 ? `
+                <div class="article-grid">
+                    ${articles.map(article => `
+                        <div class="recent-item" onclick="blog.showArticle('${article.id}')">
+                            <h4>${article.title}</h4>
+                            <p>${article.excerpt}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '<div class="no-results">该分类下暂无文章</div>'}
         `;
         
         contentDiv.innerHTML = html;
@@ -1638,11 +1927,23 @@ class BlogApp {
     }
       // 显示首页
     showHome() {
+        if (this.pageType !== 'home') {
+            window.location.href = this.resolvePagePath('index.html');
+            return;
+        }
+
         this.switchView('home');
         this.clearActiveLinks();
-        this.clearTableOfContents();
-    }// 显示关于页面
+        this.renderHomeView();
+    }
+
+    // 显示关于页面
     showAbout() {
+        if (this.pageType !== 'about') {
+            window.location.href = this.resolvePagePath('about.html');
+            return;
+        }
+
         this.switchView('about');
         this.clearActiveLinks();
         this.clearTableOfContents();
@@ -1650,16 +1951,25 @@ class BlogApp {
     
     // 切换视图
     switchView(viewName) {
+        const targetView = document.getElementById(`${viewName}-view`);
+        if (!targetView) {
+            console.warn(`视图 ${viewName} 不存在，当前页面类型: ${this.pageType}`);
+            return;
+        }
+
         document.querySelectorAll('.view').forEach(view => {
             view.classList.remove('active');
         });
-        document.getElementById(`${viewName}-view`).classList.add('active');
-        
-        // 更新body的class来控制布局和目录显示
-        document.body.className = document.body.className.replace(/view-\w+/g, '');
-        document.body.classList.add(`view-${viewName}`);
-        
+        targetView.classList.add('active');
+
+        this.updateBodyViewClass(viewName);
         this.currentView = viewName;
+    }
+
+    updateBodyViewClass(viewName) {
+        const classesToRemove = Array.from(document.body.classList).filter(cls => cls.startsWith('view-'));
+        classesToRemove.forEach(cls => document.body.classList.remove(cls));
+        document.body.classList.add(`view-${viewName}`);
     }
 
     // 清除活跃链接
@@ -1672,14 +1982,31 @@ class BlogApp {
     // 显示错误信息
     showError(message) {
         const contentDiv = document.getElementById('article-content');
-        contentDiv.innerHTML = `<div class="error">${message}</div>`;
+        if (contentDiv) {
+            contentDiv.innerHTML = `<div class="error">${message}</div>`;
+        }
         this.switchView('article');
     }
     
     // 搜索功能
     search(query) {
         if (!query.trim()) {
-            this.showHome();
+            if (this.pageType !== 'home') {
+                window.location.href = this.resolvePagePath('index.html');
+            } else {
+                this.showHome();
+            }
+            return;
+        }
+
+        if (this.pageType !== 'search') {
+            const params = new URLSearchParams({ q: query.trim() });
+            window.location.href = `${this.resolvePagePath('search.html')}?${params.toString()}`;
+            return;
+        }
+
+        if (typeof searchEngine !== 'undefined' && searchEngine) {
+            searchEngine.performSearch(query, { stayOnPage: true });
             return;
         }
 
@@ -1689,14 +2016,24 @@ class BlogApp {
             article.category.toLowerCase().includes(query.toLowerCase())
         );
 
-        this.showSearchView(results, query);
+        this.showSearchView(results, query, { stayOnPage: true });
     }    // 显示搜索视图
-    showSearchView(articles, query) {
+    showSearchView(articles, query, options = {}) {
+        const stayOnPage = options.stayOnPage || this.pageType === 'search';
+        if (!stayOnPage) {
+            const params = new URLSearchParams({ q: query.trim() });
+            window.location.href = `${this.resolvePagePath('search.html')}?${params.toString()}`;
+            return;
+        }
+
         this.switchView('search');
         this.clearActiveLinks();
         this.clearTableOfContents();
         
         const contentDiv = document.getElementById('search-content');
+        if (!contentDiv) {
+            return;
+        }
         
         const html = `
             <h1>搜索结果: "${query}"</h1>
@@ -1777,8 +2114,19 @@ function showAbout() {
 // 初始化博客应用
 let blog;
 document.addEventListener('DOMContentLoaded', () => {
-    blog = new BlogApp();
-    initTheme(); // 初始化主题
+    const pageType = document.body.getAttribute('data-page') || 'home';
+
+    if (typeof initTheme === 'function') {
+        initTheme();
+    }
+
+    blog = new BlogApp(pageType);
+
+    if (typeof initSearch === 'function') {
+        initSearch();
+    }
+
+    blog.init(pageType);
     
     // 初始化图片修复工具
     if (typeof ImageFixUtil !== 'undefined') {

@@ -1,7 +1,9 @@
 // 博客系统配置文件
+const contentBasePath = window.location.pathname.includes('/pages/') ? '../' : '';
+
 const BlogConfig = {
     // 内容目录配置
-    contentDir: 'Vault',
+    contentDir: `${contentBasePath}Vault`,
     
     // 附件目录配置
     attachmentsDir: 'attachments',    // 缓存设置

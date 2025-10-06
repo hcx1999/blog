@@ -22,5 +22,12 @@ $$Q_{n+1} = Q_n + \frac1n[R_n-Q_n]$$
 - UCB(Upper Confidence Bound)
 - 梯度强盗算法
 ## 第3章 有限马尔可夫决策过程
-有限MDP(Markov Decision Procedure)
+### 1. 有限MDP(Markov Decision Procedure)
 ![[attachments/Pasted image 20251006142310.png]]
+- 智能体-环境接口具有马尔可夫性。
+- 目标被形式化表征为一种特殊信号，称为收益。
+- 我们希望最大化回报，而回报与未来的收益序列有关。
+一般将回报定义为
+$$G_t \doteq R_{t+1}+\gamma R_{t+2}+\gamma^2R_{t+3}+\dots=\sum_{k=0}^{\infty}\gamma^kR_{t+k+1}$$
+$$G_t\doteq R_{t+1}+\gamma G_{t+1}$$
+任务分为事件性任务和持续性任务，事件性任务的回报只影响后面有限个奖赏。
