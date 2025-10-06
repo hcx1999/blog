@@ -1,3 +1,26 @@
+function computePageBasePath() {
+    const path = window.location.pathname;
+    const pagesSegment = '/pages/';
+    const pagesIndex = path.indexOf(pagesSegment);
+
+    if (pagesIndex === -1) {
+        return 'pages/';
+    }
+
+    const suffix = path.slice(pagesIndex + pagesSegment.length);
+    const segments = suffix.split('/').filter(Boolean);
+
+    if (segments.length > 0 && segments[segments.length - 1].includes('.')) {
+        segments.pop();
+    }
+
+    if (segments.length === 0) {
+        return '';
+    }
+
+    return '../'.repeat(segments.length);
+}
+
 // 搜索功能模块
 class SearchEngine {
     constructor() {
@@ -12,14 +35,15 @@ class SearchEngine {
         if (typeof blog !== 'undefined' && blog && typeof blog.resolvePagePath === 'function') {
             return blog.resolvePagePath('search.html');
         }
-        return window.location.pathname.includes('/pages/') ? 'search.html' : 'pages/search.html';
+        return `${computePageBasePath()}search/`;
     }
 
     getHomePageUrl() {
         if (typeof blog !== 'undefined' && blog && typeof blog.resolvePagePath === 'function') {
             return blog.resolvePagePath('index.html');
         }
-        return window.location.pathname.includes('/pages/') ? 'index.html' : 'pages/index.html';
+        const base = computePageBasePath();
+        return base === '' ? './' : base;
     }
 
     // 初始化搜索事件监听

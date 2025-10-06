@@ -68,12 +68,51 @@ class BlogApp {
 
     computeAssetBasePath() {
         const path = window.location.pathname;
-        return path.includes('/pages/') ? '../' : '';
+        const pagesIndex = path.indexOf('/pages/');
+
+        if (pagesIndex === -1) {
+            return '';
+        }
+
+        const depth = this.calculatePagesDepth(path);
+        return '../'.repeat(depth + 1);
     }
 
     computePageBasePath() {
         const path = window.location.pathname;
-        return path.includes('/pages/') ? '' : 'pages/';
+        const pagesIndex = path.indexOf('/pages/');
+
+        if (pagesIndex === -1) {
+            return 'pages/';
+        }
+
+        const depth = this.calculatePagesDepth(path);
+        return depth === 0 ? '' : '../'.repeat(depth);
+    }
+
+    calculatePagesDepth(path) {
+        const pagesSegment = '/pages/';
+        const pagesIndex = path.indexOf(pagesSegment);
+
+        if (pagesIndex === -1) {
+            return 0;
+        }
+
+        const suffix = path.slice(pagesIndex + pagesSegment.length);
+        if (!suffix) {
+            return 0;
+        }
+
+        const segments = suffix.split('/').filter(Boolean);
+        if (segments.length === 0) {
+            return 0;
+        }
+
+        if (segments[segments.length - 1].includes('.')) {
+            return segments.length - 1;
+        }
+
+        return segments.length;
     }
 
     resolveAssetPath(relativePath) {
@@ -87,7 +126,34 @@ class BlogApp {
         if (/^(?:[a-z]+:)?\/\//i.test(page) || page.startsWith('../') || page.startsWith('/')) {
             return page;
         }
-        return `${this.pageBasePath}${page}`;
+        const normalized = this.normalizePagePath(page);
+        return `${this.pageBasePath}${normalized}`;
+    }
+
+    normalizePagePath(page) {
+        if (!page) {
+            return '';
+        }
+
+        const cleaned = page.replace(/^\.\//, '');
+
+        const mapping = {
+            'index.html': '',
+            'about.html': 'about/',
+            'category.html': 'category/',
+            'article.html': 'article/',
+            'search.html': 'search/'
+        };
+
+        if (mapping.hasOwnProperty(cleaned)) {
+            return mapping[cleaned];
+        }
+
+        if (!cleaned.includes('.') && !cleaned.endsWith('/')) {
+            return `${cleaned}/`;
+        }
+
+        return cleaned;
     }
 
     // 检查协议（确保在合适的环境中运行）

@@ -8,7 +8,26 @@
  * 3. 或者调用特定函数手动修复特定问题
  */
 var ImageFixUtil = (function() {
-            var basePath = window.location.pathname.includes('/pages/') ? '../' : '';
+            function computeBasePath() {
+        var path = window.location.pathname;
+        var pagesSegment = '/pages/';
+        var pagesIndex = path.indexOf(pagesSegment);
+
+        if (pagesIndex === -1) {
+            return '';
+        }
+
+        var suffix = path.slice(pagesIndex + pagesSegment.length);
+        var segments = suffix.split('/').filter(Boolean);
+
+        if (segments.length > 0 && segments[segments.length - 1].indexOf('.') !== -1) {
+            segments.pop();
+        }
+
+        return '../'.repeat(segments.length + 1);
+    }
+
+            var basePath = computeBasePath();
       // 配置选项
     var config = {
         debug: true,

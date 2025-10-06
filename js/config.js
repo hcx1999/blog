@@ -1,5 +1,24 @@
 // 博客系统配置文件
-const contentBasePath = window.location.pathname.includes('/pages/') ? '../' : '';
+function computeContentBasePath() {
+    const path = window.location.pathname;
+    const pagesSegment = '/pages/';
+    const pagesIndex = path.indexOf(pagesSegment);
+
+    if (pagesIndex === -1) {
+        return '';
+    }
+
+    const suffix = path.slice(pagesIndex + pagesSegment.length);
+    const segments = suffix.split('/').filter(Boolean);
+
+    if (segments.length > 0 && segments[segments.length - 1].includes('.')) {
+        segments.pop();
+    }
+
+    return '../'.repeat(segments.length + 1);
+}
+
+const contentBasePath = computeContentBasePath();
 
 const BlogConfig = {
     // 内容目录配置
