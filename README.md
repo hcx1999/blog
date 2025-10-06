@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Logo](src/avatar.svg)
+<img src="src/avatar.svg" alt="Logo" width="120" height="120" style="border-radius:50%; border:0px" />
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Static Badge](https://img.shields.io/badge/Build_with-Claude_AI-purple)](https://www.anthropic.com/claude)
@@ -35,9 +35,9 @@
 
 ## 📖 使用方法
 
-1. 将Markdown笔记放入`Vault`目录
+1. 将Markdown笔记放入 `Vault`目录
 2. 文件会自动被扫描并添加到博客中
-3. 支持从文件名中提取分类（如`AI 01-数学基础.md`会被归类为"AI"）
+3. 支持从文件名中提取分类（如 `AI 01-数学基础.md`会被归类为"AI"）
 4. 文件内容会被解析并显示，支持内部链接和图像引用
 
 ## 🎨 主要功能

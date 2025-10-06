@@ -1213,74 +1213,84 @@ class BlogApp {
         const tocContainer = document.getElementById('table-of-contents');
         if (!tocContainer) return;
 
-        // 查找所有标题元素
-        const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        
+        const headings = Array.from(container.querySelectorAll('h1, h2, h3, h4, h5, h6'));
+
         if (headings.length === 0) {
             tocContainer.innerHTML = '<div class="toc-placeholder">本文章无标题结构</div>';
             return;
         }
 
-        // 为每个标题添加ID（如果没有的话）
-        headings.forEach((heading, index) => {
-            if (!heading.id) {
-                heading.id = `heading-${index}`;
-            }
+        const tocItems = headings.map((heading, index) => {
+            const level = parseInt(heading.tagName.charAt(1), 10);
+            const id = heading.id || `heading-${index}`;
+            heading.id = id;
+
+            return {
+                element: heading,
+                level,
+                id,
+                text: heading.textContent.trim(),
+                renderedText: this.renderMarkdownForToc(heading.textContent.trim()),
+                children: []
+            };
         });
 
-        // 生成目录HTML
-        let tocHTML = '<ul>';
-        let currentLevel = 0;
+        const baseLevel = Math.min(...tocItems.map(item => item.level));
+        const root = { level: baseLevel - 1, children: [] };
+        const stack = [root];
 
-        headings.forEach(heading => {
-            const level = parseInt(heading.tagName.charAt(1));
-            const rawText = heading.textContent.trim();
-            // 应用Markdown渲染到目录文本
-            const renderedText = this.renderMarkdownForToc(rawText);
-            const id = heading.id;
+        tocItems.forEach(item => {
+            const node = { ...item, children: [] };
 
-            // 处理层级变化
-            if (level > currentLevel) {
-                // 需要增加层级
-                for (let i = currentLevel; i < level - 1; i++) {
-                    tocHTML += '<ul>';
-                }
-                if (currentLevel > 0) {
-                    tocHTML += '<ul>';
-                }
-            } else if (level < currentLevel) {
-                // 需要减少层级
-                for (let i = level; i < currentLevel; i++) {
-                    tocHTML += '</ul></li>';
-                }
-            } else if (currentLevel > 0) {
-                // 同级，关闭上一个li
-                tocHTML += '</li>';
+            while (stack.length && node.level <= stack[stack.length - 1].level) {
+                stack.pop();
             }
 
-            // 添加当前标题（使用渲染后的文本）
-            tocHTML += `<li><a href="#${id}" class="toc-h${level}" onclick="return blog.scrollToHeading('${id}')">${renderedText}</a>`;
-            currentLevel = level;
+            const parent = stack[stack.length - 1];
+            parent.children.push(node);
+            stack.push(node);
         });
 
-        // 关闭所有未关闭的标签
-        for (let i = 1; i < currentLevel; i++) {
-            tocHTML += '</ul></li>';
-        }
-        if (currentLevel > 0) {
-            tocHTML += '</li>';
-        }
-        tocHTML += '</ul>';
-        
-        tocContainer.innerHTML = tocHTML;
+        const buildList = (nodes, depth = 0) => {
+            const ul = document.createElement('ul');
+            ul.classList.add('toc-list');
+            if (depth > 0) {
+                ul.classList.add('toc-sublist');
+            }
 
-        // 更新目录计数
+            nodes.forEach(node => {
+                const li = document.createElement('li');
+                li.classList.add('toc-item', `toc-level-${node.level}`);
+
+                const link = document.createElement('a');
+                link.href = `#${node.id}`;
+                link.classList.add(`toc-h${node.level}`);
+                link.innerHTML = node.renderedText;
+                link.addEventListener('click', event => {
+                    event.preventDefault();
+                    this.scrollToHeading(node.id);
+                });
+
+                li.appendChild(link);
+
+                if (node.children.length > 0) {
+                    li.appendChild(buildList(node.children, depth + 1));
+                }
+
+                ul.appendChild(li);
+            });
+
+            return ul;
+        };
+
+        const tocFragment = document.createDocumentFragment();
+        tocFragment.appendChild(buildList(root.children));
+
+        tocContainer.innerHTML = '';
+        tocContainer.appendChild(tocFragment);
+
         this.updateTocCount(headings.length);
-
-        // 显示阅读进度条
         this.showReadingProgress();
-
-        // 监听滚动事件，高亮当前标题
         this.setupTocScrollSpy(headings);
     }
 
