@@ -31,7 +31,7 @@ jobs:
       - name: Check required files
         run: |
           echo "检查必要文件..."
-          required_files=("index.html" "js/blog.js" "css/style.css")
+          required_files=("index.html" "scripts/blog.js" "styles/style.css")
           for file in "${required_files[@]}"; do
             if [ ! -f "$file" ]; then
               echo "❌ 缺少必要文件: $file"
@@ -51,27 +51,27 @@ jobs:
             exit 1
           fi
           
-          # 确保 js 目录存在
-          mkdir -p js
+          # 确保 scripts 目录存在
+          mkdir -p scripts
           
           # 尝试使用 Node.js 脚本生成
-          if [ -f "js/generate-file-list.js" ]; then
+          if [ -f "scripts/generate-file-list.js" ]; then
             echo "使用 Node.js 脚本生成文件列表..."
-            node js/generate-file-list.js
+            node scripts/generate-file-list.js
           fi
           
           # 验证或手动生成 files.json
-          if [ ! -f "js/files.json" ] || [ ! -s "js/files.json" ]; then
+          if [ ! -f "scripts/files.json" ] || [ ! -s "scripts/files.json" ]; then
             echo "手动生成 files.json..."
-            echo "{" > js/files.json
-            echo "  \"generated\": \"$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")\"," >> js/files.json
-            echo "  \"generator\": \"GitHub Actions\"," >> js/files.json
-            echo "  \"version\": \"1.0\"," >> js/files.json
+            echo "{" > scripts/files.json
+            echo "  \"generated\": \"$(date -u +\"%Y-%m-%dT%H:%M:%S.000Z\")\"," >> scripts/files.json
+            echo "  \"generator\": \"GitHub Actions\"," >> scripts/files.json
+            echo "  \"version\": \"1.0\"," >> scripts/files.json
             
             # 计算文件总数
             total_files=$(find Vault -name "*.md" -type f | wc -l)
-            echo "  \"totalFiles\": $total_files," >> js/files.json
-            echo "  \"files\": [" >> js/files.json
+            echo "  \"totalFiles\": $total_files," >> scripts/files.json
+            echo "  \"files\": [" >> scripts/files.json
             
             # 添加文件信息
             first=true
@@ -85,34 +85,34 @@ jobs:
                 if [ "$first" = true ]; then
                   first=false
                 else
-                  echo "    ," >> js/files.json
+                  echo "    ," >> scripts/files.json
                 fi
                 
-                echo "    {" >> js/files.json
-                echo "      \"filename\": \"$filename\"," >> js/files.json
-                echo "      \"size\": $size," >> js/files.json
-                echo "      \"modified\": \"$modified_iso\"," >> js/files.json
-                echo "      \"created\": \"$modified_iso\"" >> js/files.json
-                echo -n "    }" >> js/files.json
+                echo "    {" >> scripts/files.json
+                echo "      \"filename\": \"$filename\"," >> scripts/files.json
+                echo "      \"size\": $size," >> scripts/files.json
+                echo "      \"modified\": \"$modified_iso\"," >> scripts/files.json
+                echo "      \"created\": \"$modified_iso\"" >> scripts/files.json
+                echo -n "    }" >> scripts/files.json
               fi
             done
             
-            echo "" >> js/files.json
-            echo "  ]" >> js/files.json
-            echo "}" >> js/files.json
+            echo "" >> scripts/files.json
+            echo "  ]" >> scripts/files.json
+            echo "}" >> scripts/files.json
           fi
 
       - name: Verify build
         run: |
           echo "验证构建结果..."
           echo "生成的 files.json 内容:"
-          cat js/files.json | head -20
+          cat scripts/files.json | head -20
           echo ""
           echo "Vault 目录中的文件:"
           ls -la Vault/*.md 2>/dev/null || echo "没有找到 Markdown 文件"
           echo ""
           echo "文件大小统计:"
-          du -sh js/files.json css/ js/ Vault/ 2>/dev/null || true
+          du -sh scripts/files.json styles/ scripts/ Vault/ 2>/dev/null || true
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

@@ -253,7 +253,7 @@ class BlogApp {
     async handleStaticHostingEnvironment() {
         try {
             // 优先从 files.json 获取文件列表
-            const response = await fetch(this.resolveAssetPath('js/files.json'));
+            const response = await fetch(this.resolveAssetPath('scripts/files.json'));
             if (response.ok) {
                 const fileData = await response.json();
                 if (fileData.files && Array.isArray(fileData.files)) {
@@ -309,7 +309,7 @@ class BlogApp {
     async fallbackToExistingFilesList() {
         try {
             // 尝试从 files.json 获取
-            const response = await fetch(this.resolveAssetPath('js/files.json'));
+            const response = await fetch(this.resolveAssetPath('scripts/files.json'));
             if (response.ok) {
                 const fileData = await response.json();
                 if (fileData.files && Array.isArray(fileData.files)) {
@@ -366,7 +366,7 @@ class BlogApp {
     // 检查文件列表是否需要更新
     async checkIfFileListNeedsUpdate(currentFiles) {
         try {
-            const response = await fetch(this.resolveAssetPath('js/files.json'));
+            const response = await fetch(this.resolveAssetPath('scripts/files.json'));
             if (!response.ok) {
                 console.log('files.json不存在，需要创建');
                 return true;
@@ -431,7 +431,7 @@ class BlogApp {
             
             // 如果目录扫描失败，尝试从 files.json 获取
             try {
-                const response = await fetch(this.resolveAssetPath('js/files.json'));
+                const response = await fetch(this.resolveAssetPath('scripts/files.json'));
                 if (response.ok) {
                     const fileData = await response.json();
                     if (fileData.files && Array.isArray(fileData.files)) {
@@ -583,7 +583,7 @@ class BlogApp {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            console.log('📥 已生成最新的 files.json 文件，请下载并替换 js/files.json');
+            console.log('📥 已生成最新的 files.json 文件，请下载并替换 scripts/files.json');
             
             // 显示提示信息
             this.showUpdateNotification();
@@ -611,7 +611,7 @@ class BlogApp {
         `;
         notification.innerHTML = `
             <strong>📥 文件列表已更新</strong><br>
-            已下载最新的 files.json，请替换 js/files.json 文件
+            已下载最新的 files.json，请替换 scripts/files.json 文件
         `;
         
         document.body.appendChild(notification);
@@ -627,7 +627,7 @@ class BlogApp {
     async checkAndUpdateFileList(currentFiles) {
         try {
             // 尝试获取现有的 files.json
-            const response = await fetch(this.resolveAssetPath('js/files.json'));
+            const response = await fetch(this.resolveAssetPath('scripts/files.json'));
             if (response.ok) {
                 const existingData = await response.json();
                 const existingFiles = existingData.files ? existingData.files.map(f => f.filename) : [];

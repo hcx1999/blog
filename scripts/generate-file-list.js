@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const VAULT_DIR = 'Vault';
-const OUTPUT_FILE = 'js/files.json';
+const OUTPUT_FILE = 'scripts/files.json';
 /**
  * 递归扫描目录，查找所有 .md 文件
  * @param {string} dir - 要扫描的目录
