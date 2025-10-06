@@ -2,7 +2,7 @@
 Sutton RLBook
 ## 第1章 导论
 ### 1. 马尔可夫过程
-![[attachments/Pasted image 20251006142310.png]]
+![强化学习环境示意图](attachments/Pasted%20image%2020250608103854.png)
 
 例子：TicTacToe
 ### 2. 早期历史
@@ -22,3 +22,5 @@ $$Q_{n+1} = Q_n + \frac1n[R_n-Q_n]$$
 - UCB(Upper Confidence Bound)
 - 梯度强盗算法
 ## 第3章 有限马尔可夫决策过程
+有限MDP(Markov Decision Procedure)
+![[attachments/Pasted image 20251006142310.png]]

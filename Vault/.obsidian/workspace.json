@@ -93,7 +93,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 308.5
+    "width": 211.5
   },
   "right": {
     "id": "a653e5076f42554b",
@@ -187,12 +187,13 @@
   },
   "active": "796e15725dc80d1c",
   "lastOpenFiles": [
+    "Web JavaScript语言.md",
+    "Rust Rust语言.md",
+    "Note 幻觉抑制课题组实习.md",
+    "Others 杂记.md",
+    "AI 强化学习.md",
     "AI AI基础.md",
     "Linux 环境配置.md",
-    "Note 幻觉抑制课题组实习.md",
-    "Rust Rust语言.md",
-    "Web JavaScript语言.md",
-    "AI 强化学习.md",
     "attachments/Pasted image 20251006142310.png",
     "attachments/Pasted image 20250928123605.png",
     "attachments/Pasted image 20250928123120.png",

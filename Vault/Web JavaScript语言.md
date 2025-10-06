@@ -1,4 +1,4 @@
-JavaScript 语言与前端学习笔记
+JavaScript语言
 # 01 JavaScript语言基础
 变量->值->类型
 “JavaScript没有类型”严格来说是错误的，因为虽然变量没有类型，但是值是有类型的。
