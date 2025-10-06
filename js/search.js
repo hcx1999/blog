@@ -4,6 +4,7 @@ class SearchEngine {
         this.searchIndex = [];
         this.currentQuery = '';
         this.isSearchMode = false;
+        this._tempElement = document.createElement('div');
         this.initSearchEvents();
     }
 
@@ -205,13 +206,13 @@ class SearchEngine {
             
             for (const result of results) {
                 const highlightedTitle = this.highlightSearchTerms(result.title, query);
-                const highlightedExcerpt = this.highlightSearchTerms(result.excerpt, query);
-                
+                const snippet = this.buildHighlightedSnippet(result, query);
+
                 html += `
                     <div class="search-result-item" onclick="blog.showArticle('${result.id}')">
                         <div class="search-result-category">${this.escapeHtml(result.category)}</div>
                         <div class="search-result-title">${highlightedTitle}</div>
-                        <div class="search-result-excerpt">${highlightedExcerpt}</div>
+                            <div class="search-result-excerpt">${snippet}</div>
                     </div>
                 `;
             }
@@ -225,18 +226,109 @@ class SearchEngine {
     // 高亮搜索词
     highlightSearchTerms(text, query) {
         if (!text || !query) return this.escapeHtml(text);
-        
+
         const normalizedQuery = this.normalizeSearchText(query);
         const queryTerms = normalizedQuery.split(/\s+/).filter(term => term.length > 0);
-        
+
         let highlightedText = this.escapeHtml(text);
-        
+
         for (const term of queryTerms) {
+            if (!term) continue;
             const regex = new RegExp(`(${this.escapeRegex(term)})`, 'gi');
-            highlightedText = highlightedText.replace(regex, '<span class="search-highlight">$1</span>');
+            highlightedText = highlightedText.replace(regex, '<mark class="search-highlight">$1</mark>');
         }
-        
+
         return highlightedText;
+    }
+
+    buildHighlightedSnippet(result, query) {
+        const maxSnippetLength = 160;
+        const margin = 40;
+        const rawTerms = query.split(/\s+/).filter(Boolean);
+
+        let contentText = result.content || '';
+        if (!contentText && result.excerpt) {
+            contentText = result.excerpt;
+        }
+
+    const plainText = this.stripHtml(contentText).replace(/\s+/g, ' ').trim();
+
+        if (!plainText || rawTerms.length === 0) {
+            return this.highlightSearchTerms(result.excerpt || '', query);
+        }
+
+        const lowerPlain = plainText.toLowerCase();
+
+        let bestRange = null;
+
+        rawTerms.forEach(term => {
+            const lowerTerm = term.toLowerCase();
+            if (!lowerTerm) return;
+
+            let index = lowerPlain.indexOf(lowerTerm);
+            while (index !== -1) {
+                let start = Math.max(index - margin, 0);
+                let end = Math.min(index + lowerTerm.length + margin, plainText.length);
+
+                if (end - start > maxSnippetLength) {
+                    const excess = end - start - maxSnippetLength;
+                    start += Math.floor(excess / 2);
+                    end = start + maxSnippetLength;
+                }
+
+                const snippetText = plainText.slice(start, end);
+                const matchCount = this.countMatches(snippetText, rawTerms);
+
+                if (!bestRange || matchCount > bestRange.matchCount || (matchCount === bestRange.matchCount && snippetText.length < bestRange.text.length)) {
+                    bestRange = {
+                        start,
+                        end,
+                        text: snippetText,
+                        matchCount
+                    };
+                }
+
+                index = lowerPlain.indexOf(lowerTerm, index + lowerTerm.length);
+            }
+        });
+
+        let snippet;
+
+        if (bestRange) {
+            snippet = bestRange.text.trim();
+            const leadingEllipsis = bestRange.start > 0 ? '…' : '';
+            const trailingEllipsis = bestRange.end < plainText.length ? '…' : '';
+            snippet = `${leadingEllipsis}${snippet}${trailingEllipsis}`;
+        } else {
+            snippet = plainText.slice(0, maxSnippetLength).trim();
+            if (plainText.length > maxSnippetLength) {
+                snippet = `${snippet}…`;
+            }
+        }
+
+        return this.highlightSearchTerms(snippet, query);
+    }
+
+    countMatches(text, terms) {
+        if (!text) return 0;
+
+        const lowerText = text.toLowerCase();
+        return terms.reduce((count, term) => {
+            const loweredTerm = term.toLowerCase();
+            if (!loweredTerm) return count;
+            let idx = lowerText.indexOf(loweredTerm);
+            while (idx !== -1) {
+                count++;
+                idx = lowerText.indexOf(loweredTerm, idx + loweredTerm.length);
+            }
+            return count;
+        }, 0);
+    }
+
+    stripHtml(html) {
+        if (!html) return '';
+        this._tempElement.innerHTML = html;
+        return this._tempElement.textContent || this._tempElement.innerText || '';
     }
 
     // 清除搜索
@@ -262,9 +354,8 @@ class SearchEngine {
 
     // HTML转义
     escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        this._tempElement.textContent = text == null ? '' : text;
+        return this._tempElement.innerHTML;
     }
 
     // 正则表达式转义

@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="src/avatar.svg" alt="Logo" width="120" height="120" style="border-radius:50%; border:0px" />
+<img src="src/avatar.svg" alt="Logo" width="120" height="120" style="border-radius:50%;"/>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Static Badge](https://img.shields.io/badge/Build_with-Claude_AI-purple)](https://www.anthropic.com/claude)
@@ -24,20 +24,19 @@
 
 ## 🎯 项目灵感
 
-这个博客系统起源于一个简单的需求：将Obsidian笔记发布到网页以便跨设备访问。通过AI辅助开发，我们创建了一个优雅且功能丰富的静态博客系统，无需依赖任何复杂的框架或构建工具。
+项目起源于一个简单的需求：将Obsidian笔记发布到网页以便跨设备访问。通过AI辅助开发，我们创建了一个优雅且功能丰富的静态博客系统，无需依赖任何复杂的框架或构建工具。
 
-## 🛠️ 技术栈
+## 🛠️ 技术框架
 
 - **前端框架**: 原生HTML/CSS/JavaScript
 - **Markdown渲染**: marked.js
 - **数学公式**: KaTeX
-- **构建辅助**: Claude Sonnet 4 AI
 
 ## 📖 使用方法
 
-1. 将Markdown笔记放入 `Vault`目录
+1. 将Markdown笔记放入 `Vault`目录（或者直接Obsidian打开Vault）
 2. 文件会自动被扫描并添加到博客中
-3. 支持从文件名中提取分类（如 `AI 01-数学基础.md`会被归类为"AI"）
+3. 支持从文件名中提取分类
 4. 文件内容会被解析并显示，支持内部链接和图像引用
 
 ## 🎨 主要功能
@@ -49,10 +48,6 @@
 - **文章目录**: 自动生成并支持点击跳转
 - **数学公式渲染**: 完美支持复杂的LaTeX公式
 - **图片路径修复**: 智能处理Obsidian图片链接
-
-## 👨‍💻 关于作者
-
-北京大学信息科学技术学院2024级学生，热爱编程、人工智能、Linux开发和数学。
 
 ## 📝 License
 

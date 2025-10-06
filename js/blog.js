@@ -1382,6 +1382,21 @@ class BlogApp {
         const activeLink = document.querySelector(`.toc-nav a[href="#${activeId}"]`);
         if (activeLink) {
             activeLink.classList.add('active');
+
+            const scrollContainer = document.querySelector('.toc-sidebar');
+            if (scrollContainer) {
+                const linkRect = activeLink.getBoundingClientRect();
+                const containerRect = scrollContainer.getBoundingClientRect();
+                const buffer = 24;
+
+                if (linkRect.top < containerRect.top + buffer || linkRect.bottom > containerRect.bottom - buffer) {
+                    activeLink.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                        inline: 'nearest'
+                    });
+                }
+            }
         }
     }
     
