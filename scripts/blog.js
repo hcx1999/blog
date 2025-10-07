@@ -1716,16 +1716,21 @@ class BlogApp {
             activeLink.classList.add('active');
 
             const scrollContainer = document.querySelector('.toc-sidebar');
-            if (scrollContainer) {
-                const linkRect = activeLink.getBoundingClientRect();
+            if (scrollContainer && scrollContainer.clientHeight > 0 && scrollContainer.scrollHeight > scrollContainer.clientHeight) {
                 const containerRect = scrollContainer.getBoundingClientRect();
-                const buffer = 24;
+                const linkRect = activeLink.getBoundingClientRect();
+                const currentOffset = linkRect.top - containerRect.top;
+                const desiredOffset = (scrollContainer.clientHeight / 2) - (linkRect.height / 2);
+                const diff = currentOffset - desiredOffset;
 
-                if (linkRect.top < containerRect.top + buffer || linkRect.bottom > containerRect.bottom - buffer) {
-                    activeLink.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'nearest',
-                        inline: 'nearest'
+                if (Math.abs(diff) > 16) {
+                    const targetScrollTop = scrollContainer.scrollTop + diff;
+                    const maxScrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+                    const clampedScrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
+
+                    scrollContainer.scrollTo({
+                        top: clampedScrollTop,
+                        behavior: 'smooth'
                     });
                 }
             }
