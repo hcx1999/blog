@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "a122c8c2dcba10a3",
+        "id": "62a3fe616efe4d74",
         "type": "tabs",
         "children": [
           {
-            "id": "48e43374644a67ad",
+            "id": "997e3967f9f91703",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 290.50152587890625,
+    "collapsed": true
   },
   "right": {
     "id": "a653e5076f42554b",
@@ -94,7 +95,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Welcome.md",
+                "file": "AI 强化学习.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +105,7 @@
                 "unlinkedCollapsed": false
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Welcome"
+              "title": "Backlinks for AI 强化学习"
             }
           },
           {
@@ -142,17 +143,16 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Welcome.md",
+                "file": "AI 强化学习.md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": "LaTeX suite"
               },
               "icon": "lucide-list",
-              "title": "Outline of Welcome"
+              "title": "Outline of AI 强化学习"
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "horizontal",
@@ -170,16 +170,17 @@
       "bases:Create new base": false
     }
   },
-  "active": "48e43374644a67ad",
+  "active": "997e3967f9f91703",
   "lastOpenFiles": [
-    "attachments/Pasted image 20251007133840.png",
-    "attachments/Pasted image 20251007131155.png",
-    "test.md",
-    "AI 强化学习.md",
     "AI AI基础.md",
-    "Rust Rust语言.md",
-    "Note 幻觉抑制课题组实习.md",
+    "AI 强化学习.md",
+    "attachments/Pasted image 20251007131155.png",
     "Web JavaScript语言.md",
+    "Rust Rust语言.md",
+    "attachments/Pasted image 20251007133840.png",
+    "attachments/Pasted image 20251007133840 1.png",
+    "test.md",
+    "Note 幻觉抑制课题组实习.md",
     "Others 杂记.md",
     "Linux 环境配置.md",
     "attachments/Pasted image 20251006142310.png",
@@ -201,9 +202,7 @@
     "AI 01-数学基础.md",
     "attachments/Pasted image 20250419170637.png",
     "未命名",
-    "attachments/Pasted image 20250831154315.png",
     "[在.md",
-    "attachments/Pasted image 20250829125701.png",
     "AI 10-LLM.md",
     "AI 11-具身智能.md",
     "AI ai基础作业笔记.md",
