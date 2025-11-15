@@ -317,3 +317,8 @@ improvement: 改进
 build: 打包
 ci: 持续集成
 ```
+## 小工具
+### pandoc将md转为pdf
+```bash
+pandoc file_name.md --pdf-engine=xelatex -o file_name.pdf -V mainfont='Microsoft YaHei'
+```
