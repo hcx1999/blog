@@ -1,11 +1,13 @@
 // 主题切换功能
 function toggleTheme() {
+    const html = document.documentElement;
     const body = document.body;
     const themeToggle = document.getElementById('theme-toggle');
     const lightTheme = document.getElementById('prism-light-theme');
     const darkTheme = document.getElementById('prism-dark-theme');
     
-    if (body.getAttribute('data-theme') === 'dark') {
+    if (html.getAttribute('data-theme') === 'dark') {
+        html.removeAttribute('data-theme');
         body.removeAttribute('data-theme');
         themeToggle.textContent = '🌙';
         localStorage.setItem('theme', 'light');
@@ -13,6 +15,7 @@ function toggleTheme() {
         if (lightTheme) lightTheme.disabled = false;
         if (darkTheme) darkTheme.disabled = true;
     } else {
+        html.setAttribute('data-theme', 'dark');
         body.setAttribute('data-theme', 'dark');
         themeToggle.textContent = '☀️';
         localStorage.setItem('theme', 'dark');
@@ -32,6 +35,7 @@ function toggleTheme() {
 // 初始化主题
 function initTheme() {
     const savedTheme = localStorage.getItem('theme');
+    const html = document.documentElement;
     const body = document.body;
     const themeToggle = document.getElementById('theme-toggle');
     const lightTheme = document.getElementById('prism-light-theme');
@@ -40,12 +44,14 @@ function initTheme() {
     if (!themeToggle) return; // 防止在页面未完全加载时出错
     
     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        html.setAttribute('data-theme', 'dark');
         body.setAttribute('data-theme', 'dark');
         themeToggle.textContent = '☀️';
         // 设置深色代码主题
         if (lightTheme) lightTheme.disabled = true;
         if (darkTheme) darkTheme.disabled = false;
     } else {
+        html.removeAttribute('data-theme');
         body.removeAttribute('data-theme');
         themeToggle.textContent = '🌙';
         // 设置浅色代码主题
@@ -1629,6 +1635,29 @@ class BlogApp {
             .replace(/&lt;(\/?(strong|em|code|del|mark))&gt;/g, '<$1>');
     }
 
+    // 快速平滑滚动函数
+    smoothScrollTo(targetY, duration = 300) {
+        const startY = window.scrollY;
+        const distance = targetY - startY;
+        const startTime = performance.now();
+
+        const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+        const scroll = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easing = easeOutCubic(progress);
+            
+            window.scrollTo(0, startY + distance * easing);
+            
+            if (progress < 1) {
+                requestAnimationFrame(scroll);
+            }
+        };
+
+        requestAnimationFrame(scroll);
+    }
+
     // 滚动到指定标题
     scrollToHeading(headingId) {
         const heading = document.getElementById(headingId);
@@ -1638,10 +1667,7 @@ class BlogApp {
             const elementPosition = heading.offsetTop;
             const offsetPosition = elementPosition - headerHeight - 20;
 
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: 'smooth'
-            });
+            this.smoothScrollTo(offsetPosition, 300);
 
             // 更新目录高亮
             this.updateTocActiveState(headingId);
@@ -1708,7 +1734,7 @@ class BlogApp {
 
                     scrollContainer.scrollTo({
                         top: clampedScrollTop,
-                        behavior: 'smooth'
+                        behavior: 'auto'
                     });
                 }
             }
@@ -1749,10 +1775,7 @@ class BlogApp {
 
     // 返回顶部
     scrollToTop() {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+        this.smoothScrollTo(0, 400);
     }
 
     // 更新返回顶部按钮显示状态

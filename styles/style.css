@@ -666,7 +666,7 @@ body {
 
 .search-results {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
     gap: 1.5rem;
 }
 
@@ -1012,6 +1012,15 @@ body.view-search .layout-grid {
     .recent-item {
         padding: clamp(16px, 4vw, 24px);
     }
+    
+    /* 搜索结果移动端优化 */
+    .search-result-item {
+        padding: 1rem;
+    }
+    
+    .search-content {
+        padding: 1.5rem 1rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1059,6 +1068,23 @@ body.view-search .layout-grid {
     
     .recent-item {
         padding: clamp(12px, 4vw, 20px);
+    }
+    
+    /* 搜索结果小屏幕优化 */
+    .search-result-item {
+        padding: 0.875rem;
+    }
+    
+    .search-result-title {
+        font-size: 1rem;
+    }
+    
+    .search-content {
+        padding: 1rem;
+    }
+    
+    .search-header {
+        margin-bottom: 1rem;
     }
     
     /* 手机上的侧边栏内容进一步紧凑化 */
