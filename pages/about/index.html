@@ -3,6 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
     <title>关于 | hcx1999</title>
     <link rel="stylesheet" href="../../styles/style.css">
     <link rel="stylesheet" href="../../styles/about.css">
@@ -100,15 +108,7 @@
                     <div class="about-section">
                         <h3>🌟 关于本站</h3>
                         <p>起因是博主用Obsidian记笔记，但是不太容易发布到网页上跨设备观看，于是用脚本将Vault里面的md文档直接渲染到了网页上。</p>
-                        <p>本站100% Prompt Engineering.</p>
-                        <p>博客特性：</p>
-                        <ul>
-                            <li>纯静态页面，加载速度快</li>
-                            <li>支持深色/浅色主题切换</li>
-                            <li>自动生成文章目录</li>
-                            <li>支持数学公式渲染</li>
-                            <li>响应式设计，适配多种设备</li>
-                        </ul>
+                        <p>本站100% Prompt Engineering，并不依赖任何框架，本人也没有敲一行代码。</p>
                     </div>
                 </div>
             </div>

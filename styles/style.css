@@ -2,63 +2,74 @@
     display: inline-flex;
     min-width: auto;
 }
-/* 主题变量 */
-:root {
-    /* 浅色主题 */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
-    --bg-tertiary: #f1f5f9;
-    --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --bg-card: rgba(255, 255, 255, 0.9);
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --text-muted: #94a3b8;
-    --accent-primary: #3b82f6;
-    --accent-secondary: #06b6d4;
-    --accent-tertiary: #8b5cf6;
-    --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --accent-gradient-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --error-color: #ef4444;
-    --border-light: #e2e8f0;
-    --border-medium: #cbd5e1;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-    --glow-primary: 0 0 20px rgba(59, 130, 246, 0.3);
-    --glow-secondary: 0 0 20px rgba(139, 92, 246, 0.3);
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+/* 主题变量 - 学术风格配色 */
+:root,
+html {
+    /* 浅色主题 - 学术风格（偏蓝，柔和背景） */
+    --bg-primary: #f5f7f9;
+    --bg-secondary: #eef1f4;
+    --bg-tertiary: #e3e7eb;
+    --bg-gradient: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    --bg-card: rgba(245, 247, 249, 0.95);
+    --text-primary: #2c3e50;
+    --text-secondary: #546e7a;
+    --text-muted: #90a4ae;
+    --accent-primary: #1976d2;
+    --accent-secondary: #42a5f5;
+    --accent-tertiary: #5c6bc0;
+    --accent-gradient: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    --accent-gradient-hover: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%);
+    --success-color: #43a047;
+    --warning-color: #fb8c00;
+    --error-color: #e53935;
+    --border-light: #e1e8ed;
+    --border-medium: #b0bec5;
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08);
+    --shadow-md: 0 2px 4px -1px rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+    --shadow-lg: 0 4px 6px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-xl: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    --glow-primary: 0 0 15px rgba(25, 118, 210, 0.15);
+    --glow-secondary: 0 0 15px rgba(66, 165, 245, 0.15);
+    --transition: all 0.25s ease;
+    --transition-fast: all 0.15s ease;
 }
 
-/* 深色主题 */
+/* 深色主题 - 学术风格（偏蓝，柔和背景） */
+html[data-theme="dark"],
 [data-theme="dark"] {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-tertiary: #334155;
-    --bg-gradient: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%);
-    --bg-card: rgba(15, 23, 42, 0.9);
-    --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
-    --accent-primary: #60a5fa;
-    --accent-secondary: #22d3ee;
-    --accent-tertiary: #a78bfa;
-    --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --accent-gradient-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-    --success-color: #34d399;
-    --warning-color: #fbbf24;
-    --error-color: #f87171;
-    --border-light: #334155;
-    --border-medium: #475569;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
-    --glow-primary: 0 0 20px rgba(96, 165, 250, 0.4);
-    --glow-secondary: 0 0 20px rgba(167, 139, 250, 0.4);
+    --bg-primary: #262626;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #353535;
+    --bg-gradient: linear-gradient(135deg, #263238 0%, #262626 100%);
+    --bg-card: rgba(38, 38, 38, 0.95);
+    --text-primary: #e4e4e4;
+    --text-secondary: #b0bec5;
+    --text-muted: #78909c;
+    --accent-primary: #42a5f5;
+    --accent-secondary: #64b5f6;
+    --accent-tertiary: #7986cb;
+    --accent-gradient: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+    --accent-gradient-hover: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+    --success-color: #66bb6a;
+    --warning-color: #ffa726;
+    --error-color: #ef5350;
+    --border-light: #3f3f3f;
+    --border-medium: #4f4f4f;
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4);
+    --shadow-md: 0 2px 4px -1px rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+    --shadow-lg: 0 4px 6px -2px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+    --shadow-xl: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+    --glow-primary: 0 0 15px rgba(66, 165, 245, 0.2);
+    --glow-secondary: 0 0 15px rgba(121, 134, 203, 0.2);
+}
+
+/* 确保html和body都应用背景色 */
+html {
+    background: var(--bg-secondary);
+}
+
+html[data-theme="dark"] {
+    background: var(--bg-secondary);
 }
 
 /* 基础样式 */
@@ -73,10 +84,6 @@ body {
     line-height: 1.7;
     color: var(--text-primary);
     background: var(--bg-secondary);
-    background-image: 
-        radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
-        radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
-    background-attachment: fixed;
     transition: var(--transition);
     margin: 0;
     padding: 0;
@@ -124,22 +131,22 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(45deg, var(--accent-primary), var(--accent-tertiary));
+    background: var(--border-medium);
     border-radius: 4px;
     transition: var(--transition);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(45deg, var(--accent-secondary), var(--accent-primary));
+    background: var(--text-muted);
 }
 
 /* 头部导航 - 固定于顶部 */
 .header {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: var(--shadow-lg);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(245, 247, 249, 0.98);
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid var(--border-light);
     transition: var(--transition);
     z-index: 1000;
     position: sticky;
@@ -148,8 +155,8 @@ body {
 }
 
 [data-theme="dark"] .header {
-    background: rgba(15, 23, 42, 0.85);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(38, 38, 38, 0.98);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .navbar {
@@ -217,7 +224,6 @@ body {
 
 .brand-link:hover .blog-icon {
     transform: rotate(360deg) scale(1.1);
-    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.5));
 }
 
 .nav-menu {
@@ -597,7 +603,6 @@ body {
     outline: none;
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), var(--shadow-md);
-    width: 280px;
     background: var(--bg-primary);
 }
 
@@ -636,25 +641,12 @@ body {
 }
 
 .search-clear {
-    background: var(--error-color);
-    color: white;
-    box-shadow: var(--shadow-sm);
-    left: auto;
-    right: 4px;
+    display: none !important;
 }
 
 .search-btn:hover {
     transform: translateY(-50%) scale(1.05);
     color: var(--accent-primary);
-}
-
-.search-clear:hover {
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: var(--shadow-md);
-}
-
-.search-clear:hover {
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
 }
 
 /* 搜索结果样式 */
@@ -1283,16 +1275,10 @@ body.view-search .layout-grid {
 
 .view {
     display: none;
-    animation: fadeIn 0.3s ease-in-out;
 }
 
 .view.active {
     display: block;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
 }
 
 /* 首页样式 */

@@ -69,13 +69,7 @@ class SearchEngine {
                 }
             });
 
-            // 失焦时如果有内容则搜索
-            searchInput.addEventListener('blur', (e) => {
-                const query = e.target.value.trim();
-                if (query && query !== this.currentQuery) {
-                    this.performSearch(query);
-                }
-            });
+            // 移除blur事件，避免点击清除按钮时触发搜索
         }
     }
 
@@ -87,9 +81,9 @@ class SearchEngine {
             searchClear.style.display = 'block';
         } else {
             searchClear.style.display = 'none';
-            if (this.isSearchMode) {
-                this.clearSearch();
-            }
+            // 只清空搜索状态，不跳转页面
+            this.currentQuery = '';
+            // 不再自动调用 clearSearch()，避免删除输入时跳转
         }
     }
 
@@ -150,7 +144,8 @@ class SearchEngine {
             searchClear.style.display = 'block';
         }
         
-        if (typeof blog !== 'undefined' && blog) {
+        // 只在非搜索页面时切换视图，避免重复切换
+        if (typeof blog !== 'undefined' && blog && !isSearchPage) {
             if (typeof blog.switchView === 'function') {
                 blog.switchView('search');
             }

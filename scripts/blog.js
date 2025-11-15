@@ -736,36 +736,8 @@ class BlogApp {
 
     // 数字递增动画
     animateCounter(element, targetValue) {
-        const startValue = parseInt(element.textContent) || 0;
-        const increment = targetValue > startValue ? 1 : -1;
-        const duration = 800; // 动画持续时间
-        const steps = Math.abs(targetValue - startValue);
-        const stepDuration = steps > 0 ? duration / steps : 0;
-
-        if (steps === 0) {
-            element.textContent = targetValue;
-            return;
-        }
-
-        // 添加动画类
-        element.classList.add('updating');
-        
-        let currentValue = startValue;
-        const timer = setInterval(() => {
-            currentValue += increment;
-            element.textContent = currentValue;
-            
-            if (currentValue === targetValue) {
-                clearInterval(timer);
-                element.classList.remove('updating');
-                element.classList.add('count-animation');
-                
-                // 移除动画类
-                setTimeout(() => {
-                    element.classList.remove('count-animation');
-                }, 600);
-            }
-        }, stepDuration);
+        // 直接设置值，不使用动画
+        element.textContent = targetValue;
     }
 
     // 解析Markdown文件
@@ -931,9 +903,15 @@ class BlogApp {
         const searchInput = document.getElementById('search-input');
         if (searchInput && query) {
             searchInput.value = query;
+            // 显示清除按钮
+            const searchClear = document.getElementById('search-clear');
+            if (searchClear) {
+                searchClear.style.display = 'block';
+            }
         }
 
         if (query && typeof searchEngine !== 'undefined' && searchEngine) {
+            // 直接执行搜索，不需要再次切换视图
             searchEngine.performSearch(query, { stayOnPage: true });
         } else {
             const contentDiv = document.getElementById('search-content');
