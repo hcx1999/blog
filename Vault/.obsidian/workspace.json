@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "62a3fe616efe4d74",
+        "id": "014483261263bfcd",
         "type": "tabs",
         "children": [
           {
-            "id": "997e3967f9f91703",
+            "id": "fe7142adf2e517e2",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -169,12 +169,17 @@
       "bases:Create new base": false
     }
   },
-  "active": "997e3967f9f91703",
+  "active": "fe7142adf2e517e2",
   "lastOpenFiles": [
-    "Untitled.md",
+    "Math 机器学习.md",
+    "AI 强化学习.md",
+    "AI 计算神经科学.md",
+    "attachments/Pasted image 20251128144835.png",
+    "attachments/Pasted image 20251128144308.png",
+    "attachments/Pasted image 20251128103035.png",
     "Others 杂记.md",
     "Linux 环境配置.md",
-    "AI 强化学习.md",
+    "Untitled.md",
     "attachments/Pasted image 20251112154028.png",
     "attachments/Pasted image 20251017103705.png",
     "attachments/Pasted image 20251017103144.png",
@@ -187,9 +192,6 @@
     "test.md",
     "Note 幻觉抑制课题组实习.md",
     "attachments/Pasted image 20251006142310.png",
-    "attachments/Pasted image 20250928123605.png",
-    "attachments/Pasted image 20250928123120.png",
-    "attachments/Pasted image 20250911205248.png",
     "System ICS lab 踩坑笔记.md",
     "Python Python 学习笔记.md",
     "AI 09-强化学习.md",
@@ -205,9 +207,6 @@
     "[在.md",
     "AI 10-LLM.md",
     "AI 11-具身智能.md",
-    "AI ai基础作业笔记.md",
-    "js css和css3.md",
-    "js Notes-tds.md",
     "index.json",
     "file-index.json",
     "attachments",
