@@ -1,0 +1,106 @@
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Folder, FolderOpen, FileText, ChevronRight, ChevronDown } from 'lucide-react';
+import { cn } from '../utils/cn';
+import { motion, AnimatePresence } from 'framer-motion';
+import type { VaultCategory } from '../utils/vault';
+
+interface SidebarProps {
+  hierarchy: VaultCategory[];
+  isOpen: boolean;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ hierarchy, isOpen }) => {
+  const location = useLocation();
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
+  const toggleCategory = (categoryName: string) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(categoryName)) {
+        next.delete(categoryName);
+      } else {
+        next.add(categoryName);
+      }
+      return next;
+    });
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.aside
+          initial={{ x: -300, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: -300, opacity: 0 }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          className={cn(
+            "fixed left-0 top-16 bottom-0 w-64 bg-white dark:bg-gray-900",
+            "border-r border-gray-200 dark:border-gray-800 overflow-y-auto z-40"
+          )}
+        >
+      <div className="p-4">
+        <div className="space-y-1">
+          {hierarchy.map((category) => (
+            <div key={category.name}>
+              <button
+                onClick={() => toggleCategory(category.name)}
+                className={cn(
+                  "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium",
+                  "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+                  "text-gray-700 dark:text-gray-200"
+                )}
+              >
+                {expandedCategories.has(category.name) ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+                {expandedCategories.has(category.name) ? (
+                  <FolderOpen className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                ) : (
+                  <Folder className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                )}
+                <span>{category.name}</span>
+                <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
+                  {category.files.length}
+                </span>
+              </button>
+              
+              <AnimatePresence>
+                {expandedCategories.has(category.name) && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden ml-4"
+                  >
+                    {category.files.map((file) => (
+                      <Link
+                        key={file.path}
+                        to={`/article/${encodeURIComponent(file.path)}`}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all",
+                          "hover:bg-gray-100 dark:hover:bg-gray-800",
+                          location.pathname === `/article/${encodeURIComponent(file.path)}`
+                            ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 border-l-2 border-gray-500"
+                            : "text-gray-600 dark:text-gray-400"
+                        )}
+                      >
+                        <FileText className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate">{file.name}</span>
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </div>
+      </div>
+        </motion.aside>
+      )}
+    </AnimatePresence>
+  );
+};

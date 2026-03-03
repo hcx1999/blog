@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors duration-200;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+}
+
+@layer components {
+  .prose-custom {
+    @apply prose prose-slate max-w-none dark:prose-invert;
+  }
+
+  .prose-custom pre {
+    @apply bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto;
+  }
+
+  .prose-custom code {
+    @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm;
+  }
+
+  .prose-custom pre code {
+    @apply bg-transparent p-0;
+  }
+}
+
+/* 代码高亮样式 - 黑白灰色系 */
+:root {
+  --hljs-bg: #f5f5f5;
+  --hljs-text: #333333;
+  --hljs-comment: #6a9955;
+  --hljs-keyword: #0000ff;
+  --hljs-string: #a31515;
+  --hljs-number: #098658;
+  --hljs-function: #795e26;
+  --hljs-variable: #000000;
+}
+
+.dark {
+  --hljs-bg: #1e1e1e;
+  --hljs-text: #e5e5e5;
+  --hljs-comment: #6a9955;
+  --hljs-keyword: #569cd6;
+  --hljs-string: #ce9178;
+  --hljs-number: #b5cea8;
+  --hljs-function: #dcdcaa;
+  --hljs-variable: #e5e5e5;
+}
+
+/* 覆盖highlight.js的背景色 */
+.hljs {
+  background: var(--hljs-bg) !important;
+  color: var(--hljs-text) !important;
+}
+
+/* 语法高亮 */
+.hljs-comment {
+  color: var(--hljs-comment) !important;
+}
+
+.hljs-keyword {
+  color: var(--hljs-keyword) !important;
+}
+
+.hljs-string {
+  color: var(--hljs-string) !important;
+}
+
+.hljs-number {
+  color: var(--hljs-number) !important;
+}
+
+.hljs-title,
+.hljs-function {
+  color: var(--hljs-function) !important;
+}
+
+.hljs-variable {
+  color: var(--hljs-variable) !important;
+}

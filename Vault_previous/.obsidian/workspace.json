@@ -1,0 +1,214 @@
+{
+  "main": {
+    "id": "7a4edb3332ac73a4",
+    "type": "split",
+    "children": [
+      {
+        "id": "136e2e852cea776c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "48be87fc42565a4b",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "69874e31d0e2323e",
+    "type": "split",
+    "children": [
+      {
+        "id": "541f0a69192dd51e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7afd8a3fa1280e4f",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "32b81d3af6ce6a54",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "tag:#人工智能基础",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "cd780f2aab48bd0e",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "right": {
+    "id": "a653e5076f42554b",
+    "type": "split",
+    "children": [
+      {
+        "id": "3c862e134fbb2775",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3f7547d73b19c722",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Math 机器学习.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": false
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Math 机器学习"
+            }
+          },
+          {
+            "id": "29abd8fdf756347d",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Math 机器学习.md",
+                "linksCollapsed": true,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Math 机器学习"
+            }
+          },
+          {
+            "id": "f495a9467761dc73",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "606ec845ee39483d",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Math 机器学习.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Math 机器学习"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "48be87fc42565a4b",
+  "lastOpenFiles": [
+    "Linux 环境配置.md",
+    "AI 强化学习.md",
+    "AI AI基础.md",
+    "AI 计算神经科学.md",
+    "Math 机器学习.md",
+    "Math 高斯过程.md",
+    "attachments/Pasted image 20251225132236.png",
+    "attachments/Pasted image 20251225043228.png",
+    "Others 杂记.md",
+    "Untitled.md",
+    "高斯过程.md",
+    "Untitled 1.md",
+    "attachments/Pasted image 20251203114050.png",
+    "Untitled 2.md",
+    "attachments/Pasted image 20251201222538.png",
+    "Untitled 4.md",
+    "image/Math机器学习/1764488442762.png",
+    "image/Math机器学习",
+    "image",
+    "Web JavaScript语言.md",
+    "attachments/Pasted image 20251130111337.png",
+    "attachments/Pasted image 20251130111252.png",
+    "Note 幻觉抑制课题组实习.md",
+    "attachments/Pasted image 20251129194132.png",
+    "Rust Rust语言.md",
+    "attachments/Pasted image 20251128144835.png",
+    "attachments/Pasted image 20251128144308.png",
+    "test.md",
+    "System ICS lab 踩坑笔记.md",
+    "Python Python 学习笔记.md",
+    "AI 09-强化学习.md",
+    "AI 08-搜索.md",
+    "AI 07-Transformer.md",
+    "AI 06-循环神经网络.md",
+    "AI 05-对抗神经网络.md",
+    "AI 04-卷积神经网络.md",
+    "AI 03-神经网络.md",
+    "AI 02-机器学习.md",
+    "未命名",
+    "index.json",
+    "file-index.json",
+    "attachments",
+    "imgs"
+  ]
+}
