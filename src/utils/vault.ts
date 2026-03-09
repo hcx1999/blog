@@ -15,6 +15,17 @@ export interface VaultCategory {
 
 const IMPORT_MD: Record<string, any> = import.meta.glob('/vault/**/*.md', { query: '?raw', import: 'default', eager: true });
 const IMPORT_NB: Record<string, any> = import.meta.glob('/vault/**/*.ipynb', { query: '?raw', import: 'default', eager: true });
+const IMPORT_IMAGES: Record<string, string> = import.meta.glob('/vault/**/*.{png,jpg,jpeg,gif,svg,webp}', { eager: true, import: 'default' }) as Record<string, string>;
+
+// 创建图片名称到URL的映射
+export const imageMap: Map<string, string> = new Map();
+for (const path in IMPORT_IMAGES) {
+  const fileName = path.split('/').pop() || '';
+  imageMap.set(fileName, IMPORT_IMAGES[path]);
+  // 也支持不带扩展名的查找
+  const nameWithoutExt = fileName.replace(/\.[^.]+$/, '');
+  imageMap.set(nameWithoutExt, IMPORT_IMAGES[path]);
+}
 
 export const getVaultStructure = (): VaultFile[] => {
   const files: VaultFile[] = [];
