@@ -1,11 +1,12 @@
 import { visit } from 'unist-util-visit';
+import type { Node, Parent } from 'unist';
 
 export default function remarkMathFix() {
-  return (tree, file) => {
+  return (tree: Node, file: any) => {
     const source = String(file);
     
-    visit(tree, 'inlineMath', (node, index, parent) => {
-      if (node.position) {
+    visit(tree, 'inlineMath', (node: any, index: number | undefined, parent: Parent | undefined) => {
+      if (node.position && index !== undefined && parent) {
         const start = node.position.start.offset || 0;
         const end = node.position.end.offset || 0;
         const raw = source.slice(start, end);
@@ -14,7 +15,6 @@ export default function remarkMathFix() {
           const innerValue = raw.slice(2, -2);
           parent.children[index] = {
             type: 'math',
-            meta: null,
             value: innerValue,
             data: {
               hName: 'pre',
@@ -27,7 +27,7 @@ export default function remarkMathFix() {
                 }
               ]
             }
-          };
+          } as any;
         }
       }
     });
