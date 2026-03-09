@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useMemo, useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
@@ -8,6 +8,22 @@ import { ArticlePage } from './pages/ArticlePage';
 import { SearchResultsPage } from './pages/SearchResultsPage';
 import { loadVaultPosts, getVaultHierarchy } from './utils/vault';
 import { cn } from './utils/cn';
+
+const RedirectHandler: React.FC = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedPath = sessionStorage.getItem('spa-redirect-path');
+    if (savedPath) {
+      sessionStorage.removeItem('spa-redirect-path');
+      // Remove /blog prefix if present
+      const normalizedPath = savedPath.startsWith('/blog') ? savedPath.replace('/blog', '') : savedPath;
+      navigate(normalizedPath, { replace: true });
+    }
+  }, [navigate]);
+
+  return null;
+};
 
 const AppContent: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -20,6 +36,7 @@ const AppContent: React.FC = () => {
 
   return (
     <AppProvider posts={posts}>
+      <RedirectHandler />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-800">
         <Navbar toggleSidebar={toggleSidebar} />
         <Sidebar hierarchy={hierarchy} isOpen={sidebarOpen} />

@@ -6,16 +6,23 @@
     <script>
       // For GitHub Pages 404 handling
       // This script ensures that client-side routing works correctly
-      const path = window.location.pathname;
-      const search = window.location.search;
-      const hash = window.location.hash;
-      
-      // Construct the full URL with path, search, and hash
-      const fullPath = path + search + hash;
-      
-      // For GitHub Pages, we need to serve index.html for all requests
-      // but preserve the original URL so React Router can handle it
-      window.location.replace('/blog' + (fullPath.startsWith('/blog') ? fullPath.replace('/blog', '') : fullPath));
+      // Using the GitHub Pages SPA 404 redirect technique
+      (function() {
+        var path = window.location.pathname;
+        var search = window.location.search;
+        var hash = window.location.hash;
+        
+        // Check if we're already at the index.html path
+        if (path.endsWith('/index.html')) {
+          return;
+        }
+        
+        // Store the original path in session storage for React Router to use
+        sessionStorage.setItem('spa-redirect-path', path + search + hash);
+        
+        // Redirect to the root index.html
+        window.location.replace('/blog/index.html');
+      })();
     </script>
   </head>
   <body>
