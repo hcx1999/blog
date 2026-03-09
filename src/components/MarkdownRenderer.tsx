@@ -7,6 +7,7 @@ import rehypeHighlight from 'rehype-highlight';
 import { Copy, Check } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { imageMap } from '../utils/vault';
+import remarkMathFix from '../utils/remarkMathFix';
 
 interface MarkdownRendererProps {
   content: string;
@@ -45,7 +46,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
   return (
     <div className="prose-custom">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkMath]}
+        remarkPlugins={[remarkGfm, remarkMath, remarkMathFix]}
         rehypePlugins={[rehypeKatex, rehypeHighlight]}
         components={{
           h1: ({ children, ...props }) => (

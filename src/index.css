@@ -42,37 +42,6 @@
   }
 }
 
-/* 确保行间公式居中 - 最高优先级 */
-.prose-custom .katex-display,
-.katex-display {
-  text-align: center !important;
-  margin: 1em 0 !important;
-  width: 100% !important;
-  display: block !important;
-}
-
-.prose-custom .katex-display > .katex,
-.katex-display > .katex {
-  display: inline-block !important;
-  text-align: center !important;
-}
-
-/* 覆盖tailwind prose的所有可能影响 */
-.prose :where(.katex-display):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
-  text-align: center !important;
-  margin: 1em 0 !important;
-}
-
-.prose :where(.katex-display > .katex):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
-  display: inline-block !important;
-  text-align: center !important;
-}
-
-/* 解决Markdown单换行问题 */
-.prose-custom p {
-  white-space: pre-wrap;
-}
-
 /* 代码高亮样式 - 黑白灰色系 */
 :root {
   --hljs-bg: #f5f5f5;
