@@ -3,7 +3,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { InlineMath, BlockMath } from 'react-katex';
-import 'katex/dist/katex.min.css';
 import { Copy, Check } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { imageMap } from '../utils/vault';
@@ -31,21 +30,21 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
     // 先处理 Obsidian 图片格式 ![[image.png]]
     result = result.replace(/!\[\[([^\]]+)\]\]/g, (_match, imageName) => {
       const placeholder = `OBSIDIAN_IMAGE_${counter++}`;
-      // 从 imageMap 获取图片 URL
       const imageUrl = imageMap.get(imageName) || imageMap.get(imageName.replace(/\s+/g, '%20')) || '';
       imageBlocks.push({ url: imageUrl, alt: imageName, placeholder });
       return placeholder;
     });
 
-    // 处理行间公式 $$...$$
+    // 处理行间公式 $$...$$（支持多行）
     result = result.replace(/\$\$([\s\S]*?)\$\$/g, (_match, formula) => {
       const placeholder = `MATH_BLOCK_${counter++}`;
       mathBlocks.push({ type: 'block', formula: formula.trim(), placeholder });
       return placeholder;
     });
 
-    // 处理行内公式 $...$
-    result = result.replace(/(?<!\$)\$([^$\n]+)\$(?!\$)/g, (_match, formula) => {
+    // 处理行内公式 $...$（不匹配 $$）
+    // 使用更宽松的正则，允许更多字符
+    result = result.replace(/\$(?!\$)([^\$\n]+?)\$(?!\$)/g, (_match, formula) => {
       const placeholder = `MATH_INLINE_${counter++}`;
       mathBlocks.push({ type: 'inline', formula: formula.trim(), placeholder });
       return placeholder;
