@@ -34,7 +34,7 @@
   }
 
   .prose-custom code {
-    @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm;
+    @apply bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-1.5 py-0.5 rounded text-sm;
   }
 
   .prose-custom pre code {

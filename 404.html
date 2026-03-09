@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Blog</title>
+    <script>
+      // For GitHub Pages 404 handling
+      // This script ensures that client-side routing works correctly
+      const path = window.location.pathname;
+      const search = window.location.search;
+      const hash = window.location.hash;
+      
+      // Construct the full URL with path, search, and hash
+      const fullPath = path + search + hash;
+      
+      // For GitHub Pages, we need to serve index.html for all requests
+      // but preserve the original URL so React Router can handle it
+      window.location.replace('/blog' + (fullPath.startsWith('/blog') ? fullPath.replace('/blog', '') : fullPath));
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
