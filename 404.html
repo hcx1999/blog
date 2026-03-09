@@ -4,24 +4,17 @@
     <meta charset="utf-8">
     <title>Blog</title>
     <script>
-      // For GitHub Pages 404 handling
-      // This script ensures that client-side routing works correctly
-      // Using the GitHub Pages SPA 404 redirect technique
+      // For GitHub Pages 404 handling - Simple and direct
       (function() {
-        var path = window.location.pathname;
-        var search = window.location.search;
-        var hash = window.location.hash;
-        
-        // Check if we're already at the index.html path
-        if (path.endsWith('/index.html')) {
-          return;
-        }
-        
-        // Store the original path in session storage for React Router to use
-        sessionStorage.setItem('spa-redirect-path', path + search + hash);
-        
-        // Redirect to the root index.html
-        window.location.replace('/blog/index.html');
+        var l = window.location;
+        l.replace(
+          l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+          '/blog/' + 
+          '?p=/' +
+          l.pathname.slice(1).split('/').slice(1).join('/') +
+          (l.search || '') +
+          (l.hash || '')
+        );
       })();
     </script>
   </head>

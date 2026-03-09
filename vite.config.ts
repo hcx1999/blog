@@ -28,5 +28,9 @@ export default defineConfig({
       }
     }
   ],
-  base: '/blog/'
+  base: '/blog/',
+  server: {
+    port: 5173,
+    open: '/blog/'
+  }
 })
