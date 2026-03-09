@@ -28,9 +28,8 @@ export default defineConfig({
       }
     }
   ],
-  base: '/blog/',
   server: {
     port: 5173,
-    open: '/blog/'
+    open: true
   }
 })

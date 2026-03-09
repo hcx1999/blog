@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
@@ -9,21 +9,16 @@ import { SearchResultsPage } from './pages/SearchResultsPage';
 import { loadVaultPosts, getVaultHierarchy } from './utils/vault';
 import { cn } from './utils/cn';
 
-const QueryParamHandler: React.FC = () => {
-  const [searchParams] = useSearchParams();
+const RedirectHandler: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const p = searchParams.get('p');
-    if (p) {
-      // Remove the p parameter from the URL and navigate to the actual path
-      const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.delete('p');
-      const searchString = newSearchParams.toString();
-      const newUrl = p + (searchString ? `?${searchString}` : '');
-      navigate(newUrl, { replace: true });
+    const redirectPath = sessionStorage.getItem('redirectPath');
+    if (redirectPath) {
+      sessionStorage.removeItem('redirectPath');
+      navigate(redirectPath, { replace: true });
     }
-  }, [searchParams, navigate]);
+  }, [navigate]);
 
   return null;
 };
@@ -39,7 +34,7 @@ const AppContent: React.FC = () => {
 
   return (
     <AppProvider posts={posts}>
-      <QueryParamHandler />
+      <RedirectHandler />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-800">
         <Navbar toggleSidebar={toggleSidebar} />
         <Sidebar hierarchy={hierarchy} isOpen={sidebarOpen} />
@@ -65,7 +60,7 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter basename="/blog">
+    <BrowserRouter>
       <AppContent />
     </BrowserRouter>
   );

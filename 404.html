@@ -4,17 +4,12 @@
     <meta charset="utf-8">
     <title>Blog</title>
     <script>
-      // For GitHub Pages 404 handling - Simple and direct
+      // GitHub Pages SPA 404 Redirect
+      // 保存当前路径到sessionStorage，然后重定向到index.html
       (function() {
         var l = window.location;
-        l.replace(
-          l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-          '/blog/' + 
-          '?p=/' +
-          l.pathname.slice(1).split('/').slice(1).join('/') +
-          (l.search || '') +
-          (l.hash || '')
-        );
+        sessionStorage.setItem('redirectPath', l.pathname + l.search + l.hash);
+        l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/');
       })();
     </script>
   </head>
