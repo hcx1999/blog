@@ -10,7 +10,7 @@ import { loadVaultPosts, getVaultHierarchy } from './utils/vault';
 import { cn } from './utils/cn';
 
 const AppContent: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const posts = useMemo(() => loadVaultPosts(), []);
   const hierarchy = useMemo(() => getVaultHierarchy(), []);
 

@@ -9,7 +9,14 @@ export const HomePage: React.FC = () => {
           <img 
             src={`${import.meta.env.BASE_URL}avatar.svg`} 
             alt="&omega;" 
-            className="w-24 h-24 mb-4"
+            className="w-24 h-24 mb-4 transition-transform duration-500 hover:rotate-360"
+            style={{ transition: 'transform 0.5s ease-in-out' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'rotate(360deg)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'rotate(0deg)';
+            }}
           />
           <h1 className="text-2xl font-bold mb-2">&omega;</h1>
           
