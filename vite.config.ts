@@ -28,11 +28,5 @@ export default defineConfig({
       }
     }
   ],
-  base: '/blog/',
-  server: {
-    port: 5173,
-    open: '/blog/',
-    // 处理客户端路由
-    historyApiFallback: true
-  }
+  base: '/blog/'
 })
