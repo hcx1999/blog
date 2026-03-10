@@ -27,14 +27,7 @@ const RedirectHandler: React.FC<{ children: React.ReactNode }> = ({ children }) 
   }, [redirectPath, navigate]);
 
   if (redirectPath) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-800">
-        <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400">
-          <div className="w-6 h-6 border-2 border-gray-200 dark:border-gray-700 border-t-gray-500 dark:border-t-gray-400 rounded-full animate-spin" />
-          <span>Loading...</span>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return <>{children}</>;
