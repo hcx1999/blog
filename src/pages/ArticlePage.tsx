@@ -81,9 +81,7 @@ export const ArticlePage: React.FC = () => {
       </div>
 
       <aside className="hidden lg:block w-56 flex-shrink-0">
-        <div className="sticky top-20">
-          <TableOfContents items={tocItems} contentRef={contentRef} />
-        </div>
+        <TableOfContents items={tocItems} contentRef={contentRef} />
       </aside>
     </div>
   );

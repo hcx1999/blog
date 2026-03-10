@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { List, ChevronDown } from 'lucide-react';
 import type { TOCItem } from '../types';
 import { cn } from '../utils/cn';
@@ -11,6 +11,32 @@ interface TableOfContentsProps {
 export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, contentRef }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const tocNavRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [tocStyle, setTocStyle] = useState<React.CSSProperties>({});
+
+  useEffect(() => {
+    const updateTocPosition = () => {
+      if (!containerRef.current) return;
+      
+      const container = containerRef.current;
+      const rect = container.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const navbarHeight = 64;
+      const topOffset = navbarHeight + 16;
+
+      setTocStyle({
+        position: 'fixed',
+        top: topOffset,
+        width: rect.width,
+        maxHeight: `calc(100vh - ${topOffset + 32}px)`
+      });
+    };
+
+    updateTocPosition();
+    window.addEventListener('resize', updateTocPosition);
+    return () => window.removeEventListener('resize', updateTocPosition);
+  }, []);
 
   useEffect(() => {
     if (!contentRef.current) return;
@@ -28,7 +54,6 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
       }
     );
 
-    // Function to observe all heading elements
     const observeHeadings = () => {
       items.forEach(item => {
         const element = document.getElementById(item.id);
@@ -36,10 +61,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
       });
     };
 
-    // Observe immediately
     observeHeadings();
 
-    // Also observe after a short delay to handle async content (like ipynb files)
     const timer = setTimeout(observeHeadings, 500);
 
     return () => {
@@ -47,6 +70,34 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
       observer.disconnect();
     };
   }, [items, contentRef]);
+
+  useEffect(() => {
+    if (!activeId || !tocNavRef.current) return;
+
+    const container = tocNavRef.current;
+    const activeButton = container.querySelector(`[data-toc-id="${activeId}"]`) as HTMLElement;
+    if (!activeButton) return;
+
+    const containerHeight = container.clientHeight;
+    const scrollHeight = container.scrollHeight;
+    const maxScroll = scrollHeight - containerHeight;
+
+    const containerRect = container.getBoundingClientRect();
+    const buttonRect = activeButton.getBoundingClientRect();
+
+    const buttonTopInContainer = buttonRect.top - containerRect.top + container.scrollTop;
+    const buttonHeight = buttonRect.height;
+    const buttonCenter = buttonTopInContainer + buttonHeight / 2;
+
+    const targetScroll = buttonCenter - containerHeight / 2;
+
+    const clampedScroll = Math.max(0, Math.min(maxScroll, targetScroll));
+
+    container.scrollTo({
+      top: clampedScroll,
+      behavior: 'smooth'
+    });
+  }, [activeId]);
 
   const scrollToHeading = (id: string) => {
     const element = document.getElementById(id);
@@ -64,27 +115,34 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
   if (items.length === 0) return null;
 
   const desktopToc = (
-    <div className="hidden lg:block sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto">
-      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-        目录
-      </h3>
-      <nav className="space-y-1">
-        {items.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => scrollToHeading(item.id)}
-            className={cn(
-              "w-full text-left py-1 text-sm transition-colors",
-              activeId === item.id
-                ? "text-gray-900 dark:text-gray-200 font-medium"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-            )}
-            style={{ paddingLeft: `${(item.level - 1) * 1}rem` }}
-          >
-            {item.text}
-          </button>
-        ))}
-      </nav>
+    <div ref={containerRef} className="hidden lg:block">
+      <div
+        ref={tocNavRef}
+        style={tocStyle}
+        className="overflow-y-auto pb-20"
+      >
+        <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+          目录
+        </h3>
+        <nav className="space-y-1">
+          {items.map((item) => (
+            <button
+              key={item.id}
+              data-toc-id={item.id}
+              onClick={() => scrollToHeading(item.id)}
+              className={cn(
+                "w-full text-left py-1 text-sm transition-colors",
+                activeId === item.id
+                  ? "text-gray-900 dark:text-gray-200 font-medium"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+              )}
+              style={{ paddingLeft: `${(item.level - 1) * 1}rem` }}
+            >
+              {item.text}
+            </button>
+          ))}
+        </nav>
+      </div>
     </div>
   );
 
