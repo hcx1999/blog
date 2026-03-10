@@ -1,11 +1,26 @@
 import { visit } from 'unist-util-visit';
 import type { Node, Parent } from 'unist';
+import type { VFile } from 'vfile';
+
+import type { Data } from 'unist';
+
+interface MathNode extends Node {
+  type: 'math';
+  value: string;
+  data?: Data;
+}
+
+interface InlineMathNode extends Node {
+  type: 'inlineMath';
+  value: string;
+  data?: Data;
+}
 
 export default function remarkMathFix() {
-  return (tree: Node, file: any) => {
+  return (tree: Node, file: VFile) => {
     const source = String(file);
     
-    visit(tree, 'inlineMath', (node: any, index: number | undefined, parent: Parent | undefined) => {
+    visit(tree, 'inlineMath', (node: InlineMathNode, index: number | undefined, parent: Parent | undefined) => {
       if (node.position && index !== undefined && parent) {
         const start = node.position.start.offset || 0;
         const end = node.position.end.offset || 0;
@@ -27,7 +42,7 @@ export default function remarkMathFix() {
                 }
               ]
             }
-          } as any;
+          } as MathNode;
         }
       }
     });

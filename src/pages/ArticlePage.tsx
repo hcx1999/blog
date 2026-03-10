@@ -1,12 +1,45 @@
 import React, { useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '../context/useAppContext';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { NotebookRenderer } from '../components/NotebookRenderer';
 import { TableOfContents } from '../components/TableOfContents';
 import { extractTOC } from '../utils/toc';
-import type { TOCItem } from '../types';
+import type { TOCItem, NotebookCell } from '../types';
 import { FileText } from 'lucide-react';
+
+const extractNotebookTOC = (content: string): TOCItem[] => {
+  try {
+    const notebook = JSON.parse(content) as { cells?: NotebookCell[] };
+    const toc: TOCItem[] = [];
+    
+    notebook.cells?.forEach((cell: NotebookCell) => {
+      if (cell.cell_type === 'markdown') {
+        const source = Array.isArray(cell.source) ? cell.source.join('') : cell.source;
+        const lines = source.split('\n');
+        
+        lines.forEach((line: string) => {
+          const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+          if (headingMatch) {
+            const level = headingMatch[1].length;
+            const text = headingMatch[2].trim();
+            const id = text.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-');
+            
+            toc.push({
+              id,
+              text,
+              level
+            });
+          }
+        });
+      }
+    });
+    
+    return toc;
+  } catch {
+    return [];
+  }
+};
 
 export const ArticlePage: React.FC = () => {
   const { path } = useParams<{ path: string }>();
@@ -23,40 +56,6 @@ export const ArticlePage: React.FC = () => {
       </div>
     );
   }
-
-  // Extract TOC for both markdown and ipynb files
-  const extractNotebookTOC = (content: string): TOCItem[] => {
-    try {
-      const notebook = JSON.parse(content);
-      const toc: TOCItem[] = [];
-      
-      notebook.cells?.forEach((cell: any) => {
-        if (cell.cell_type === 'markdown') {
-          const source = Array.isArray(cell.source) ? cell.source.join('') : cell.source;
-          const lines = source.split('\n');
-          
-          lines.forEach((line: string) => {
-            const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
-            if (headingMatch) {
-              const level = headingMatch[1].length;
-              const text = headingMatch[2].trim();
-              const id = text.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-');
-              
-              toc.push({
-                id,
-                text,
-                level
-              });
-            }
-          });
-        }
-      });
-      
-      return toc;
-    } catch {
-      return [];
-    }
-  };
 
   const tocItems = post.type === 'markdown' 
     ? extractTOC(post.content) 

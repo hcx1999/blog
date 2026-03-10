@@ -3,21 +3,7 @@ import { Code, Terminal } from 'lucide-react';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github.css';
-
-interface NotebookCell {
-  cell_type: 'markdown' | 'code' | 'raw';
-  source: string | string[];
-  outputs?: any[];
-}
-
-interface Notebook {
-  cells: NotebookCell[];
-  metadata: any;
-  nbformat: number;
-  nbformat_minor: number;
-}
-
-
+import type { Notebook, NotebookOutput } from '../types';
 
 interface NotebookRendererProps {
   content: string;
@@ -29,9 +15,9 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) =
 
   React.useEffect(() => {
     try {
-      const parsed = JSON.parse(content);
+      const parsed = JSON.parse(content) as Notebook;
       setNotebook(parsed);
-    } catch (err) {
+    } catch {
       setError('Failed to parse notebook');
     }
   }, [content]);
@@ -62,7 +48,7 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) =
     return Array.isArray(source) ? source.join('') : source;
   };
 
-  const renderOutput = (output: any, index: number) => {
+  const renderOutput = (output: NotebookOutput, index: number) => {
     if (output.output_type === 'stream') {
       return (
         <div key={index} className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded text-sm font-mono">
@@ -74,7 +60,7 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) =
     if (output.output_type === 'execute_result' || output.output_type === 'display_data') {
       const data = output.data;
 
-      if (data['image/png']) {
+      if (data?.['image/png']) {
         return (
           <div key={index} className="mt-2">
             <img
@@ -86,7 +72,7 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) =
         );
       }
 
-      if (data['image/jpeg']) {
+      if (data?.['image/jpeg']) {
         return (
           <div key={index} className="mt-2">
             <img
@@ -98,7 +84,7 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) =
         );
       }
 
-      if (data['image/svg+xml']) {
+      if (data?.['image/svg+xml']) {
         const svgContent = Array.isArray(data['image/svg+xml']) ? data['image/svg+xml'].join('') : data['image/svg+xml'];
         return (
           <div
@@ -109,7 +95,7 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) =
         );
       }
 
-      if (data['text/html']) {
+      if (data?.['text/html']) {
         return (
           <div
             key={index}
@@ -119,7 +105,7 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) =
         );
       }
 
-      if (data['text/plain']) {
+      if (data?.['text/plain']) {
         return (
           <div key={index} className="mt-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded text-sm">
             {data['text/plain']}

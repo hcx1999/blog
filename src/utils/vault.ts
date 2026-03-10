@@ -1,4 +1,4 @@
-import type { BlogPost, FileType } from '../types';
+import type { BlogPost, FileType, NotebookCell } from '../types';
 
 export interface VaultFile {
   name: string;
@@ -13,8 +13,8 @@ export interface VaultCategory {
   files: VaultFile[];
 }
 
-const IMPORT_MD: Record<string, any> = import.meta.glob('/vault/**/*.md', { query: '?raw', import: 'default', eager: true });
-const IMPORT_NB: Record<string, any> = import.meta.glob('/vault/**/*.ipynb', { query: '?raw', import: 'default', eager: true });
+const IMPORT_MD: Record<string, string> = import.meta.glob('/vault/**/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const IMPORT_NB: Record<string, string> = import.meta.glob('/vault/**/*.ipynb', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const IMPORT_IMAGES: Record<string, string> = import.meta.glob('/vault/**/*.{png,jpg,jpeg,gif,svg,webp}', { eager: true, import: 'default' }) as Record<string, string>;
 
 // 创建图片名称到URL的映射
@@ -39,7 +39,7 @@ export const getVaultStructure = (): VaultFile[] => {
       path: relativePath,
       type: 'file',
       extension: 'md',
-      content: IMPORT_MD[path] as string,
+      content: IMPORT_MD[path],
     });
   }
 
@@ -52,7 +52,7 @@ export const getVaultStructure = (): VaultFile[] => {
       path: relativePath,
       type: 'file',
       extension: 'ipynb',
-      content: IMPORT_NB[path] as string,
+      content: IMPORT_NB[path],
     });
   }
 
@@ -78,7 +78,7 @@ export const loadVaultPosts = (): BlogPost[] => {
     const category = getCategoryFromPath(file.path);
 
     let title = file.name;
-    let content = file.content;
+    const content = file.content;
 
     if (fileType === 'markdown') {
       const titleMatch = content.match(/^#\s+(.+)$/m);
@@ -87,7 +87,7 @@ export const loadVaultPosts = (): BlogPost[] => {
       }
     } else {
       try {
-        const nb = JSON.parse(content);
+        const nb = JSON.parse(content) as { cells?: NotebookCell[] };
         if (nb.cells && nb.cells.length > 0) {
           const firstCell = nb.cells[0];
           if (firstCell.cell_type === 'markdown' && firstCell.source) {
@@ -98,7 +98,8 @@ export const loadVaultPosts = (): BlogPost[] => {
             }
           }
         }
-      } catch {
+      } catch (error) {
+        console.warn('Failed to parse notebook:', file.path, error);
       }
     }
 

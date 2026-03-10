@@ -1,11 +1,8 @@
 import React from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Search, FileText, ArrowRight } from 'lucide-react';
-import { useAppContext } from '../context/AppContext';
-
-const escapeRegExp = (str: string): string => {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-};
+import { useAppContext } from '../context/useAppContext';
+import { escapeRegExp, filterPosts } from '../utils/search';
 
 const HighlightText: React.FC<{ text: string; query: string }> = ({ text, query }) => {
   if (!query.trim()) return <>{text}</>;
@@ -28,35 +25,31 @@ const HighlightText: React.FC<{ text: string; query: string }> = ({ text, query 
   );
 };
 
+const getExcerpt = (content: string, query: string): string => {
+  const lowerContent = content.toLowerCase();
+  const lowerQuery = query.toLowerCase();
+  const index = lowerContent.indexOf(lowerQuery);
+  
+  if (index === -1) {
+    return content.substring(0, 120) + '...';
+  }
+  
+  const start = Math.max(0, index - 40);
+  const end = Math.min(content.length, index + query.length + 80);
+  let excerpt = content.substring(start, end);
+  
+  if (start > 0) excerpt = '...' + excerpt;
+  if (end < content.length) excerpt = excerpt + '...';
+  
+  return excerpt;
+};
+
 export const SearchResultsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   const { posts } = useAppContext();
 
-  const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(query.toLowerCase()) ||
-    post.content.toLowerCase().includes(query.toLowerCase()) ||
-    post.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
-  );
-
-  const getExcerpt = (content: string, q: string): string => {
-    const lowerContent = content.toLowerCase();
-    const lowerQuery = q.toLowerCase();
-    const index = lowerContent.indexOf(lowerQuery);
-    
-    if (index === -1) {
-      return content.substring(0, 120) + '...';
-    }
-    
-    const start = Math.max(0, index - 40);
-    const end = Math.min(content.length, index + q.length + 80);
-    let excerpt = content.substring(start, end);
-    
-    if (start > 0) excerpt = '...' + excerpt;
-    if (end < content.length) excerpt = excerpt + '...';
-    
-    return excerpt;
-  };
+  const filteredPosts = filterPosts(posts, query);
 
   return (
     <div className="max-w-4xl mx-auto">

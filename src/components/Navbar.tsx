@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, Sun, Moon, Menu } from 'lucide-react';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '../context/useAppContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cn } from '../utils/cn';
 

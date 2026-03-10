@@ -9,6 +9,7 @@ import { Copy, Check } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { imageMap } from '../utils/vault';
 import remarkMathFix from '../utils/remarkMathFix';
+import type { ElementContent } from 'hast';
 
 interface MarkdownRendererProps {
   content: string;
@@ -83,11 +84,15 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           pre: ({ node, ...props }) => {
             let codeText = '';
             try {
-              const codeElement = node?.children?.[0] as any;
-              if (codeElement?.children?.[0]?.value) {
-                codeText = codeElement.children[0].value;
+              const codeElement = node?.children?.[0];
+              if (codeElement?.type === 'element' && 'children' in codeElement) {
+                const textNode = (codeElement.children as ElementContent[])[0];
+                if (textNode?.type === 'text' && 'value' in textNode) {
+                  codeText = textNode.value;
+                }
               }
             } catch {
+              // Silently ignore extraction errors
             }
             return (
               <div className="relative group">

@@ -1,51 +1,42 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { BlogPost } from '../types';
+import { AppContext } from './context';
 
-interface AppContextType {
-  posts: BlogPost[];
-  currentPost: BlogPost | null;
-  setCurrentPost: (post: BlogPost | null) => void;
-  sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
-  darkMode: boolean;
-  toggleDarkMode: () => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  filteredPosts: BlogPost[];
-}
-
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const getInitialDarkMode = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') return true;
+  if (savedTheme === 'light') return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+};
 
 export const AppProvider: React.FC<{ children: ReactNode; posts: BlogPost[] }> = ({ children, posts }) => {
   const [currentPost, setCurrentPost] = useState<BlogPost | null>(posts[0] || null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(getInitialDarkMode);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
   const toggleDarkMode = () => {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
-    localStorage.setItem('theme', newMode ? 'dark' : 'light');
-    if (newMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    setDarkMode(prev => {
+      const newMode = !prev;
+      localStorage.setItem('theme', newMode ? 'dark' : 'light');
+      if (newMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      return newMode;
+    });
   };
 
-  const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredPosts = useMemo(() => 
+    posts.filter(post =>
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    ),
+    [posts, searchQuery]
   );
 
   return (
@@ -64,12 +55,4 @@ export const AppProvider: React.FC<{ children: ReactNode; posts: BlogPost[] }> =
       {children}
     </AppContext.Provider>
   );
-};
-
-export const useAppContext = () => {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error('useAppContext must be used within an AppProvider');
-  }
-  return context;
 };

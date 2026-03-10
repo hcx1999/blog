@@ -1,21 +1,21 @@
-export interface NotebookCell {
-  cell_type: string;
-  source: string | string[];
-  outputs?: Array<{
-    output_type: string;
-    data?: {
-      'image/png'?: string;
-      'image/jpeg'?: string;
-      'image/svg+xml'?: string;
-      'text/plain'?: string;
-      'text/html'?: string;
-    };
-  }>;
+import type { NotebookCell } from '../types';
+
+export interface NotebookMetadata {
+  kernelspec?: {
+    display_name: string;
+    language: string;
+    name: string;
+  };
+  language_info?: {
+    name: string;
+    version: string;
+  };
+  [key: string]: unknown;
 }
 
 export interface Notebook {
   cells: NotebookCell[];
-  metadata: any;
+  metadata: NotebookMetadata;
   nbformat: number;
   nbformat_minor: number;
 }
