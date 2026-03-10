@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "具身智能/导论01 机器人学.md",
+                "file": "计算机视觉/导论01 传统视觉算法.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "导论01 机器人学"
+              "title": "导论01 传统视觉算法"
             }
           }
         ]
@@ -182,8 +182,8 @@
   },
   "active": "514502da275d9905",
   "lastOpenFiles": [
-    "算法设计与分析/导论01 复杂度分析.md",
     "具身智能/导论01 机器人学.md",
+    "算法设计与分析/导论01 复杂度分析.md",
     "test-math.md",
     "算法设计与分析/导论02 分治策略.md",
     "计算机视觉/导论01 传统视觉算法.md",

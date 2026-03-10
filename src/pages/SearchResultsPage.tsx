@@ -3,10 +3,15 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { Search, FileText, ArrowRight } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
+const escapeRegExp = (str: string): string => {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 const HighlightText: React.FC<{ text: string; query: string }> = ({ text, query }) => {
   if (!query.trim()) return <>{text}</>;
 
-  const parts = text.split(new RegExp(`(${query})`, 'gi'));
+  const escapedQuery = escapeRegExp(query);
+  const parts = text.split(new RegExp(`(${escapedQuery})`, 'gi'));
   
   return (
     <>

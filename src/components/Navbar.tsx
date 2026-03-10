@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, Sun, Moon, Menu } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cn } from '../utils/cn';
+
+const FOCUS_SEARCH_EVENT = 'focusSearch';
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -11,20 +13,53 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
   const { darkMode, toggleDarkMode } = useAppContext();
   const [searchParams] = useSearchParams();
-  const [searchInput, setSearchInput] = useState(searchParams.get('q') || '');
+  const [searchInput, setSearchInput] = useState(() => searchParams.get('q') || '');
   const navigate = useNavigate();
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const q = searchParams.get('q');
-    if (q) {
-      setSearchInput(q);
+    const handleFocusSearch = () => {
+      searchInputRef.current?.focus();
+    };
+
+    window.addEventListener(FOCUS_SEARCH_EVENT, handleFocusSearch);
+    return () => window.removeEventListener(FOCUS_SEARCH_EVENT, handleFocusSearch);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleSearchInputChange = useCallback((value: string) => {
+    setSearchInput(value);
+    
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
-  }, [searchParams]);
+    
+    debounceTimerRef.current = setTimeout(() => {
+      if (value.trim()) {
+        navigate(`/search?q=${encodeURIComponent(value.trim())}`, { replace: true });
+      }
+    }, 300);
+  }, [navigate]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
     if (searchInput.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchInput.trim())}`);
+    } else {
+      navigate('/');
     }
   };
 
@@ -55,10 +90,11 @@ export const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
           <div className="relative">
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
+              ref={searchInputRef}
               type="text"
               placeholder="搜索..."
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={(e) => handleSearchInputChange(e.target.value)}
               className={cn(
                 "w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700",
                 "bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2",

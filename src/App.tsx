@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { Navbar } from './components/Navbar';
@@ -8,6 +8,10 @@ import { ArticlePage } from './pages/ArticlePage';
 import { SearchResultsPage } from './pages/SearchResultsPage';
 import { loadVaultPosts, getVaultHierarchy } from './utils/vault';
 import { cn } from './utils/cn';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import type { KeyboardShortcut } from './hooks/useKeyboardShortcuts';
+
+export const FOCUS_SEARCH_EVENT = 'focusSearch';
 
 const RedirectHandler: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -39,9 +43,44 @@ const AppContent: React.FC = () => {
   const posts = useMemo(() => loadVaultPosts(), []);
   const hierarchy = useMemo(() => getVaultHierarchy(), []);
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev);
+  }, []);
+
+  const handleFocusSearch = useCallback(() => {
+    window.dispatchEvent(new CustomEvent(FOCUS_SEARCH_EVENT));
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        const activeElement = document.activeElement;
+        if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
+          (activeElement as HTMLElement).blur();
+        }
+      }
+      
+      if (e.key === 'Tab') {
+        const activeElement = document.activeElement;
+        const isInputFocused = activeElement instanceof HTMLInputElement || 
+                              activeElement instanceof HTMLTextAreaElement ||
+                              activeElement?.getAttribute('contenteditable') === 'true';
+        if (!isInputFocused) {
+          e.preventDefault();
+          setSidebarOpen(prev => !prev);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const shortcuts: KeyboardShortcut[] = useMemo(() => [
+    { key: '/', action: handleFocusSearch, description: '聚焦搜索框' },
+  ], [handleFocusSearch]);
+
+  useKeyboardShortcuts(shortcuts);
 
   return (
     <AppProvider posts={posts}>
