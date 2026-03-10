@@ -9,7 +9,7 @@
       (function() {
         var l = window.location;
         sessionStorage.setItem('redirectPath', l.pathname + l.search + l.hash);
-        l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/');
+        l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/blog/');
       })();
     </script>
   </head>
