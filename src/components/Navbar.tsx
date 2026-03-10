@@ -44,14 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
           <img 
               src={`${import.meta.env.BASE_URL}avatar.svg`} 
               alt="Blog Logo" 
-              className="w-8 h-8 transition-transform duration-500 hover:rotate-360"
-              style={{ transition: 'transform 0.5s ease-in-out' }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'rotate(360deg)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'rotate(0deg)';
-              }}
+              className="w-8 h-8"
             />
           <span className="font-semibold">&omega;</span>
         </button>
