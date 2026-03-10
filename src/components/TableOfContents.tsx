@@ -21,7 +21,6 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
       
       const container = containerRef.current;
       const rect = container.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
       const navbarHeight = 64;
       const topOffset = navbarHeight + 16;
 

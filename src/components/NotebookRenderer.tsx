@@ -74,24 +74,6 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) =
     if (output.output_type === 'execute_result' || output.output_type === 'display_data') {
       const data = output.data;
 
-      if (data['text/plain']) {
-        return (
-          <div key={index} className="mt-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded text-sm">
-            {data['text/plain']}
-          </div>
-        );
-      }
-
-      if (data['text/html']) {
-        return (
-          <div
-            key={index}
-            className="mt-2"
-            dangerouslySetInnerHTML={{ __html: Array.isArray(data['text/html']) ? data['text/html'].join('') : data['text/html'] }}
-          />
-        );
-      }
-
       if (data['image/png']) {
         return (
           <div key={index} className="mt-2">
@@ -112,6 +94,35 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) =
               alt="Notebook output"
               className="max-w-full h-auto rounded"
             />
+          </div>
+        );
+      }
+
+      if (data['image/svg+xml']) {
+        const svgContent = Array.isArray(data['image/svg+xml']) ? data['image/svg+xml'].join('') : data['image/svg+xml'];
+        return (
+          <div
+            key={index}
+            className="mt-2"
+            dangerouslySetInnerHTML={{ __html: svgContent }}
+          />
+        );
+      }
+
+      if (data['text/html']) {
+        return (
+          <div
+            key={index}
+            className="mt-2"
+            dangerouslySetInnerHTML={{ __html: Array.isArray(data['text/html']) ? data['text/html'].join('') : data['text/html'] }}
+          />
+        );
+      }
+
+      if (data['text/plain']) {
+        return (
+          <div key={index} className="mt-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded text-sm">
+            {data['text/plain']}
           </div>
         );
       }
