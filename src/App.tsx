@@ -16,17 +16,22 @@ export const FOCUS_SEARCH_EVENT = 'focusSearch';
 
 const RedirectHandler: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
-  const [redirectPath] = useState(() => sessionStorage.getItem('redirectPath'));
+  const [isRedirecting, setIsRedirecting] = useState(() => {
+    const redirectPath = sessionStorage.getItem('redirectPath');
+    return !!redirectPath;
+  });
 
   useEffect(() => {
+    const redirectPath = sessionStorage.getItem('redirectPath');
     if (redirectPath) {
       sessionStorage.removeItem('redirectPath');
       const pathWithoutBase = redirectPath.replace(/^\/blog/, '');
       navigate(pathWithoutBase || '/', { replace: true });
+      setIsRedirecting(false);
     }
-  }, [redirectPath, navigate]);
+  }, [navigate]);
 
-  if (redirectPath) {
+  if (isRedirecting) {
     return null;
   }
 
