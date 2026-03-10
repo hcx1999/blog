@@ -3,45 +3,12 @@
   <head>
     <meta charset="utf-8">
     <title>Blog</title>
-    <style>
-      body { margin: 0; padding: 0; }
-      #root { min-height: 100vh; }
-      .loading {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        font-family: system-ui, -apple-system, sans-serif;
-        color: #666;
-      }
-    </style>
     <script>
       (function() {
         var l = window.location;
         var path = l.pathname + l.search + l.hash;
-        
         sessionStorage.setItem('redirectPath', path);
-        
-        var basePath = '/blog/';
-        var assetsPath = basePath + 'assets/';
-        
-        document.addEventListener('DOMContentLoaded', function() {
-          var rootDiv = document.createElement('div');
-          rootDiv.id = 'root';
-          rootDiv.innerHTML = '<div class="loading">Loading...</div>';
-          document.body.appendChild(rootDiv);
-          
-          var link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = assetsPath + 'index-D7EIKjhY.css';
-          document.head.appendChild(link);
-          
-          var script = document.createElement('script');
-          script.type = 'module';
-          script.crossOrigin = 'anonymous';
-          script.src = assetsPath + 'index-ChRtArP-.js';
-          document.body.appendChild(script);
-        });
+        l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/blog/');
       })();
     </script>
   </head>
