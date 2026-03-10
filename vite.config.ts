@@ -5,7 +5,7 @@ import { join, dirname } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: './',
+  base: '/blog/',
   plugins: [
     react(),
     {
