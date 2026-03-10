@@ -76,22 +76,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ hierarchy, isOpen }) => {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden ml-4"
                   >
-                    {category.files.map((file) => (
-                      <Link
-                        key={file.path}
-                        to={`/article/${encodeURIComponent(file.path)}`}
-                        className={cn(
-                          "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all",
-                          "hover:bg-gray-100 dark:hover:bg-gray-800",
-                          location.pathname === `/article/${encodeURIComponent(file.path)}`
-                            ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 border-l-2 border-gray-500"
-                            : "text-gray-600 dark:text-gray-400"
-                        )}
-                      >
-                        <FileText className="w-4 h-4 flex-shrink-0" />
-                        <span className="truncate">{file.name}</span>
-                      </Link>
-                    ))}
+                    {category.files.map((file) => {
+                      const articlePath = `/article/${encodeURIComponent(file.path)}`;
+                      const isActive = decodeURIComponent(location.pathname) === `/article/${file.path}`;
+                      return (
+                        <Link
+                          key={file.path}
+                          to={articlePath}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all",
+                            "hover:bg-gray-100 dark:hover:bg-gray-800",
+                            isActive
+                              ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 border-l-2 border-gray-500"
+                              : "text-gray-600 dark:text-gray-400"
+                          )}
+                        >
+                          <FileText className="w-4 h-4 flex-shrink-0" />
+                          <span className="truncate">{file.name}</span>
+                        </Link>
+                      );
+                    })}
                   </motion.div>
                 )}
               </AnimatePresence>

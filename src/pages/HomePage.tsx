@@ -7,7 +7,7 @@ export const HomePage: React.FC = () => {
         {/* 头像 */}
         <div className="mb-8 flex flex-col items-center">
           <img 
-            src={`${import.meta.env.BASE_URL}avatar.svg`} 
+            src={`${import.meta.env.BASE_URL}/avatar.svg`} 
             alt="&omega;" 
             className="w-24 h-24 mb-4 transition-transform duration-500 hover:rotate-360"
             style={{ transition: 'transform 0.5s ease-in-out' }}
@@ -44,7 +44,7 @@ export const HomePage: React.FC = () => {
               rel="noopener noreferrer"
               className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
-              <img src={`${import.meta.env.BASE_URL}xj.svg`} alt="ICUlizhi" className="w-12 h-12" />
+              <img src={`${import.meta.env.BASE_URL}/xj.svg`} alt="ICUlizhi" className="w-12 h-12" />
               <div>
                 <div className="font-medium">ICUlizhi</div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">p大22级图灵班&经双，爱好中国哲学</div>

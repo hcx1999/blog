@@ -2,6 +2,7 @@ import React from 'react';
 import { Code, Terminal } from 'lucide-react';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import hljs from 'highlight.js';
+import DOMPurify from 'dompurify';
 import 'highlight.js/styles/github.css';
 import type { Notebook, NotebookOutput } from '../types';
 
@@ -52,7 +53,7 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) =
     if (output.output_type === 'stream') {
       return (
         <div key={index} className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded text-sm font-mono">
-          {output.text}
+          {output.text || ''}
         </div>
       );
     }
@@ -90,17 +91,18 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) =
           <div
             key={index}
             className="mt-2"
-            dangerouslySetInnerHTML={{ __html: svgContent }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svgContent) }}
           />
         );
       }
 
       if (data?.['text/html']) {
+        const htmlContent = Array.isArray(data['text/html']) ? data['text/html'].join('') : data['text/html'];
         return (
           <div
             key={index}
             className="mt-2"
-            dangerouslySetInnerHTML={{ __html: Array.isArray(data['text/html']) ? data['text/html'].join('') : data['text/html'] }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlContent) }}
           />
         );
       }

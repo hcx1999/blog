@@ -12,6 +12,7 @@ const extractNotebookTOC = (content: string): TOCItem[] => {
   try {
     const notebook = JSON.parse(content) as { cells?: NotebookCell[] };
     const toc: TOCItem[] = [];
+    const idCounts = new Map<string, number>();
     
     notebook.cells?.forEach((cell: NotebookCell) => {
       if (cell.cell_type === 'markdown') {
@@ -23,13 +24,14 @@ const extractNotebookTOC = (content: string): TOCItem[] => {
           if (headingMatch) {
             const level = headingMatch[1].length;
             const text = headingMatch[2].trim();
-            const id = text.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-');
+            const baseId = text.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-');
             
-            toc.push({
-              id,
-              text,
-              level
-            });
+            const count = idCounts.get(baseId) || 0;
+            idCounts.set(baseId, count + 1);
+            
+            const id = count > 0 ? `${baseId}-${count}` : baseId;
+            
+            toc.push({ id, text, level });
           }
         });
       }
@@ -46,7 +48,8 @@ export const ArticlePage: React.FC = () => {
   const { posts } = useAppContext();
   const contentRef = useRef<HTMLDivElement | null>(null);
 
-  const post = posts.find(p => p.id === path);
+  const decodedPath = path ? decodeURIComponent(path) : '';
+  const post = posts.find(p => p.id === decodedPath);
 
   if (!post) {
     return (

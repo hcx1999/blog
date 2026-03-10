@@ -38,11 +38,36 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
 
   const processedText = preprocessContent(content);
 
-  const generateId = (children: React.ReactNode) => {
+  const idCounts = new Map<string, number>();
+
+  const generateId = (children: React.ReactNode): string | undefined => {
+    let text = '';
+    
     if (typeof children === 'string') {
-      return children.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-');
+      text = children;
+    } else if (Array.isArray(children)) {
+      text = children
+        .map(child => {
+          if (typeof child === 'string') return child;
+          if (typeof child === 'object' && child !== null && 'props' in child) {
+            return generateId((child as { props: { children?: React.ReactNode } }).props.children) || '';
+          }
+          return '';
+        })
+        .join('');
+    } else if (typeof children === 'object' && children !== null && 'props' in children) {
+      text = generateId((children as { props: { children?: React.ReactNode } }).props.children) || '';
     }
-    return undefined;
+    
+    if (!text.trim()) return undefined;
+    
+    const baseId = text.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-').replace(/^-|-$/g, '');
+    if (!baseId) return undefined;
+    
+    const count = idCounts.get(baseId) || 0;
+    idCounts.set(baseId, count + 1);
+    
+    return count > 0 ? `${baseId}-${count}` : baseId;
   };
 
   return (

@@ -77,7 +77,7 @@ export const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
           className="hover:opacity-80 transition-opacity flex items-center gap-2"
         >
           <img 
-              src={`${import.meta.env.BASE_URL}avatar.svg`} 
+              src={`${import.meta.env.BASE_URL}/avatar.svg`} 
               alt="Blog Logo" 
               className="w-8 h-8"
             />

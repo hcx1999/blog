@@ -11,6 +11,7 @@ import { loadVaultPosts, getVaultHierarchy } from './utils/vault';
 import { cn } from './utils/cn';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import type { KeyboardShortcut } from './hooks/useKeyboardShortcuts';
+import { siteConfig } from './config/site';
 
 export const FOCUS_SEARCH_EVENT = 'focusSearch';
 
@@ -25,7 +26,7 @@ const RedirectHandler: React.FC<{ children: React.ReactNode }> = ({ children }) 
     const redirectPath = sessionStorage.getItem('redirectPath');
     if (redirectPath) {
       sessionStorage.removeItem('redirectPath');
-      const pathWithoutBase = redirectPath.replace(/^\/blog/, '');
+      const pathWithoutBase = redirectPath.replace(new RegExp(`^${siteConfig.basename}`), '');
       navigate(pathWithoutBase || '/', { replace: true });
       setIsRedirecting(false);
     }
@@ -113,7 +114,7 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter basename="/blog">
+    <BrowserRouter basename={siteConfig.basename}>
       <AppContent />
     </BrowserRouter>
   );

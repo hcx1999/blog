@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { BlogPost } from '../types';
 import { AppContext } from './context';
@@ -12,20 +12,21 @@ const getInitialDarkMode = (): boolean => {
 };
 
 export const AppProvider: React.FC<{ children: ReactNode; posts: BlogPost[] }> = ({ children, posts }) => {
-  const [currentPost, setCurrentPost] = useState<BlogPost | null>(posts[0] || null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(getInitialDarkMode);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   const toggleDarkMode = () => {
     setDarkMode(prev => {
       const newMode = !prev;
       localStorage.setItem('theme', newMode ? 'dark' : 'light');
-      if (newMode) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
       return newMode;
     });
   };
@@ -42,10 +43,6 @@ export const AppProvider: React.FC<{ children: ReactNode; posts: BlogPost[] }> =
   return (
     <AppContext.Provider value={{
       posts,
-      currentPost,
-      setCurrentPost,
-      sidebarOpen,
-      setSidebarOpen,
       darkMode,
       toggleDarkMode,
       searchQuery,
