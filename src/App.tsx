@@ -16,7 +16,8 @@ const RedirectHandler: React.FC = () => {
     const redirectPath = sessionStorage.getItem('redirectPath');
     if (redirectPath) {
       sessionStorage.removeItem('redirectPath');
-      navigate(redirectPath, { replace: true });
+      const pathWithoutBase = redirectPath.replace(/^\/blog/, '');
+      navigate(pathWithoutBase || '/', { replace: true });
     }
   }, [navigate]);
 
