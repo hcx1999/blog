@@ -5,10 +5,22 @@
     <title>Blog</title>
     <script>
       (function() {
+        var savedTheme = localStorage.getItem('theme');
+        var isDark = savedTheme === 'dark' || 
+                     (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+    <script>
+      // NOTE: This path must match siteConfig.basename in src/config/site.ts
+      var BASE_PATH = '/blog';
+      (function() {
         var l = window.location;
         var path = l.pathname + l.search + l.hash;
         sessionStorage.setItem('redirectPath', path);
-        l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/blog/');
+        l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + BASE_PATH + '/');
       })();
     </script>
   </head>
