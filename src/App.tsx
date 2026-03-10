@@ -9,8 +9,9 @@ import { SearchResultsPage } from './pages/SearchResultsPage';
 import { loadVaultPosts, getVaultHierarchy } from './utils/vault';
 import { cn } from './utils/cn';
 
-const RedirectHandler: React.FC = () => {
+const RedirectHandler: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
+  const [isRedirecting, setIsRedirecting] = useState(true);
 
   useEffect(() => {
     const redirectPath = sessionStorage.getItem('redirectPath');
@@ -19,9 +20,18 @@ const RedirectHandler: React.FC = () => {
       const pathWithoutBase = redirectPath.replace(/^\/blog/, '');
       navigate(pathWithoutBase || '/', { replace: true });
     }
+    setIsRedirecting(false);
   }, [navigate]);
 
-  return null;
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-800">
+        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 };
 
 const AppContent: React.FC = () => {
@@ -35,26 +45,27 @@ const AppContent: React.FC = () => {
 
   return (
     <AppProvider posts={posts}>
-      <RedirectHandler />
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-800">
-        <Navbar toggleSidebar={toggleSidebar} />
-        <Sidebar hierarchy={hierarchy} isOpen={sidebarOpen} />
-        <main
-          className={cn(
-            "pt-16 min-h-screen transition-all duration-300",
-            sidebarOpen ? "ml-64" : "ml-0"
-          )}
-        >
-          <div className="p-6 lg:p-8">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/article/:path" element={<ArticlePage />} />
-              <Route path="/search" element={<SearchResultsPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </div>
-        </main>
-      </div>
+      <RedirectHandler>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-800">
+          <Navbar toggleSidebar={toggleSidebar} />
+          <Sidebar hierarchy={hierarchy} isOpen={sidebarOpen} />
+          <main
+            className={cn(
+              "pt-16 min-h-screen transition-all duration-300",
+              sidebarOpen ? "ml-64" : "ml-0"
+            )}
+          >
+            <div className="p-6 lg:p-8">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/article/:path" element={<ArticlePage />} />
+                <Route path="/search" element={<SearchResultsPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </div>
+          </main>
+        </div>
+      </RedirectHandler>
     </AppProvider>
   );
 };
