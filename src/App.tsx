@@ -60,7 +60,7 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/blog">
       <AppContent />
     </BrowserRouter>
   );
