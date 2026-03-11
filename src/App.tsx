@@ -28,7 +28,8 @@ const RedirectHandler: React.FC<{ children: React.ReactNode }> = ({ children }) 
       sessionStorage.removeItem('redirectPath');
       const pathWithoutBase = redirectPath.replace(new RegExp(`^${siteConfig.basename}`), '');
       navigate(pathWithoutBase || '/', { replace: true });
-      setIsRedirecting(false);
+      // 使用setTimeout来避免在effect中直接调用setState
+      setTimeout(() => setIsRedirecting(false), 0);
     }
   }, [navigate]);
 
@@ -40,12 +41,19 @@ const RedirectHandler: React.FC<{ children: React.ReactNode }> = ({ children }) 
 };
 
 const AppContent: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('sidebar-open');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sidebar-open', JSON.stringify(sidebarOpen));
+  }, [sidebarOpen]);
   const posts = useMemo(() => loadVaultPosts(), []);
   const hierarchy = useMemo(() => getVaultHierarchy(), []);
 
   const toggleSidebar = useCallback(() => {
-    setSidebarOpen(prev => !prev);
+    setSidebarOpen((prev: boolean) => !prev);
   }, []);
 
   const handleFocusSearch = useCallback(() => {
@@ -68,7 +76,7 @@ const AppContent: React.FC = () => {
                               activeElement?.getAttribute('contenteditable') === 'true';
         if (!isInputFocused) {
           e.preventDefault();
-          setSidebarOpen(prev => !prev);
+          setSidebarOpen((prev: boolean) => !prev);
         }
       }
     };

@@ -53,12 +53,6 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* 页脚 */}
-        <div className="mt-auto pt-8 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            © 2026 hcx1999
-          </p>
-        </div>
       </div>
     </div>
   );

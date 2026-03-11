@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Folder, FolderOpen, FileText, ChevronRight, ChevronDown } from 'lucide-react';
 import { cn } from '../utils/cn';
@@ -12,7 +12,14 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ hierarchy, isOpen }) => {
   const location = useLocation();
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('sidebar-expanded-categories');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sidebar-expanded-categories', JSON.stringify(Array.from(expandedCategories)));
+  }, [expandedCategories]);
 
   const toggleCategory = (categoryName: string) => {
     setExpandedCategories(prev => {

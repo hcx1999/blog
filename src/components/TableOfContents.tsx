@@ -10,10 +10,19 @@ interface TableOfContentsProps {
 
 export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, contentRef }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(() => {
+    const saved = localStorage.getItem('toc-mobile-open');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('toc-mobile-open', JSON.stringify(isMobileOpen));
+  }, [isMobileOpen]);
+  const [tocItems, setTocItems] = useState<TOCItem[]>([]);
   const tocNavRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [tocStyle, setTocStyle] = useState<React.CSSProperties>({});
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
     const updateTocPosition = () => {
@@ -40,35 +49,66 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
   useEffect(() => {
     if (!contentRef.current) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries.filter(entry => entry.isIntersecting);
-        if (visibleEntries.length > 0) {
-          setActiveId(visibleEntries[0].target.id);
+    const extractAndObserve = () => {
+      setActiveId(null);
+      const headingSelector = 'h1, h2, h3, h4, h5, h6';
+      const headings = contentRef.current!.querySelectorAll(headingSelector);
+      const extractedItems: TOCItem[] = [];
+      
+      headings.forEach((heading) => {
+        const h = heading as HTMLElement;
+        if (h.id) {
+          const level = parseInt(h.tagName.charAt(1), 10);
+          extractedItems.push({
+            id: h.id,
+            text: h.textContent || '',
+            level: level
+          });
         }
-      },
-      {
-        rootMargin: '-20% 0px -70% 0px',
-        threshold: 0
-      }
-    );
+      });
 
-    const observeHeadings = () => {
-      items.forEach(item => {
+      setTocItems(extractedItems);
+
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const visibleEntries = entries
+            .filter(entry => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+          
+          if (visibleEntries.length > 0) {
+            setActiveId(visibleEntries[0].target.id);
+          }
+        },
+        {
+          rootMargin: '-20% 0px -70% 0px',
+          threshold: 0
+        }
+      );
+
+      observerRef.current = observer;
+
+      extractedItems.forEach((item) => {
         const element = document.getElementById(item.id);
-        if (element) observer.observe(element);
+        if (element) {
+          observer.observe(element);
+        }
       });
     };
 
-    observeHeadings();
-
-    const timer = setTimeout(observeHeadings, 500);
+    extractAndObserve();
+    const timer = setTimeout(extractAndObserve, 800);
 
     return () => {
       clearTimeout(timer);
-      observer.disconnect();
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
     };
-  }, [items, contentRef]);
+  }, [contentRef, items]);
 
   useEffect(() => {
     if (!activeId || !tocNavRef.current) return;
@@ -89,7 +129,6 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
     const buttonCenter = buttonTopInContainer + buttonHeight / 2;
 
     const targetScroll = buttonCenter - containerHeight / 2;
-
     const clampedScroll = Math.max(0, Math.min(maxScroll, targetScroll));
 
     container.scrollTo({
@@ -100,18 +139,22 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
 
   const scrollToHeading = (id: string) => {
     const element = document.getElementById(id);
-    if (element) {
-      const navbarHeight = 64;
-      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-      window.scrollTo({
-        top: elementPosition - navbarHeight,
-        behavior: 'smooth'
-      });
-      setIsMobileOpen(false);
-    }
+    if (!element) return;
+    
+    const navbarHeight = 64;
+    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+    
+    window.scrollTo({
+      top: elementPosition - navbarHeight,
+      behavior: 'smooth'
+    });
+    
+    setIsMobileOpen(false);
   };
 
-  if (items.length === 0) return null;
+  const displayItems = tocItems.length > 0 ? tocItems : items;
+
+  if (displayItems.length === 0) return null;
 
   const desktopToc = (
     <div ref={containerRef} className="hidden lg:block">
@@ -124,7 +167,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
           目录
         </h3>
         <nav className="space-y-1">
-          {items.map((item) => (
+          {displayItems.map((item) => (
             <button
               key={item.id}
               data-toc-id={item.id}
@@ -161,7 +204,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
       </button>
       {isMobileOpen && (
         <nav className="mt-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 space-y-1">
-          {items.map((item) => (
+          {displayItems.map((item) => (
             <button
               key={item.id}
               onClick={() => scrollToHeading(item.id)}

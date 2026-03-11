@@ -24,7 +24,7 @@ const extractNotebookTOC = (content: string): TOCItem[] => {
           if (headingMatch) {
             const level = headingMatch[1].length;
             const text = headingMatch[2].trim();
-            const baseId = text.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-');
+            const baseId = text.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-').replace(/^-|-$/g, '');
             
             const count = idCounts.get(baseId) || 0;
             idCounts.set(baseId, count + 1);
