@@ -34,6 +34,7 @@ For example, when $\beta=\pi/2$, $R=R_z(\gamma)R_y(\pi/2)R_x(\alpha)=\left[\begi
 ### Quaternion
 So, here we introduce **Quaternion**. 
 <iframe src="https://krasjet.github.io/quaternion/quaternion.pdf" width="100%" height="600px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
+
 ## Motion Planning
 ### Configuration Space
 Configuration space ($\mathcal C$-space) is a subset of $\mathbb R^n$ containing all possible states of the system(state space in RL). $\mathcal C_{free}\subseteq\mathcal C$ contains all valid states, $\mathcal C_{obs}\subseteq\mathcal C$ represents obstacles.
