@@ -74,9 +74,9 @@ export const ArticlePage: React.FC = () => {
 
           <div className="article-content">
             {post.type === 'markdown' ? (
-              <MarkdownRenderer content={post.content} />
+              <MarkdownRenderer content={post.content} articlePath={post.id} />
             ) : (
-              <NotebookRenderer content={post.content} />
+              <NotebookRenderer content={post.content} articlePath={post.id} />
             )}
           </div>
         </article>

@@ -8,9 +8,10 @@ import type { Notebook, NotebookOutput } from '../types';
 
 interface NotebookRendererProps {
   content: string;
+  articlePath?: string;
 }
 
-export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) => {
+export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content, articlePath }) => {
   const [notebook, setNotebook] = React.useState<Notebook | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -133,7 +134,7 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({ content }) =
         if (cell.cell_type === 'markdown') {
           return (
             <div key={cellIndex} className="prose-custom">
-              <MarkdownRenderer content={getSource(cell.source)} />
+              <MarkdownRenderer content={getSource(cell.source)} articlePath={articlePath} />
             </div>
           );
         }

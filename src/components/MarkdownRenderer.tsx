@@ -8,14 +8,16 @@ import rehypeRaw from 'rehype-raw';
 import { Copy, Check } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { imageMap } from '../utils/vault';
+import { siteConfig } from '../config/site';
 import remarkMathFix from '../utils/remarkMathFix';
 import type { ElementContent } from 'hast';
 
 interface MarkdownRendererProps {
   content: string;
+  articlePath?: string;
 }
 
-export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
+export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, articlePath }) => {
   const [copiedCode, setCopiedCode] = React.useState<string | null>(null);
 
   const copyCode = (code: string) => {
@@ -24,14 +26,48 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
+  // 将相对路径转换为基于 basename 的绝对路径
+  const resolveAssetPath = (relativePath: string): string => {
+    // 如果已经是绝对路径或 URL，直接返回
+    if (relativePath.startsWith('http') || relativePath.startsWith('/')) {
+      return relativePath;
+    }
+
+    // 获取文章所在目录
+    const articleDir = articlePath ? articlePath.replace(/\/[^\/]+$/, '') : '';
+    
+    // 构建 vault 下的完整路径
+    let vaultPath: string;
+    if (relativePath.startsWith('./')) {
+      // 相对当前文章目录
+      vaultPath = articleDir ? `${articleDir}/${relativePath.slice(2)}` : relativePath.slice(2);
+    } else if (relativePath.startsWith('../')) {
+      // 上级目录（简化处理，假设只有一级）
+      const parentDir = articleDir.replace(/\/[^\/]+$/, '');
+      vaultPath = parentDir ? `${parentDir}/${relativePath.slice(3)}` : relativePath.slice(3);
+    } else {
+      // 同一目录
+      vaultPath = articleDir ? `${articleDir}/${relativePath}` : relativePath;
+    }
+
+    // 返回基于 basename 的 URL
+    return `${siteConfig.basename}/vault/${vaultPath}`;
+  };
+
   const preprocessContent = (text: string) => {
     let result = text;
+    // 处理 Obsidian 风格的图片引用 ![[image.png]]
     result = result.replace(/!\[\[([^\]]+)\]\]/g, (_match, imageName) => {
       const imageUrl = imageMap.get(imageName) || imageMap.get(imageName.replace(/\s+/g, '%20')) || '';
       if (imageUrl) {
         return `![${imageName}](${imageUrl})`;
       }
       return `*[图片未找到: ${imageName}]*`;
+    });
+    // 处理 Obsidian 风格的资源文件引用 [[file.pdf]]
+    result = result.replace(/\[\[([^\]]+\.(?:pdf|doc|docx|xls|xlsx|ppt|pptx|zip|rar|txt|csv|json))\]\]/gi, (_match, fileName) => {
+      const fileUrl = resolveAssetPath(fileName);
+      return `[${fileName}](${fileUrl})`;
     });
     return result;
   };
@@ -150,6 +186,32 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
               {...props}
             />
           ),
+          iframe: ({ src, ...props }) => {
+            // 处理相对路径的 iframe 引用
+            const resolvedSrc = src ? resolveAssetPath(src) : src;
+            return (
+              <iframe
+                src={resolvedSrc}
+                {...props}
+                className="w-full rounded-lg border border-gray-200 dark:border-gray-700 my-4"
+              />
+            );
+          },
+          a: ({ href, children, ...props }) => {
+            // 处理资源文件链接
+            const resolvedHref = href ? resolveAssetPath(href) : href;
+            return (
+              <a
+                href={resolvedHref}
+                {...props}
+                className="text-primary-600 hover:text-primary-700 underline"
+                target={resolvedHref?.startsWith('http') ? '_blank' : undefined}
+                rel={resolvedHref?.startsWith('http') ? 'noopener noreferrer' : undefined}
+              >
+                {children}
+              </a>
+            );
+          },
           blockquote: ({ children, ...props }) => (
             <blockquote
               className="border-l-4 border-primary-500 pl-4 py-1 my-4 bg-gray-50 dark:bg-gray-800 rounded-r-lg"
