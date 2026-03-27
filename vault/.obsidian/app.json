@@ -1,0 +1,7 @@
+{
+  "promptDelete": false,
+  "deleteUnlinkedAttachments": "always",
+  "showLineNumber": false,
+  "spellcheck": true,
+  "attachmentFolderPath": "./附件"
+}
