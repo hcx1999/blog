@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "0f613cb0e6e25077",
+        "id": "f707816f589019a3",
         "type": "tabs",
         "children": [
           {
-            "id": "4b4f56d7af781ee7",
+            "id": "26edd36db1407504",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
-    "collapsed": true
+    "width": 200
   },
   "right": {
     "id": "58f2ff7030bbd05d",
@@ -182,18 +181,18 @@
       "bases:新建数据库": false
     }
   },
-  "active": "4b4f56d7af781ee7",
+  "active": "26edd36db1407504",
   "lastOpenFiles": [
+    "具身智能/Vision and Grasping.md",
+    "具身智能/Robotics.md",
+    "计算机视觉/Intro02 Deep Learning.md",
+    "计算机视觉/DETR.md",
     "Agent/相关论文调研.md",
     "Agent/论文粗略表格.md",
     "Agent/table.md",
-    "计算机视觉/Intro02 Deep Learning.md",
     "Agent",
-    "计算机视觉/DETR.md",
     "计算机视觉/Intro03 3D Vision.md",
     "计算机视觉/Intro01 Traditional Vision Algorithm.md",
-    "具身智能/Vision and Grasping.md",
-    "具身智能/Robotics.md",
     "深度学习/Transformer论文精读.md",
     "深度学习",
     "计算机视觉/附件/2105.04120v1.pdf",

@@ -386,10 +386,14 @@ For more smooth path, we may use **Shortcutting**.
 - **Grasp Synthesis** is a high-dimensional search or optimization problem to find gripper poses or joint configurations. 
 **Grasp Pose** defines the position, orientation and the articulation(关节连接) of a hand. For **4-DoF grasp**, there's a 3D position and 1D hand orientation aligned with the direction of gravity, a.k.a. **top-down grasping**. As for **6-Dof grasp**, it's defined by a 3D position and 3D orientation. 
 ### 6D Object Pose
-### Rotation Regression
-### Rotation Fitting
-### Instance-level 6D Object Pose Estimation
-### Category-level 6D Object Pose Estimation
+3D-Translation and 3D-Rotation.
+#### Instance-level 6D Object Pose Estimation
+Pose is defined for each instance according to their CAD model. To know the pose of a instance, we need to know the internal reference of the camera, the size of the instance to avoid ambiguity(歧义), and symmetry(对称性). 
+- Input: RGB/RGBD()
+#### PoseCNN
+#### Iterative Closest Point(ICP)
+ICP is a method for point cloud registration. It takes two point clouds as input and computes an R & T matrix that transforms one point cloud to align with the other as closely as possible.
+#### Category-level 6D Object Pose Estimation
 `,Qz=`## 数学基础
 
 ### 阶乘：斯特林公式
@@ -446,7 +450,7 @@ $$W(n)=T(n)+O(nlogn)=O(nlogn)$$
 ![[Pasted image 20260309115414.png]]
 **复杂度分析：** $W(n)\\leq W(\\frac 5n)+W(\\frac{7n}{10})+cn=\\dots=O(n)$
 `,eB=`<iframe width="775" height="436" src="https://www.youtube.com/embed/1EJ84QqkxWc" title="First Principles of Computer Vision" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`,tB=`## DETR论文精读
-### 核心文件
+### 整体模型架构
 #### main.py
 - 程序入口
 ##### def main()
@@ -458,6 +462,7 @@ $$W(n)=T(n)+O(nlogn)=O(nlogn)$$
 在训练循环中，先将图片和标签搬到gpu上，然后输入model，计算不同criterion并加权求和得到总损失，再利用总损失进行反向传播（先清零再更新梯度，再加入梯度裁剪防止梯度爆炸，最后更新模型参数）。这里可以增加一个安全机制，就是如果损失变为NaN或无穷大则直接退出训练。最后记录当前训练情况并返回。
 ##### def evaluate()
 使用@torch.no_grad()修饰器，不计算梯度。其他逻辑与训练相同。
+### 模型的每个核心部分
 #### models/detr.py
 主模型和损失函数
 ##### class DETR
@@ -498,17 +503,28 @@ SetCriterion用于计算损失
 ##### def build()
 根据超参构建模型和损失函数的实例并返回
 #### models/backbone.py
-这里面的几个类都是相当于CNN的接口，好像通过某种方式使得
-- 可以微调，也就是论文中的仅调整低分辨率高语义的层
-- 微调时冻结norm的某些统计量实现某种功能（没看懂）
-- 在device上不会有多余的拷贝和转移
-具体没看懂，感觉相当于CNN和整体的架构之间的一个接头
-#### models/position_encoding.py \\& models/transformer.py
-经典ViT架构，好像没什么改动(?)
+##### class FrozenBatchnorm2d
+是一种特殊的batchnorm，与普通的区别在于不更新均值和方差等统计量，目的是为了维持稳定性。使用register_buffer来注册权重，在加载和保存时参与，在训练时不参与，也不会保存计算图。
+##### def FrozenBatchnorm2d.forward()
+这是一个魔法操作，具体原理没看懂，注释说是通过某种**fuser-friendly**的方式实现的batchnorm的前向传播的功能。
+##### class BackboneBase
+这个类用于封装和适配骨干网络，具体来讲干了两件事，一个是用NestedTensor完成原图（大小不同）与大小相同的padding mask之后的图之间的转换（同时传递maskxinxi）；另一个是完成对ResNet中间层的提取，也就是所谓的“钩子”。
+##### class Joiner
+Joiner是一个胶水类，负责将特征图和位置编码聚合到一起（解耦，Decoupling），共同传给Transformer.
+#### models/position_encoding.py
+2D正弦编码，不编码padding mask，仅编码有效部分。
+此处写了一个硬编码和一个可学习编码，但最终结构中写的是硬编码。之所以没像ViT那样使用可学习编码的原因很可能是输入图片的大小不一，可学习编码没有体现优势。
+#### models/transformer.py
+经典ViT架构，有以下改动：
+- 传统Transformer中计算attention会把qkv都加上位置编码，但是detr中只对q和k加上了位置编码。因为这样位置信息对注意力权重影响依然很大，但对图像的值本身不会有污染性的影响。
+- 采用Pre-Norm，也就是在注意力计算开始之前先进行一次层归一化而不是之后，这对深层模型效果更好。
+- 提取多个层的权重来获得浅层特征，也就是获取高分辨率低语义的图像特征，而非仅获得最终的语义特征。
 #### models/matcher.py
-匈牙利匹配
+匈牙利算法匹配预测框和真实框。
 #### models/segmentation.py
-将任务从目标检测扩展为语义分割`,nB=`## Filters
+将任务从目标检测扩展为语义分割
+### 数据获取与增强
+`,nB=`## Filters
 ### Linear Filtering
 现在我们希望对图片进行一些处理，结合我们已有知识，我们希望使用信号处理的常用手段——滤波，扩展到二维，来进行图片的处理。此处我们只研究线性滤波。
 从数学的角度理解，滤波器（filter）可看作一个映射函数$\\mathcal{G}$，它的输入是图片（二维离散信号），输出也是图片。若滤波器$\\mathcal{G}$属于线性时不变（LTI）滤波器，则其运算规则可表示为卷积形式： $h[i,j] = (f * g)[i,j] = \\sum\\limits_{m=-\\infty}^{+\\infty}\\sum\\limits_{n=-\\infty}^{+\\infty}f[m,n]g[i-m,j-n]$ 其中$f$为输入图片（二维像素矩阵），$h$为输出图片，$g$称为该卷积型滤波器$\\mathcal{G}$的卷积核（也常称滤波器核）。而非线性滤波器（如中值滤波、双边滤波）的运算规则并非卷积，因此无“卷积核”这一概念。
