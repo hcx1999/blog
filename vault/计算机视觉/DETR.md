@@ -1,5 +1,5 @@
 ## DETR论文精读
-### 核心文件
+### 整体模型架构
 #### main.py
 - 程序入口
 ##### def main()
@@ -11,6 +11,7 @@
 在训练循环中，先将图片和标签搬到gpu上，然后输入model，计算不同criterion并加权求和得到总损失，再利用总损失进行反向传播（先清零再更新梯度，再加入梯度裁剪防止梯度爆炸，最后更新模型参数）。这里可以增加一个安全机制，就是如果损失变为NaN或无穷大则直接退出训练。最后记录当前训练情况并返回。
 ##### def evaluate()
 使用@torch.no_grad()修饰器，不计算梯度。其他逻辑与训练相同。
+### 模型的每个核心部分
 #### models/detr.py
 主模型和损失函数
 ##### class DETR
@@ -51,14 +52,24 @@ SetCriterion用于计算损失
 ##### def build()
 根据超参构建模型和损失函数的实例并返回
 #### models/backbone.py
-这里面的几个类都是相当于CNN的接口，好像通过某种方式使得
-- 可以微调，也就是论文中的仅调整低分辨率高语义的层
-- 微调时冻结norm的某些统计量实现某种功能（没看懂）
-- 在device上不会有多余的拷贝和转移
-具体没看懂，感觉相当于CNN和整体的架构之间的一个接头
-#### models/position_encoding.py \& models/transformer.py
-经典ViT架构，好像没什么改动(?)
+##### class FrozenBatchnorm2d
+是一种特殊的batchnorm，与普通的区别在于不更新均值和方差等统计量，目的是为了维持稳定性。使用register_buffer来注册权重，在加载和保存时参与，在训练时不参与，也不会保存计算图。
+##### def FrozenBatchnorm2d.forward()
+这是一个魔法操作，具体原理没看懂，注释说是通过某种**fuser-friendly**的方式实现的batchnorm的前向传播的功能。
+##### class BackboneBase
+这个类用于封装和适配骨干网络，具体来讲干了两件事，一个是用NestedTensor完成原图（大小不同）与大小相同的padding mask之后的图之间的转换（同时传递maskxinxi）；另一个是完成对ResNet中间层的提取，也就是所谓的“钩子”。
+##### class Joiner
+Joiner是一个胶水类，负责将特征图和位置编码聚合到一起（解耦，Decoupling），共同传给Transformer.
+#### models/position_encoding.py
+2D正弦编码，不编码padding mask，仅编码有效部分。
+此处写了一个硬编码和一个可学习编码，但最终结构中写的是硬编码。之所以没像ViT那样使用可学习编码的原因很可能是输入图片的大小不一，可学习编码没有体现优势。
+#### models/transformer.py
+经典ViT架构，有以下改动：
+- 传统Transformer中计算attention会把qkv都加上位置编码，但是detr中只对q和k加上了位置编码。因为这样位置信息对注意力权重影响依然很大，但对图像的值本身不会有污染性的影响。
+- 采用Pre-Norm，也就是在注意力计算开始之前先进行一次层归一化而不是之后，这对深层模型效果更好。
+- 提取多个层的权重来获得浅层特征，也就是获取高分辨率低语义的图像特征，而非仅获得最终的语义特征。
 #### models/matcher.py
-匈牙利匹配
+匈牙利算法匹配预测框和真实框。
 #### models/segmentation.py
 将任务从目标检测扩展为语义分割
+### 数据获取与增强
