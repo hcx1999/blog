@@ -12,6 +12,20 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ hierarchy, isOpen }) => {
   const location = useLocation();
+  const [isMobile, setIsMobile] = useState(() => {
+    return typeof window !== 'undefined' && window.innerWidth < 768;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(() => {
     const saved = localStorage.getItem('sidebar-expanded-categories');
     return saved ? new Set(JSON.parse(saved)) : new Set();
@@ -42,8 +56,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ hierarchy, isOpen }) => {
           exit={{ x: -300, opacity: 0 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
           className={cn(
-            "fixed left-0 top-16 bottom-0 w-64 bg-white dark:bg-gray-900",
-            "border-r border-gray-200 dark:border-gray-800 overflow-y-auto z-40"
+            "fixed left-0 top-16 bottom-0 bg-white dark:bg-gray-900",
+            "overflow-y-auto z-40",
+            isMobile ? "w-full border-r border-gray-200 dark:border-gray-800" : "w-[20%] max-w-80"
           )}
         >
       <div className="p-4">

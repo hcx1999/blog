@@ -45,10 +45,30 @@ const AppContent: React.FC = () => {
     const saved = localStorage.getItem('sidebar-open');
     return saved ? JSON.parse(saved) : false;
   });
+  const [isMobile, setIsMobile] = useState(() => {
+    return typeof window !== 'undefined' && window.innerWidth < 768;
+  });
 
   useEffect(() => {
     localStorage.setItem('sidebar-open', JSON.stringify(sidebarOpen));
   }, [sidebarOpen]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      const newIsMobile = width < 768;
+      console.log('Screen width:', width, 'isMobile:', newIsMobile);
+      setIsMobile(newIsMobile);
+    };
+
+    // 初始计算
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+
+
   const posts = useMemo(() => loadVaultPosts(), []);
   const hierarchy = useMemo(() => getVaultHierarchy(), []);
 
@@ -101,7 +121,7 @@ const AppContent: React.FC = () => {
             <main
               className={cn(
                 "pt-16 min-h-screen transition-all duration-300",
-                sidebarOpen ? "ml-64" : "ml-0"
+                !isMobile && sidebarOpen ? "ml-[20%]" : "ml-0"
               )}
             >
               <div className="p-6 lg:p-8">

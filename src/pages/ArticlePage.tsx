@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
@@ -7,6 +7,7 @@ import { TableOfContents } from '../components/TableOfContents';
 import { extractTOC } from '../utils/toc';
 import type { TOCItem, NotebookCell } from '../types';
 import { FileText } from 'lucide-react';
+import { cn } from '../utils/cn';
 
 const extractNotebookTOC = (content: string): TOCItem[] => {
   try {
@@ -47,6 +48,20 @@ export const ArticlePage: React.FC = () => {
   const { path } = useParams<{ path: string }>();
   const { posts } = useAppContext();
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const [isMobile, setIsMobile] = useState(() => {
+    return typeof window !== 'undefined' && window.innerWidth < 768;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // 初始计算
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const decodedPath = path ? decodeURIComponent(path) : '';
   const post = posts.find(p => p.id === decodedPath);
@@ -65,7 +80,7 @@ export const ArticlePage: React.FC = () => {
     : extractNotebookTOC(post.content);
 
   return (
-    <div className="flex gap-8">
+    <div className="flex relative">
       <div className="flex-1 min-w-0" ref={contentRef}>
         <article className="max-w-3xl mx-auto">
           <header className="mb-8 pb-6 border-b border-gray-200 dark:border-gray-800">
@@ -82,9 +97,17 @@ export const ArticlePage: React.FC = () => {
         </article>
       </div>
 
-      <aside className="hidden lg:block w-56 flex-shrink-0">
-        <TableOfContents items={tocItems} contentRef={contentRef} />
+      <aside className={cn("w-[20%] max-w-80 flex-shrink-0", isMobile && "hidden")}>
+        <TableOfContents items={tocItems} contentRef={contentRef} isMobile={isMobile} />
       </aside>
+      
+      {/* 悬浮球单独渲染，不放在 aside 中 */}
+      <TableOfContents 
+        items={tocItems} 
+        contentRef={contentRef} 
+        isMobile={isMobile} 
+        onlyFloating={true} 
+      />
     </div>
   );
 };
