@@ -41,7 +41,7 @@ On unit sphere $\mathcal S^3$, the angle between two quaternions $<p,q>=arccos(p
 #### Slerp: Spherical Linear Interpolation
 Why not linear interpolation? Because it need to be normalized, and does not have a constant rate of rotation. So we use Slerp: $q(t)=\frac{\sin((1-t)\theta)}{\sin\theta}q_1+\frac{\sin(t\theta)}{\sin\theta}q_2, \theta=arccos(q_1\cdot q_2)$
 #### Uniform Sampling in $\mathbb{SO}(3)$
-Sample a 4D vector from 4-dimension standard normal distribution $N(0,I_{4\times 4})$ and then normalize it, and get the **uniform quaternions**. We could prove this is same to sample from $\mathbb S(3)$. 
+Sample a 4D vector from 4-dimension standard normal distribution $N(0,I_{4\times 4})$ and then normalize it, and get the **uniform quaternions**. We could prove this is same to sample from $\mathbb SO(3)$. 
 ## Motion Planning
 **Work space** is the real 3D physical space including robots, obstacles, objects etc. But we have to build a virtual space to describe the shape and joint constraint of the robot.
 ### Joint Configuration Space
@@ -55,12 +55,13 @@ However, precise collision check is so slow, we have to balance accuracy and spe
 One feasible method is to approximate every object as convex ones. Because convex-convex collision checking is usually very fast in cpu.
 - Convex-Hull(凸包): get a single convex mesh, most efficient but not accurate.
 - Exact Convex Decomposition: NP-hard, not practical. 
-- Approximate Convex Decomposition(ACD, 近似凸分解): Determine a partition of the mesh triangles with a minimal number of clusters, while ensuring that each cluster has a concavity lower than a user defined threshold.
+- **Approximate Convex Decomposition(ACD, 近似凸分解)**: Determine a partition of the mesh triangles with a minimal number of clusters, while ensuring that each cluster has a concavity lower than a user defined threshold.
 So two basic insight is **Grid-based Search** and **Sample-based Algorithm**, the latter is the mainstream method now in industry.
 ### Sample-based Algorithm
-**Probabilistic Roadmap Method(PRM)** is an algorithm contains 2 stages: Map construction phase(sample and connect) and query phase(Dijkstra). 
-**Rapidly-exploring Random Tree(RRT)** is an algorithm that balanced **Exploration vs Exploitation(探索与利用)**. 
-To find the nearest neighbor in the tree, we may use KD-Tree. 
-For more smooth path, we may use **Shortcutting**. 
+#### Probabilistic Roadmap Method(PRM)
+PRM is an algorithm contains 2 stages: Map construction phase(sample and connect) and query phase(Dijkstra). For NARROW spaces, we use **Gaussian Sampling** or **Bridge Sampling** to replace Uniform Sampling to acquire efficiency. 
+#### Rapidly-exploring Random Tree(RRT)
+RRT is an algorithm that balanced **Exploration vs Exploitation(探索与利用)**. To find the nearest neighbor in the tree, we may use some magic data structure, like KD-Tree. 
+Algorithms like RRT and RRT connect(RRT connect is bidirectional RRT) is not asymptotically optimal(渐进最优，即收敛到最优解). PRM is asymptotically optimal but requires massive sampling. PRM and RRT often produce jerky, unnatural paths. **Shortcutting** is a very useful post-processing heuristic that solves these. 
 ## Control System
 没听懂，占坑待填。
