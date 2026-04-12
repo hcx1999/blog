@@ -96,3 +96,37 @@
 .hljs-variable {
   color: var(--hljs-variable) !important;
 }
+
+/* KaTeX 数学公式样式 */
+.prose-custom .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  text-align: center;
+  margin: 1em 0;
+  padding: 0.5em 0;
+}
+
+.prose-custom .katex-display > .katex {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.prose-custom .katex {
+  font-size: 1em;
+}
+
+@media (max-width: 640px) {
+  .prose-custom .katex {
+    font-size: 0.9em;
+  }
+}
+
+.prose-custom .katex-html {
+  max-width: 100%;
+}
+
+.prose-custom .katex-mathml {
+  max-width: 100%;
+}
