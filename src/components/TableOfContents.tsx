@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { List, ChevronDown, Menu } from 'lucide-react';
+import { List, ChevronDown } from 'lucide-react';
 import type { TOCItem } from '../types';
 import { cn } from '../utils/cn';
 
@@ -30,7 +30,6 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
   const [tocItems, setTocItems] = useState<TOCItem[]>([]);
   const tocNavRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
     if (!contentRef.current) return;
@@ -60,8 +59,6 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
     const timer = setTimeout(extractHeadings, 800);
 
     const handleScroll = () => {
-      const navbarHeight = 64;
-      
       let visibleItems: { id: string; top: number }[] = [];
       
       for (let i = 0; i < extractedItems.length; i++) {
@@ -207,42 +204,6 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, content
           ))}
         </nav>
       </div>
-    </div>
-  );
-
-  const mobileToc = (
-    <div className="lg:hidden mb-6">
-      <button
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-      >
-        <span className="font-medium flex items-center gap-2">
-          <List className="w-4 h-4" />
-          目录
-        </span>
-        <ChevronDown
-          className={cn("w-4 h-4 transition-transform", isMobileOpen && "rotate-180")}
-        />
-      </button>
-      {isMobileOpen && (
-        <nav className="mt-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 space-y-1">
-          {displayItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => scrollToHeading(item.id)}
-              className={cn(
-              "w-full text-left py-1 text-sm transition-colors",
-              activeId === item.id
-                ? "text-gray-900 dark:text-gray-200 font-medium"
-                : "text-gray-600 dark:text-gray-400"
-            )}
-              style={{ paddingLeft: `${(item.level - 1) * 1}rem` }}
-            >
-              {item.text}
-            </button>
-          ))}
-        </nav>
-      )}
     </div>
   );
 
