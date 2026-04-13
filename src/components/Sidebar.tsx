@@ -8,9 +8,10 @@ import type { VaultCategory } from '../utils/vault';
 interface SidebarProps {
   hierarchy: VaultCategory[];
   isOpen: boolean;
+  setIsOpen?: (isOpen: boolean) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ hierarchy, isOpen }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ hierarchy, isOpen, setIsOpen }) => {
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(() => {
     return typeof window !== 'undefined' && window.innerWidth < 768;
@@ -56,9 +57,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ hierarchy, isOpen }) => {
           exit={{ x: -300, opacity: 0 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
           className={cn(
-            "fixed left-0 top-16 bottom-0 bg-white dark:bg-gray-900",
+            "fixed left-0 top-16 bg-white dark:bg-gray-900",
             "overflow-y-auto z-40",
-            isMobile ? "w-full border-r border-gray-200 dark:border-gray-800" : "w-[20%] max-w-80"
+            isMobile ? "w-full h-[calc(100dvh-4rem)] border-r border-gray-200 dark:border-gray-800" : "w-[20%] max-w-80 h-[calc(100dvh-4rem)]"
           )}
         >
       <div className="p-4">
@@ -105,6 +106,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ hierarchy, isOpen }) => {
                         <Link
                           key={file.path}
                           to={articlePath}
+                          onClick={() => {
+                            if (isMobile && setIsOpen) {
+                              setIsOpen(false);
+                            }
+                          }}
                           className={cn(
                             "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all",
                             "hover:bg-gray-100 dark:hover:bg-gray-800",

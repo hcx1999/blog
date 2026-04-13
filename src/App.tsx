@@ -117,7 +117,7 @@ const AppContent: React.FC = () => {
         <RedirectHandler>
           <div className="min-h-screen bg-gray-50 dark:bg-gray-800">
             <Navbar toggleSidebar={toggleSidebar} />
-            <Sidebar hierarchy={hierarchy} isOpen={sidebarOpen} />
+            <Sidebar hierarchy={hierarchy} isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
             <main
               className={cn(
                 "pt-16 min-h-screen transition-all duration-300",
