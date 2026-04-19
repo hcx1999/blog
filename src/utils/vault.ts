@@ -13,9 +13,9 @@ export interface VaultCategory {
   files: VaultFile[];
 }
 
-const IMPORT_MD: Record<string, string> = import.meta.glob('/vault/**/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
-const IMPORT_NB: Record<string, string> = import.meta.glob('/vault/**/*.ipynb', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
-const IMPORT_IMAGES: Record<string, string> = import.meta.glob('/vault/**/*.{png,jpg,jpeg,gif,svg,webp}', { eager: true, import: 'default' }) as Record<string, string>;
+const IMPORT_MD: Record<string, string> = import.meta.glob('/Vault/**/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const IMPORT_NB: Record<string, string> = import.meta.glob('/Vault/**/*.ipynb', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const IMPORT_IMAGES: Record<string, string> = import.meta.glob('/Vault/**/*.{png,jpg,jpeg,gif,svg,webp}', { eager: true, import: 'default' }) as Record<string, string>;
 
 // 创建图片名称到URL的映射
 export const imageMap: Map<string, string> = new Map();
@@ -31,7 +31,7 @@ export const getVaultStructure = (): VaultFile[] => {
   const files: VaultFile[] = [];
 
   for (const path in IMPORT_MD) {
-    const relativePath = path.replace('/vault/', '');
+    const relativePath = path.replace('/Vault/', '');
     const parts = relativePath.split('/');
     const fileName = parts[parts.length - 1];
     files.push({
@@ -44,7 +44,7 @@ export const getVaultStructure = (): VaultFile[] => {
   }
 
   for (const path in IMPORT_NB) {
-    const relativePath = path.replace('/vault/', '');
+    const relativePath = path.replace('/Vault/', '');
     const parts = relativePath.split('/');
     const fileName = parts[parts.length - 1];
     files.push({

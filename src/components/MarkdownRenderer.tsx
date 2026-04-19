@@ -51,7 +51,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, art
     }
 
     // 返回基于 basename 的 URL
-    return `${siteConfig.basename}/vault/${vaultPath}`;
+    return `${siteConfig.basename}/Vault/${vaultPath}`;
   };
 
   const preprocessContent = (text: string) => {

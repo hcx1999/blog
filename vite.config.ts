@@ -52,16 +52,16 @@ export default defineConfig({
           console.error(`Failed to copy 404.html: ${error}`)
         }
         
-        // 复制 vault 目录中的资源文件到 dist
-        const vaultSrc = join(__dirname, 'vault')
-        const vaultDest = join(__dirname, 'dist', 'vault')
+        // 复制 Vault 目录中的资源文件到 dist
+        const vaultSrc = join(__dirname, 'Vault')
+        const vaultDest = join(__dirname, 'dist', 'Vault')
         
         if (existsSync(vaultSrc)) {
           try {
             copyDir(vaultSrc, vaultDest)
-            console.log(`Successfully copied vault assets to ${vaultDest}`)
+            console.log(`Successfully copied Vault assets to ${vaultDest}`)
           } catch (error) {
-            console.error(`Failed to copy vault assets: ${error}`)
+            console.error(`Failed to copy Vault assets: ${error}`)
           }
         }
       }
